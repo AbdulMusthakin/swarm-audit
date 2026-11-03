@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.ipynb_checkpoints/
+
+# Data and logs: large, kept out of git (folders kept via .gitkeep)
+data/**
+!data/**/
+!data/**/.gitkeep
+logs/*
+!logs/.gitkeep
+
+# LaTeX build files
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.out
+*.synctex.gz
+*.toc
+setup-paper/*.log
+report/*.log
