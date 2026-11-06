@@ -1,9 +1,40 @@
-\documentclass[11pt]{article}
+\documentclass[11pt,a4paper]{article}
 \usepackage[margin=2cm]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage[round]{natbib}
+
+\usepackage{wrapfig}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\tikzset{
+  kernel/.style = {draw, minimum width=9mm, minimum height=6mm, inner sep=1pt},
+  copy/.style   = {circle, fill, inner sep=0pt, minimum size=3pt},
+}
+\newcommand{\ptest}{p_{\mathrm{test}}}
+\newcommand{\pswarm}{p_{\mathrm{swarm}}}
+\newcommand{\dTV}{d_{\mathrm{TV}}}
+
+\newcommand{\uHH}{u_{\mathrm{HH}}}
+\newcommand{\uHL}{u_{\mathrm{HL}}}
+\newcommand{\uLH}{u_{\mathrm{LH}}}
+\newcommand{\uLL}{u_{\mathrm{LL}}}
+
+\newcommand{\FinStoch}{\mathsf{FinStoch}}
+\newcommand{\FinSetMulti}{\mathsf{FinSetMulti}}
+
+% Placeholders: visible red notes. To hide them all, change the second line below to
+% \newcommand{\placeholder}[1]{}
+\usepackage{xcolor}
+\newcommand{\placeholder}[1]{\textcolor{red!70!black}{[#1]}}
+
+\newcommand{\overbar}[1]{\mkern 1.5mu\overline{\mkern-1.5mu#1\mkern-1.5mu}\mkern 1.5mu}
+
 \usepackage[hidelinks]{hyperref}
+
+% Lets TeX stretch spacing rather than push long inline formulas into the margin.
+\setlength{\emergencystretch}{2em}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{proposition}[theorem]{Proposition}
@@ -24,8 +55,8 @@
 \input{sections/3-results}
 \input{sections/4-experiment}
 \input{sections/5-hypotheses}
-\input{sections/6-logistics}
+\input{sections/6-acknowledgement}
 
-\bibliographystyle{plain}
+\bibliographystyle{plainnat}
 \bibliography{refs}
 \end{document}

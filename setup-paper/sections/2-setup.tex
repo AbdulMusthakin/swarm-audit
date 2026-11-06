@@ -1,2 +1,112 @@
 \section{Set-up}
+\label{sec:set-up}
 
+\begin{wrapfigure}{r}{0.36\textwidth}
+  \centering
+  \begin{tikzpicture}[x=13mm, y=11mm]  % agents left to right, time bottom to top
+    \foreach \i in {1,2,3} {
+      \node[copy]   (c\i-0) at (\i,0.4) {};
+      \node[kernel] (k\i-1) at (\i,1.4) {$\kappa_{\i}$};
+      \node[copy]   (c\i-1) at (\i,2.1) {};
+      \node[kernel] (k\i-2) at (\i,3.1) {$\kappa_{\i}$};
+      \draw (\i,0) node[below] {$a_{\i}^{t}$} -- (c\i-0);
+      \draw (k\i-1) -- (c\i-1);
+      \draw (k\i-2) -- (\i,3.7) node[above] {$a_{\i}^{t+2}$};
+    }
+    % one pair j/i per edge j -> i of G; i/i = agent i's own last action
+    \foreach \j/\i in {1/1, 2/2, 3/3, 1/2, 2/1, 2/3, 3/2} {
+      \foreach \r/\s in {0/1, 1/2} {
+        \draw (c\j-\r) to[out=90, in=-90] ($(k\i-\s.south)+({(\j-\i)*2.5mm},0)$);
+      }
+    }
+  \end{tikzpicture}
+  \caption{Composed prediction for a three-agent chain (with $k=1$) over two rounds. Time points up, and the dots are copy maps.}
+  \label{fig:chain}
+\end{wrapfigure}
+
+The game we shall consider involves a repeated procurement auction with firms represented by agents.
+An agent may either bid high or low, and they have a cheap-talk vocabulary consisting of three signals: ``I'll bid high'', ``I'll bid low'', and silence.
+Each of our $n$ agents sits on a directed graph $G$; we read undirected graphs as directed ones by considering their edges bidirectional.
+In round $t \in \{1, \ldots, T\}$, what agent $i$ sees is given in Table~\ref{tab:ladder}; it then emits its own action and, on the cheap-talk step, a signal; in the first round, agents can only see the prompt.
+Every agent acts at once with the information from round $t-1$.
+
+The payoff rule, described below, is told to agents in the prompt.
+Agents are able to see their own last action as well as last round's payoff.
+However, we do not provide them with a running total: when the full history is not shared with agents, a running total would bring long memory into the last-$k$ prompts of the calibration arm, and when it is, a running total may cause agents to weigh old rounds more heavily.
+We do not disclose the number of rounds $T$ to agents, since disclosure would likely alter their behaviour in a way unrelated to communication or memory.
+
+Our payoff $u_i \colon A \times F_i \to \mathbb{R}$, with $A = \{\mathrm{H}, \mathrm{L}\}$ (high or low) and $F_i = \{0, 1/d_i, \ldots, 1\}$, is given by $u_i(\mathrm{H}, f) = \uHL + f(\uHH - \uHL)$ and $u_i(\mathrm{L}, f) = \uLL + f(\uLH - \uLL)$; here, $d_i$ is the in-degree, and $f$ is the fraction of in-neighbours who bid high.
+The parameters $\uLH, \uHH, \uLL, \uHL \in \mathbb{R}$ are values from an agent's bid (first subscript) and all of its neighbours' bids (second subscript).
+Then, by imposing the ordering $\uLH > \uHH > \uLL > \uHL$ and $2\uHH > \uLH + \uHL$, we give our game the structure of the prisoner's dilemma.
+Note that we do not assume our agents to optimize their payoff, and no result of ours depends on the payoffs.
+Also, the payoff is not a function of signals, which thus have no cost to the agents.
+
+We will currently take $(\uLH, \uHH, \uLL, \uHL) = (12, 10, 4, 0)$.
+These values are subject to change.
+
+% Information ladder: the "audit model sees" column defines q. Refer to steps by
+% name; labelled actions (step 2) is parked.
+\begin{table}[ht]
+  \centering\small
+  \begin{tabular}{@{}l p{0.3\textwidth} p{0.27\textwidth} l@{}}
+    \toprule
+    Step & Agents see & Audit model sees & Status \\
+    \midrule
+    Counts & How many neighbours took each action & The same & Core (control) \\
+    Labelled actions & Each neighbour's action, by name & Counts & Parked \\
+    Cheap talk & Action counts plus counts of each signal & Action counts only & Core (key step) \\
+    Free text & Neighbours' messages & Messages sorted into a few categories & Conditional extra \\
+    \bottomrule
+  \end{tabular}
+  \caption{Information ladder}
+  \label{tab:ladder}
+\end{table}
+
+\begin{definition}[Swarm]\label{def:swarm}
+    The set of possible records $R_i$ for agent $i$ contains all the information for agent $i$ over one round.
+    A record $r^s_i \in R_i$, which is the information regarding agent $i$ that occurred in round $s$, holds, for round $s$, the agent's own action $a^s_i \in A$, its own signal $\sigma^s_i \in \Sigma$ on the cheap-talk step only, and its in-neighbours' counts at round $s$ described in Table~\ref{tab:ladder}.
+    We denote by $H^t_i$ the set of all histories of agent $i$ at round $t$, which are each $(t-1)$-tuples $h^t_i = (r^1_i, \ldots, r^{t-1}_i) \in R^{\times(t-1)}_i$.
+    As each component of a record comes from a finite set, $R_i$ is finite, and thus $H^t_i$ is finite, so every kernel below is a morphism of $\FinStoch$.
+    We define $H_i = \bigsqcup_{t=1}^{T} H_i^t$ to be the set of histories of every length of agent $i$ across all rounds.
+    
+    We denote the kernel for the set of histories $H_i$ by $K_i \colon H_i \to O$, where the output set $O = A$ on the counts step and $O = A \times \Sigma$ on the cheap-talk step.
+    The kernel assigns to each history in $H_i$ the probability distribution on $O$; given that each agent has the same model and prompt template, $K_i$ depends on $i$ only through $d_i$.
+    It is the model's distribution over its output, given the prompt built from $h$, at temperature 1.
+    A record for round $s$ is computed via $r^s_i = \rho_i(o^s)$, where $o^s \in O^n$ is the output of all agents in round $s$, and $\rho_i \colon O^n \to R_i$ keeps agent $i$'s output and counts its in-neighbours' outputs.
+
+    We assume independent sampling, so $\mathbb{P}(o^t \mid o^1, \ldots, o^{t-1}) = \prod_i K_i(o^t_i \mid h^t_i)$, where $o^t_i$ is agent $i$'s output in round $t$, and $h^t_i = (\rho_i(o^1), \ldots, \rho_i(o^{t-1}))$.
+    Then, multiplying over rounds gives us $\mathbb{P}(o^1, \ldots, o^T) = \prod_{t=1}^T \prod_i K_i(o^t_i \mid h^t_i)$, a distribution on $(O^n)^{\times T}$.
+    For round 1, we have $h^1_i = ()$ from its definition, which matches the formula.
+    Let $\mathrm{pr} \colon O \to A$ keep the action, so it is the identity on the counts step and drops the signal on the cheap-talk step.
+    Thus, $a^t = (\mathrm{pr}(o^t_1), \ldots, \mathrm{pr}(o^t_n)) \in A^n$.
+    The whole trajectory is $a_{1:T} = (a^1, \ldots, a^T)$.
+    Finally, we denote the law of $a_{1:T}$ by $\mathcal{L}_{\text{swarm}}(a_{1:T})$.
+\end{definition}
+\begin{definition}[Audit and Prediction]\label{def:audit}    
+    Let $q \colon R_i \to \overbar{R_i}$ keep agent $i$'s action and action counts, and drop its own signal and signal counts; here, $\overbar{R_i}$ is the image, the third column of Table~\ref{tab:ladder}.
+    On a history $h$, we have $q(h) = (q(r^1), \ldots, q(r^{t-1}))$.
+    Note that on outputs, we write $q$ for $\mathrm{pr}$ from Definition~\ref{def:swarm}.
+    Let $\pi_k \colon q(H_i) \to S_i$ keep the last $k$ entries of a coarse history, where the coarse states $S_i$ are the tuples of $\overbar{R_i}$ of length at most $k$.
+    Round 1 has the empty tuple as its coarse state; for rounds with fewer than $k$ earlier rounds, $\pi_k$ keeps all entries.
+    
+    We define $\ptest$ to be a distribution on $H_i$ so that every length $0, \ldots, T-1$ has positive probability, and we denote $\ptest(i, t)$ to be $\ptest$ conditioned on $H^t_i$.
+    Let $\kappa_i \colon S_i \to A$ be the conditional expectation:
+    \begin{equation}
+        \kappa_i(\cdot \mid s) = \mathbb{E}_{h \sim \ptest}[\mathrm{pr}_* K_i(\cdot \mid h) \mid \pi_k(q(h)) = s].
+    \end{equation}
+    Note that this is only defined where $\ptest$ gives the state $s$ a positive probability; $\ptest$ gives every coarse state a positive probability.
+    We define $\overbar{\rho_i} \colon A^n \to \overbar{R_i}$ to take agent $i$'s action and count its in-neighbours' actions.
+    We have $q \circ \rho_i = \overbar{\rho_i} \circ \mathrm{pr}^n$, as counting actions only requires actions.
+
+    Also, we define a composed chain, which is an order-$k$ Markov chain on $A^n$, given by $\mathbb{P}_{\text{model}}(a^t \mid \text{earlier profiles}) = \prod_i \kappa_i(a^t_i \mid \pi_k(\overbar{\rho_i}(a^1), \ldots, \overbar{\rho_i}(a^{t-1})))$.
+    Note that our composite is, in effect, a dynamic Bayesian network.
+    Finally, we denote the law of the chain's trajectory by $\mathcal{L}_{\text{model}}(a_{1:T})$.
+\end{definition}
+
+% One or two lines: the two sources of mismatch (memory beyond k rounds, what q
+% drops). The calibration arm removes the first and the counts step the second,
+% which is why H1 should be exact. A plain paragraph here also gives the
+% wrapfigure above some text to wrap around.
+One source of mismatch is memory beyond $k$ rounds, though the calibration arm only shows the last $k$ rounds, thus removing this source.
+Another is that $q$ drops signals on the cheap-talk step.
+Thus, the prediction should be exact only on the counts step of the calibration arm.

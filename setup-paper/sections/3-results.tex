@@ -1,2 +1,41 @@
 \section{Results}
+% Budget: about half a page. Uses only Definitions 1 and 2 from Section 2.
 
+\begin{definition}[Defect]
+    Given a distribution $p$ on $H_i$, we define the defect $\varepsilon_i(p)$ to be given by
+    \begin{equation}
+        \varepsilon_i(p) \;=\; \mathbb{E}_{h \sim p}\; d_{\mathrm{TV}}\!\Big( q_{*}K_i(\,\cdot \mid h),\; \kappa_i\big(\,\cdot \mid \pi_k(q(h))\big) \Big),
+    \end{equation}
+    which is well-defined as $\ptest$ gives every coarse state a positive probability, so $\kappa_i$ is defined at $\pi_k(q(h))$.
+    Let $\pswarm(i, t)$ be the law of $h^t_i = (\rho_i(o^1), \ldots, \rho_i(o^{t-1}))$ using the swarm process of Definition~\ref{def:swarm}; this is a distribution on $H^t_i$.
+\end{definition}
+
+\begin{theorem}[TV Bound]\label{thm:TV_bound}
+    Given the assumptions found in Definition~\ref{def:swarm} and Definition~\ref{def:audit}, we have the following inequality.
+    \begin{equation}
+        d_{\mathrm{TV}}\big(\mathcal{L}_{\text{swarm}}(a_{1:T}),\, \mathcal{L}_{\text{model}}(a_{1:T})\big) \;\le\; \sum_{t=1}^{T} \sum_{i=1}^{n} \varepsilon_i\big(p_{\text{swarm}}(i,t)\big)
+    \end{equation}
+    This bound holds for any statistic $f$ of the trajectory $a_{1:T}$.
+\end{theorem}
+% \begin{proof}[Proof Sketch]
+%     % Hybrids H_j; consecutive hybrids differ in one round; data processing; sum over
+%     % rounds; the same bound for the law of any statistic of the trajectory.
+%     \placeholder{Proof sketch}
+    
+% \end{proof}
+
+\begin{proposition}[Exact Transfer]\label{prop:transfer}
+    Given that, for every agent $i$, we have $\varepsilon_i(\ptest) = 0$, and $\mathop{\mathrm{supp}} \pswarm(i, t) \subseteq \mathop{\mathrm{supp}} \ptest$ for all $t$, we have $\mathcal{L}_{\text{swarm}}(a_{1:T}) = \mathcal{L}_{\text{model}}(a_{1:T})$.
+  % Cite Fritz (2020) for the almost-sure calculus (add to refs.bib); a direct
+  % probabilistic proof also exists.
+\end{proposition}
+
+% \begin{corollary}[\placeholder{name}]
+%   \label{cor:coverage}
+%   \placeholder{Local coverage check: statement}
+% \end{corollary}
+
+% \begin{remark}
+%   % Cite Mitrophanov (2005) (add to refs.bib).
+%   \placeholder{Worst case vacuous at realistic sizes; mixing-time version}
+% \end{remark}

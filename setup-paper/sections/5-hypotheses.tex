@@ -1,2 +1,13 @@
 \section{Hypotheses}
 
+% Budget: about a quarter page. For each: the claim and what would falsify it.
+\begin{itemize}
+  \item[H1] We claim that on the counts step of the calibration arm, the prediction matches the swarm. This is tested by checking that $\Delta_t$ lies within the noise-floor band at every round and that $\varepsilon_i(\pswarm) = 0$ up to tolerance. It is falsified if these checks are negative, which would mean that there is a bug that must be fixed first.
+  \item[H2] We claim that agents meet different situations in the swarm than in their tests, so $\varepsilon_i(\pswarm(i, t)) > \varepsilon_i(\ptest(i, t))$; the shift is larger on the cheap-talk step than on the counts step. This is measured by taking the difference of the two values averaged over agents and over rounds 2 to $T$. It is falsified if the interval for the shift includes zero, or if the cheap-talk shift is not larger than the counts shift.
+  \item[H3] We claim that $\Delta_t$ levels off instead of growing linearly. This is measured via the slope of $\Delta_t$ over rounds 11 to 20 against the slope of the uncapped $B(t)$ over those rounds. It is falsified if the interval for $\Delta_t$'s slope reaches $B$'s slope. We only count where the fraction of runs already at consensus stays below a half.
+  \item[H4] We claim that the order-0 audit fails where the order-1 audit holds. This is measured by $\Delta_t$ for order-0 against order-1 on the counts step of the core arm. It is falsified if order-0's $\Delta$ falls within order-1's interval. Note that the order-1 $\Delta$ should lie between order-0 and the chain fitted to swarm data.
+  \item[H5] We observe whether $\Delta$ grows with $n$ as fast as the bound does, and whether the bound grows linearly in $n$. This is measured by the ratio $\Delta(n = 20) / \Delta(n = 10)$ against $B(20) / B(10)$ at round $T$ for each graph. Note that a ratio close to the bound's means that the bound is tight in $n$, and a smaller ratio means the gap grows more slowly than the bound. Our observation of effects across graphs with different topologies is exploratory.
+\end{itemize}
+% Commit in advance to reporting H2, H3 and H5 whichever way they come out.
+We report H2, H3, and H5 in whatever order they come out.
+% H1 is a gate, and H4 reproduces what is already known.

@@ -1,2 +1,7 @@
 \section{Question}
 
+Given that each agent passes a unit test individually, to what extent does the prediction composed from those tests align with the behaviour of the swarm, and how does the gap vary with communication and swarm size?
+We are motivated by the Hugging Face incident of July 2026, where around 700 agents in an internal OpenAI evaluation coordinated an attack, completely unprompted, on Hugging Face's systems~\citep{metr2026incident}.
+Labs usually test agents individually; according to \citet{greenblatt2026swarms}, Chief Scientist at Redwood Research, ``[w]e don't have good approaches for understanding/overseeing the activity and aims of AI `swarms'\,''.
+\citet{flint2026}, whose work most closely relates to ours, compose cached bounded-memory policies, where composition is exact by construction.
+We, contrastingly, audit full-history agents on test data separate from swarm data, provide a bound on the gap, and vary communication and swarm size.

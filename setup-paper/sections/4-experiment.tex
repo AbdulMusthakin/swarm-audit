@@ -1,2 +1,128 @@
 \section{Experiment}
+\label{sec:experiment}
 
+% Budget: about half a page. The table takes ~8 lines, leaving 2-3 lines per part.
+% This section turns the objects of Section 2 into procedures: p_test (unit tests),
+% the swarm law (swarm runs), p_swarm(i,t) (replay), and L_model (statistics).
+
+% Run matrix, from the hand-off. "Runs" is per cell, i.e. per (step, n, graph, k):
+% this is what the hand-off's Modal cost estimate assumes (e.g. the core sweep:
+% 600k calls x 650 tokens at 5,000 tokens/s = 21.7 GPU-hours). Say so in the caption.
+% Caption, still to write: T = 20 rounds throughout; what one run is; that the
+% conditional extras run only if Saturday is clean, in the order numbered.
+% To save space, the three conditional rows can collapse into one line of the caption.
+\begin{table}[ht]
+  \centering\footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{@{}p{0.15\textwidth}llllll@{}}
+    \toprule
+    Arm & Steps & $n$ & Graphs & $k$ & Runs & Status \\
+    \midrule
+    Calibration (last $k$ rounds) & Counts, cheap talk & 4          & Chain, star, fully connected & 1, 2 & 100          & Committed \\
+    Core (full history)           & Counts, cheap talk & 10, 20, 40 & Chain, star, fully connected & 1    & 100, 100, 50 & Committed \\
+    Scale                         & Counts, cheap talk & 100        & Cycle, random 4-regular      & 1    & 50           & Committed \\
+    \midrule
+    Free text                     & Free text          & 10, 20, 40 & Cycle, random 4-regular      & 1    & 50           & Conditional 1 \\
+    Second 7B family              & Cheap talk         & 10, 20, 40 & Chain, star, fully connected & 1    & 100, 100, 50 & Conditional 2 \\
+    $\sim$70B model               & Counts, cheap talk & 10         & Chain, star, fully connected & 1    & 50           & Conditional 3 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Run matrix: $T = 20$ rounds; one round follows Table~\ref{tab:ladder}; estimated time to run is 45 GPU hours; conditional extras run if Saturday is clean, in given order}
+  \label{tab:runs}
+\end{table}
+
+% UNIT-TEST PROTOCOL (how p_test is built; no swarm data is used here: say so).
+%  - Test per in-degree class, not per agent: K_i depends on i only through d_i, so
+%    one set of tests per distinct d_i (chain: 1, 2; star: 1, n-1; fully connected:
+%    n-1; cycle: 2; random 4-regular: 4). This is why unit tests are affordable.
+%  - For each coarse state s, ~20 synthetic histories h with pi_k(q(h)) = s.
+%    Lengths uniform over the lengths that can produce s: the empty state () only
+%    from length 0, every other state needs length >= 1. Make this agree with the
+%    "uniform on {0, ..., T-1}" in Definition 2.
+%  - Earlier rounds random: actions, counts, and signals on the cheap-talk step;
+%    each round's payoff computed from them, so unit-test prompts have exactly the
+%    same format as swarm prompts.
+%  - Exact probabilities: action token before signal in the output format, so
+%    pr_*K_i is the first token's probability from one forward pass. State what
+%    happens to mass on invalid tokens (e.g. renormalise over H and L).
+%  - kappa_i(. | s) = average over the histories for s; eps_i(p_test(i,t)) = mean
+%    TV distance over histories of length t-1.
+We test per in-degree class instead of per agent.
+As $K_i$ depends on $i$ only through $d_i$, we have one set of tests per distinct $d_i$.
+This also results in unit tests being affordable.
+For each coarse state $s$, we have about 20 synthetic histories $h$ with $\pi_k(q(h)) = s$.
+History lengths are uniform over the lengths that can produce $s$.
+The empty state $()$ takes from length $0$, and every other state needs length at least one.
+Each round's payoff is computed from that round's own action and the neighbour action counts, so the unit-test prompts have the same format as the swarm prompts.
+The action token is before the signal in the output format, so $\mathrm{pr}_* K_i$ is the first token's probability from one forward pass.
+For invalid tokens, we renormalize over $\mathrm{H}$ and $\mathrm{L}$.
+The average over the histories for $s$ is given by $\kappa_i(\cdot \mid s)$, and the mean total-variation distance over histories of length $t-1$ is given by $\varepsilon_i(\ptest(i,t))$.
+
+
+% SWARM RUNS (the swarm law of Definition 1).
+%  - Temperature 1; actions and signals sampled each round; all agents' calls go to
+%    the server as one batch per round (the synchronous update).
+%  - Record the full outputs o^t, not just actions, so every history can be rebuilt
+%    through rho_i; replay depends on this.
+%  - Prompt conditions from Section 2 (point back, don't repeat): payoff shown, no
+%    running total, T undisclosed, round 1 is the prompt alone, calibration prompts
+%    cut to the last k rounds.
+We choose a temperature of one, our actions and signals are sampled each round, and all agents' calls go to the server as a single batch per round.
+We record the full outputs $o^t$, so every history can be obtained via $\rho_i$; this is required for replay.
+Prompt conditions may be found in Section~\ref{sec:set-up}.
+
+% REPLAY (how p_swarm(i,t) is estimated).
+%  - ~5,000 recorded histories per (size, topology, step), each fed to a single
+%    agent; exact probabilities; TV distance from kappa_i.
+%  - Stratify the sample by round, so eps_i(p_swarm(i,t)) exists for every t:
+%    Theorem 1 sums over t, and H2 compares round by round.
+%  - Swarm data only scores the model and never fits it: say so (a reviewer will
+%    check this; it is in the hand-off's risk table).
+Our sample size is approximately 5000 recorded histories per size, topology, and step; they are each fed into a single agent.
+We have exact probabilities, and the total-variation distance is obtained from $\kappa_i$.
+We stratify the sample by round, so that $\varepsilon_i(\pswarm(i,t))$ exists for every $t$.
+Theorem~\ref{thm:TV_bound} sums over $t$, and H2 compares each round.
+The swarm data only scores the model; it does not fit the model.
+
+% STATISTICS AND DELTA (L_model against the swarm).
+%  - Statistics: fraction bidding high per round; time to consensus; final split.
+%    Define consensus precisely (e.g. all agents take the same action for m
+%    consecutive rounds), or time to consensus cannot be reproduced.
+%  - Model side: Monte Carlo of the composed chain, with many more runs than the
+%    swarm (it is cheap); exact for n = 4.
+%  - Delta: TV distance between swarm and model distributions of each statistic;
+%    bootstrap 95% intervals across runs. Bin statistics with many values: TV
+%    between empirical distributions is biased upwards with many bins.
+%  - Plot Delta against T with two curves: Theorem 1's bound with eps_i(p_swarm),
+%    and the same sum with eps_i(p_test). Label the second a prediction, not a
+%    bound: the theorem needs p_swarm.
+%  - Short horizon: T = 5, from the first five rounds of each run (one clause).
+Note that total variation, which is bounded by Theorem~\ref{thm:TV_bound}, between the two laws of a statistic, is a lower bound on the true trajectory distance (which is at most the bound), so we may use statistics to test our theorem.
+We define $X_t = \tfrac{1}{n} \sum_i \mathbf{1}[a^t_i = \mathrm{H}]$, which gives one $\Delta_t$ per round; this is what the $\Delta$ versus $T$ plot needs.
+The first round from which all agents take the same action for 3 consecutive rounds is denoted by $\tau$.
+If we have no consensus, then we write $\tau = \infty$.
+The final split is the average of $X_t$ over the last 5 rounds.
+
+We have a Monte Carlo simulation of the composed chain, where each step only looks up $\kappa_i$, so $10^4$--$10^5$ runs are cheap, and the model's sampling noise becomes negligible.
+For $n=4$, we may compute it exactly.
+We estimate total variation from 100 samples, with the estimated total variation being biased upwards.
+With $n=40$, $X_t$ takes 41 values, and two samples drawn from the same law can still give a total variation of $0.2$--$0.3$.
+We thus bin $X_t$ into five bins of width $0.2$.
+We measure the noise floor by taking two samples of the swarm's size from the model, compute the total variation between them, and plot it as a band.
+Also, for a statistic with values in $[0, 1]$, $\lvert \mathbb{E}_{\text{swarm}} X_t - \mathbb{E}_{\text{model}} X_t \rvert \leq \Delta_t$, where we are considering unbinned $\Delta_t$, so we report the difference of means next to the binned total variation.
+We bootstrap 95\% intervals across runs, resampling whole runs with replacement and recomputing $\Delta$.
+
+Our plot of $\Delta$ against $T$ has two curves.
+One is Theorem~\ref{thm:TV_bound}'s bound $B(t) = \sum_{s \leq t} \sum_i \varepsilon_i(\pswarm(i, s))$, and the other is the same sum with $\varepsilon_i(\ptest(i, s))$, which is a test-only prediction.
+
+% BASELINES.
+%  - Order-0 audit: kappa_i^0 = agent i's action distribution under p_test,
+%    ignoring its coarse state; the composed chain then has independent agents.
+%    Expected to fail, as in Ashery et al. (add to refs.bib).
+%  - Order-1 audit: the method.
+%  - Markov chain fitted to swarm data: the upper benchmark, as in Hirota et al.
+%    (add to refs.bib). Say it is not an audit, since it uses swarm data. Fit on
+%    half the runs and evaluate on the other half, so it cannot win by memorising.
+% \placeholder{Baselines}
+
+% The Friday pilot belongs with Section 6's milestones, not here.
