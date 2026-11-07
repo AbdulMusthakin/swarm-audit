@@ -128,13 +128,38 @@ vLLM warns that unseeded random sampling may not be batch invariant; that does n
 since actions and signals are drawn in Python from the logged probabilities.
 `results/serving/g3_batchinv{0,1}.json`, `g3_decision.json`.
 
-## G4, throughput benchmark: not run
+## G4, throughput benchmark: PASS — everything fits at full size
 
-Script: `scripts/benchmark.py` (writes `results/serving/g4_benchmark.json`). It first
-re-measures Llama's signal responsiveness on the final cheap-talk prompt (Abdul, 7 Nov
-2026), on the screening grid (d = 4, comparable with screening's 0.051) and on d = 2
-(`results/serving/signal_responsiveness.json`). If the audit is too slow, histories per
-state are reduced, never the prompt.
+Run on an L4 in workspace `aliyusufbelal`, batch invariance on, all measurements fresh.
+
+| measure | counts | cheap talk |
+|---|---|---|
+| one core run (hand-off's benchmark) | n = 10: 200 decisions in 22.2 s, $0.005 | n = 20: 400 decisions in 99.6 s, $0.022 |
+| prompt tokens in round 20 | 780 | 1571–1616 (limit 4,096) |
+| GPU seconds per decision, 1,000-prompt batches | 0.089 | 0.450 (three read-outs per decision) |
+
+**Plan (settled rule):** remaining manifest — calibration arms, audit tables, drift panels,
+core n = 10 and 20 in both channels, and arm 7 — projected at
+**8.5 GPU-hours and $6.82**; × 1.25 it fits the $40 cap
+(spent so far $1.55, an overestimate that counts queueing) and the 12-hour limit.
+No cuts: the signal-aware audit stays at 50 fit / 25 score, n = 20 and arm 7 run.
+`results/serving/g4_benchmark.json`, `g4_plan.json`.
+
+**Llama's signal responsiveness on the final cheap-talk prompt** (Abdul's request;
+`results/serving/signal_responsiveness.json`): spread of P(H) over the four message variants
+at fixed action counts.
+
+| grid | length 1 (the screening metric) | length 5 |
+|---|---|---|
+| d = 4, the screening grid | 0.055 (screening, old wording: 0.051) | 0.022 |
+| d = 2, the cycle's degree | 0.038 | 0.038 |
+
+By the settled rule the core continues either way. The two grids sit on opposite sides of
+the 0.05 bar, which matters for the extra-arms trigger (arm 9): flagged to Abdul.
+
+A first G4 attempt crashed on its first call (the server's `info()` returned
+`torch.__version__`, which needs torch to unpickle); fixed in `797660f`, and about 3 minutes
+of L4 time is recorded for it.
 
 ## G5, calibration (arms 4 and 4b): not run
 
