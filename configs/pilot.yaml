@@ -1,8 +1,23 @@
-# Pilot, gate G6 (docs/handoff-build.md section 4). Applies Abdul's payoff rule once,
-# using 5 counts runs at n = 10 on the cycle, then freezes the settings for both
-# channels. Temperature stays at 1. Logs go to results/pilot/ and never enter the
-# analysis. With no rule (pilot_rule: "none" in core.yaml), this gate is skipped.
-rule: null      # set by Abdul before the pilot; see core.yaml inputs.pilot_rule
+# Pilot, gate G6 (docs/handoff-build.md section 4). Temperature stays at 1. Logs go to
+# results/pilot/ and never enter the analysis.
+#
+# Rule fixed by Abdul on 7 Nov 2026, before the pilot: no tuning, except one fallback.
+# Run 5 counts runs at n = 10 on the cycle with the current payoffs. If 3 or more of
+# them reach all-low consensus by round 5, set uLH = 11 (the prisoner's-dilemma ordering
+# still holds: 11 > 10 > 4 > 0 and 2 x 10 > 11 + 0) and freeze it for both channels.
+# Otherwise change nothing. scripts/run_pilot.py applies the rule mechanically.
+#
+# "All-low consensus by round 5" uses the paper's consensus time: tau is the first round
+# t with X_t = X_{t+1} = X_{t+2} = 0, and a run counts if tau <= 5. The script also
+# evaluates two other readings (everyone low in some round <= 5; the three all-low
+# rounds completed by round 5, i.e. tau <= 3) and stops to ask Abdul if they would
+# lead to a different decision.
+rule:
+  name: all_low_fallback
+  consensus_side: L
+  by_round: 5
+  min_runs: 3
+  change: {uLH: 11}
 arm_id: 9
 channel: counts
 graph: cycle

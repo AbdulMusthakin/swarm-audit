@@ -27,6 +27,19 @@ from swarm_audit import build  # noqa: E402
 from swarm_audit.swarm import run_condition  # noqa: E402
 
 
+def check_pilot_frozen(cfg: dict) -> None:
+    """Core arms launch only after G6 has frozen the payoffs (results/pilot/summary.json)."""
+    path = REPO / "results" / "pilot" / "summary.json"
+    if not path.exists():
+        raise SystemExit("Gate G6 has not run (no results/pilot/summary.json): run scripts/run_pilot.py")
+    summ = json.loads(path.read_text())
+    frozen = summ.get("frozen_payoffs")
+    if summ.get("ambiguous") or frozen is None:
+        raise SystemExit("The pilot did not freeze the payoffs (see results/pilot/summary.json): ask Abdul")
+    if {k: float(v) for k, v in frozen.items()} != {k: float(v) for k, v in cfg["payoffs"].items()}:
+        raise SystemExit(f"config payoffs {cfg['payoffs']} differ from the frozen {frozen}")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--config", required=True)
@@ -51,6 +64,7 @@ def main() -> None:
     need = ("model_confirmed", "prompts_approved", "modal_account")
     if args.arm.startswith(("core", "second")):
         need += ("pilot_rule",)
+        check_pilot_frozen(cfg)
     build.check_cost(cfg, cfg["serving"]["timeout_minutes"] * len(conds))
     with build.gpu_session(cfg, need):
         be, _ = build.modal_backend(cfg, log_name=f"swarm_{args.arm}")

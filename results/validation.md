@@ -71,12 +71,17 @@ they are reproduced exactly from the seeds by rerunning the script.
 
 ## G3, serving repeatability: not run
 
-Needs the main model confirmed and a Modal account (hand-off section 1).
+Model confirmed (Llama 3.1 8B Instruct). Needs a teammate's Modal workspace, set up with
+`scripts/setup_workspace.py` (secret "huggingface", weights, final-prompt label check).
 Script: `scripts/check_serving.py`. The numerical floor will be recorded here.
 
 ## G4, throughput benchmark: not run
 
-Script: `scripts/benchmark.py` (writes `results/serving/g4_benchmark.json`).
+Script: `scripts/benchmark.py` (writes `results/serving/g4_benchmark.json`). It first
+re-measures Llama's signal responsiveness on the final cheap-talk prompt (Abdul, 7 Nov
+2026), on the screening grid (d = 4, comparable with screening's 0.051) and on d = 2
+(`results/serving/signal_responsiveness.json`). If the audit is too slow, histories per
+state are reduced, never the prompt.
 
 ## G5, calibration (arms 4 and 4b): not run
 
@@ -86,4 +91,10 @@ Script: `scripts/analyse.py --gate-g5` (code path exercised on scripted policies
 
 Recorded per condition in `results/runs/<arm>/<condition>/drift.json` by `scripts/run_swarm.py`.
 
-## G6, pilot: waiting for Abdul's rule (or "none")
+## G6, pilot: rule fixed (Abdul, 7 Nov 2026), not run
+
+No tuning except one fallback: 5 counts runs at n = 10 on the cycle; if 3 or more reach
+all-low consensus by round 5 (tau <= 5, the paper's consensus time), set uLH = 11 and freeze
+it for both channels; otherwise change nothing. `scripts/run_pilot.py` applies the rule
+mechanically and stops for Abdul if other readings of "by round 5" would decide differently.
+Core arms refuse to launch until `results/pilot/summary.json` has frozen the payoffs.

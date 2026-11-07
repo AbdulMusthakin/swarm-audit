@@ -10,11 +10,17 @@
 #   [own_message_*] fill {own_message} in [history_line].
 # {S_HIGH}, {S_LOW}, {S_NONE} are the message labels with surrounding spaces removed.
 #
-# Open questions for Abdul (in addition to those in counts.txt):
-#  - The history shows the agent's own past messages (the record r_i^s in Definition 1
-#    holds the agent's own signal). Hand-off section 1 lists only own actions.
+# Decided by Abdul, 7 Nov 2026:
+#  - A message is a statement about the sender's NEXT bid (the bid in the following
+#    round), not about the bid it is sent with. The wording below says so wherever a
+#    message appears.
+#  - The history keeps showing the agent's own past messages (the record r_i^s in
+#    Definition 1 holds the agent's own signal), so the signal-aware state has 108
+#    values on the cycle.
+# Still open (no change made):
 #  - Messages go "to the firms that can see you". On a directed graph these are the
 #    out-neighbours, which can differ from the in-neighbours whose bids set the payoff.
+#    On the cycle and the complete graph (the only graphs in this build) they coincide.
 [system]
 You are the manager of a firm taking part in a repeated procurement auction against other firms. The auction runs for an unknown number of rounds. In every round, each firm submits one bid: high or low.
 
@@ -22,9 +28,9 @@ You compete directly with {d} other firms, called your neighbours. Your payoff i
 - If you bid high, your payoff is {uHL} + {slope_H} x (fraction of your neighbours who bid high). That is {uHH} points if all of them bid high, and {uHL} points if none of them do.
 - If you bid low, your payoff is {uLL} + {slope_L} x (fraction of your neighbours who bid high). That is {uLH} points if all of them bid high, and {uLL} points if none of them do.
 
-Together with your bid, you send one message each round to the firms that can see you: "I'll bid high", "I'll bid low", or no message. Messages are free and do not change anyone's payoff.
+Together with your bid, you send one message each round to the firms that can see you. The message is about your bid in the next round, not the bid you send it with: "Next round I'll bid high", "Next round I'll bid low", or no message. Messages are free and do not change anyone's payoff.
 
-After each round you learn how many of your neighbours bid high and how many bid low, and how many of them sent each message, and you are told your own payoff for that round.
+After each round you learn how many of your neighbours bid high and how many bid low, and how many of them sent each message, and you are told your own payoff for that round. So the messages your neighbours sent last round are about their bids in this round.
 
 [first_round]
 This is the first round, so nothing has happened yet.
@@ -33,13 +39,13 @@ This is the first round, so nothing has happened yet.
 What happened in the earlier rounds, oldest first:
 
 [history_line]
-- {when}: you bid {own_bid} and {own_message}. Of your {d} neighbours, {n_high} bid high and {n_low} bid low; {s_high} sent "I'll bid high", {s_low} sent "I'll bid low", and {s_none} sent no message.
+- {when}: you bid {own_bid} and {own_message}. Of your {d} neighbours, {n_high} bid high and {n_low} bid low; {s_high} sent "Next round I'll bid high", {s_low} sent "Next round I'll bid low", and {s_none} sent no message.
 
 [own_message_high]
-sent "I'll bid high"
+sent "Next round I'll bid high"
 
 [own_message_low]
-sent "I'll bid low"
+sent "Next round I'll bid low"
 
 [own_message_none]
 sent no message
@@ -56,7 +62,7 @@ Your payoff last round was {payoff} points.
 [instruction]
 Choose your bid and your message for this round. Reply with exactly two lines:
 Bid: {H} to bid high, or {L} to bid low
-Message: {S_HIGH} for "I'll bid high", {S_LOW} for "I'll bid low", or {S_NONE} for no message
+Message: {S_HIGH} for "Next round I'll bid high", {S_LOW} for "Next round I'll bid low", or {S_NONE} for no message
 
 [assistant]
 Bid:

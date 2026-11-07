@@ -36,9 +36,12 @@ script refuses to start until Abdul's inputs are recorded under `inputs:` in the
 
 ## Reproducing the runs
 
-In the order of `docs/handoff-build.md`:
+In the order of `docs/handoff-build.md`. GPU runs use a teammate's Modal workspace,
+never Abdul's: sign in with `python scripts/modal_login.py`, create the secret
+"huggingface" there, then set it up once.
 
     python scripts/check_harness.py                                   # G2, CPU
+    SWARM_AUDIT_HF_SECRET=huggingface python scripts/setup_workspace.py   # weights, labels
     python scripts/check_serving.py --config core.yaml                # G3
     python scripts/benchmark.py --config core.yaml                    # G4
     python scripts/run_audit.py --config calibration.yaml --channel counts --enumerated

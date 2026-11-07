@@ -5,13 +5,14 @@
 
 # Hand-off section 1. GPU scripts refuse to start until every item is set.
 inputs:
-  model_confirmed: false    # Abdul confirms the main model (screening recommends llama-3.1-8b)
-  prompts_approved: false   # Abdul approves swarm_audit/prompts/{counts,cheap_talk}.txt
-  pilot_rule: null          # "none", or the payoff-adjustment rule fixed before the pilot (G6)
-  modal_account: null       # whose Modal workspace to use
+  model_confirmed: true     # Abdul, 7 Nov 2026: Llama 3.1 8B Instruct
+  prompts_approved: false   # cheap_talk.txt reworded (messages are about the NEXT bid); waits for Abdul's sign-off on the diff
+  pilot_rule: all_low_fallback   # Abdul, 7 Nov 2026: the one fallback in configs/pilot.yaml; otherwise no tuning
+  modal_account: teammate   # Abdul, 7 Nov 2026: a teammate's workspace, never Abdul's own
+  forbidden_workspaces: [abdulmusthakin]   # GPU scripts refuse to run in these
 
 model:
-  name: llama-3.1-8b        # PROVISIONAL until inputs.model_confirmed
+  name: llama-3.1-8b        # confirmed by Abdul, 7 Nov 2026
   hf_id: meta-llama/Llama-3.1-8B-Instruct
   revision: 0e9e39f249a16976918f6564b8830bc894c89659
   gated: true
@@ -30,6 +31,8 @@ p_test: {L_min: 1, L_max: 19, p_own_H: 0.5, p_neighbour_H: 0.5, seed: 20261108}
 # state includes the own last signal (108 states on the cycle; 36 without).
 own_signal_in_state: true
 
+# If G4 shows the audit is too slow, reduce histories per state (Abdul, 7 Nov 2026);
+# never change the prompt for speed.
 audit:
   actions: {n_fit: 100, n_score: 50}   # actions-only tables, fitted directly
   signal: {n_fit: 50, n_score: 25}     # signal-aware tables (cheap talk)

@@ -15,6 +15,8 @@ cloud session's disk is temporary). Every number comes from logged data.
 | `runs/<arm>/<condition>/run_<r>.jsonl.gz` | One line per decision (record, state, prompt sha256 and tokens, p_H, log-probabilities, p_valid, draws, action; on cheap talk both signal distributions, draw and signal). | `scripts/run_swarm.py` |
 | `runs/<arm>/manifest.json` | Config, git commit, model, backend and engine settings, seeds, timings, p_valid flags. | `scripts/run_swarm.py` |
 | `runs/<arm>/<condition>/drift.json` | The drift panel at the start and end of the condition and mixed into a swarm batch. | `scripts/run_swarm.py` |
+| `serving/workspace_setup.json` | The teammate's workspace, weights download and the label check on the final prompts. | `scripts/setup_workspace.py` |
+| `serving/signal_responsiveness.json` | Llama's signal responsiveness on the final cheap-talk prompt (d = 4 and 2). | `scripts/benchmark.py` |
 | `serving/g3_batchinv{0,1}.json` | G3: repeatability maxima and throughput. | `scripts/check_serving.py` |
 | `serving/g4_benchmark.json` | G4: throughput, tokens at round 20, cost per run, extrapolation to the manifest. | `scripts/benchmark.py` |
 | `spend.json` | GPU spend recorded by the build scripts (wall-clock at list price). | GPU scripts |

@@ -264,13 +264,37 @@ def check_cost(cfg: dict, worst_minutes: float) -> None:
         raise SystemExit("Stopping: the worst-case cost would pass the cap. Ask Abdul.")
 
 
+def current_workspace() -> str:
+    """The Modal workspace of the active credentials (from `modal token info`)."""
+    import re
+    import subprocess
+
+    r = subprocess.run(["modal", "token", "info"], capture_output=True, text=True)
+    m = re.search(r"Workspace:\s*(\S+)", r.stdout)
+    if r.returncode != 0 or not m:
+        raise SystemExit("Modal is not signed in (or `modal token info` failed). A teammate "
+                         "signs in to their own workspace with `python scripts/modal_login.py`.")
+    return m.group(1)
+
+
+def check_workspace(cfg: dict) -> str:
+    ws = current_workspace()
+    if ws in cfg.get("inputs", {}).get("forbidden_workspaces", []):
+        raise SystemExit(f"Stopping: signed in to Modal workspace {ws!r}, which Abdul ruled "
+                         "out for GPU runs. Sign in to a teammate's workspace instead.")
+    print(f"Modal workspace: {ws}")
+    return ws
+
+
 def gpu_session(cfg: dict, need: tuple[str, ...]):
-    """Context for Modal GPU work: checks the inputs and that the batch-invariance flag
-    and container count in the environment match the config, then runs the app."""
+    """Context for Modal GPU work: checks the inputs, the Modal workspace, and that the
+    batch-invariance flag and container count in the environment match the config, then
+    runs the app."""
     import os
     from contextlib import contextmanager
 
     require_inputs(cfg, need)
+    check_workspace(cfg)
     srv = cfg["serving"]
     env_bi = os.environ.get("SWARM_AUDIT_BATCH_INVARIANT", "0") == "1"
     if env_bi != bool(srv["batch_invariant"]):
@@ -288,3 +312,49 @@ def gpu_session(cfg: dict, need: tuple[str, ...]):
         with modal.enable_output(), app.run():
             yield
     return ctx()
+
+
+# --------------------------------------------------------- label check, final prompts
+
+
+def label_check_queries(cfg: dict, seed: int = 11) -> list[Query]:
+    """The drift panel (every calibration state, both channels) plus round-20 p_test
+    histories on both channels: the prompts whose label tokenisation must hold."""
+    from .audit import synthetic_history
+
+    pt = ptest(cfg)
+    rng = np.random.default_rng(seed)
+    long_pt = PTest(**{**pt.__dict__, "L_min": pt.L_max})   # the longest histories
+    out = drift_panel(cfg)
+    for ch in ("counts", "cheap_talk"):
+        for s in all_actions_states(2, start=False):
+            out.append(Query(ch, synthetic_history(rng, ch, 2, s, long_pt), 2))
+    return out
+
+
+def check_final_labels(tok: Any, cfg: dict) -> dict:
+    """Every action label is one token with the configured id after every prompt, and
+    every signal label likewise after each action label; plus prompt lengths."""
+    from .tokens import chat_prefix, check_labels, encode
+
+    lab = labels(cfg)
+    m = cfg["model"]
+    act_texts, sig_texts, n_tok = [], [], {"counts": 0, "cheap_talk": 0}
+    for qy in label_check_queries(cfg):
+        from .ladder import render
+
+        r = render(qy.channel, qy.history, qy.d, lab, params(cfg), qy.last_k)
+        text = chat_prefix(tok, r, m.get("chat_kwargs"))
+        act_texts.append(text)
+        n_tok[qy.channel] = max(n_tok[qy.channel], len(encode(tok, text)))
+        if qy.channel == "cheap_talk":
+            base = text[: -len(r.assistant)]
+            sig_texts += [base + r.signal_prefix(a) for a in lab.actions]
+    a = check_labels(tok, act_texts, lab.actions)
+    s = check_labels(tok, sig_texts, lab.signals)
+    ok = (a.ok and s.ok and list(a.ids) == m["label_ids"]["actions"]
+          and list(s.ids) == m["label_ids"]["signals"])
+    return {"pass": bool(ok), "action_ids": a.ids, "signal_ids": s.ids,
+            "configured": m["label_ids"], "problems": a.problems + s.problems,
+            "prompts_checked": len(act_texts), "signal_positions_checked": len(sig_texts),
+            "max_prompt_tokens": n_tok, "max_model_len": cfg["serving"]["max_model_len"]}

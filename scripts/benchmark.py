@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Gate G4, throughput benchmark (GPU; docs/handoff-build.md section 4).
 
-One full core run each of counts at n = 10 and cheap talk at n = 20 (cycle, full
-history). Reports decisions per second, prompt tokens at round 20, wall-clock time and
+First, Llama's signal responsiveness on the final cheap-talk prompt (screening grid,
+d = 4 and d = 2; results/serving/signal_responsiveness.json). Then one full core run each
+of counts at n = 10 and cheap talk at n = 20 (cycle, full history). Reports decisions per second, prompt tokens at round 20, wall-clock time and
 dollars per run, then extrapolates to the whole manifest (and to the audit tables).
 Report to Abdul before launching anything larger.
 
@@ -20,7 +21,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from swarm_audit import build  # noqa: E402
+from swarm_audit import build, responsiveness  # noqa: E402
 from swarm_audit.audit import table_states  # noqa: E402
 from swarm_audit.swarm import Condition, read_run, run_condition, run_file  # noqa: E402
 
@@ -38,6 +39,16 @@ def main() -> None:
     with build.gpu_session(cfg, ("model_confirmed", "prompts_approved", "modal_account")):
         be, server = build.modal_backend(cfg, log_name="g4")
         info = server.info.remote()
+        # Abdul, 7 Nov 2026: re-measure Llama's signal responsiveness on the final
+        # cheap-talk prompt (messages about the next bid). Done before the timed runs.
+        resp = responsiveness.measure(be)
+        rpath = REPO / "results" / "serving" / "signal_responsiveness.json"
+        rpath.parent.mkdir(parents=True, exist_ok=True)
+        rpath.write_text(json.dumps(resp, indent=1) + "\n")
+        for d in ("d4", "d2"):
+            print(f"signal responsiveness {d}: length 1 mean "
+                  f"{resp[d]['signal_responsiveness_length1_mean']:.3f}, length 5 mean "
+                  f"{resp[d]['signal_responsiveness_length5_mean']:.3f} (bar 0.05; screening d4: 0.051)")
         for c in conds:
             t0 = time.time()
             out = run_condition(c, be, root)
@@ -73,6 +84,9 @@ def main() -> None:
     price = cfg["serving"]["l4_usd_per_hour"]
     total_s = sum(p["seconds"] for p in plan)
     summary = {"server": info, "benchmark": res, "plan": plan,
+               "signal_responsiveness": {d: {k: v for k, v in resp[d].items()
+                                             if k not in ("groups", "prompts")}
+                                         for d in ("d4", "d2")},
                "total_hours": total_s / 3600, "total_usd": total_s / 3600 * price,
                "note": "single container, lockstep batches as in the benchmark; arm 7 included "
                        "but runs only if approved; startup and queueing time excluded",
