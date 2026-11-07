@@ -1,0 +1,16 @@
+{
+ "rounds": [
+  16,
+  20
+ ],
+ "runs": 50,
+ "runs_all_low": 42,
+ "stop_threshold": 45,
+ "stop": false,
+ "rule": "stop after 9a if at least 45 of the 50 runs have every agent bidding low in every round 16-20 (hand-off)",
+ "runs_dir": "results/extra/runs/olmo_calibration_cheap_talk/cheap_talk_n4_cycle_last1",
+ "run_fingerprint": "845b67894e6613635efd2b6278a215d400d285e8c1e1f152b846ebfdec82a1b0",
+ "computed_by": "build.lock_in(load_runs(runs_dir))",
+ "time": "2026-11-07T21:50:58+00:00",
+ "label": "EXPLORATORY arm 9 (Abdul, 7 Nov 20:15)"
+}
