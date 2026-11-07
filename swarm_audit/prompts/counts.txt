@@ -1,5 +1,8 @@
-# DRAFT FOR ABDUL'S REVIEW. This prompt is part of the experimental design and has
-# not been approved. It was drafted for model screening (docs/handoff-model-screening.md).
+# APPROVED BY ABDUL, 7 Nov 2026 (frozen), as drafted. This prompt is part of the
+# experimental design: change it only with Abdul's approval, and any change after the
+# pilot is a new condition. Apart from the messages it matches cheap_talk.txt word for
+# word, so the counts step stays a clean control for cheap talk.
+# First drafted for model screening (docs/handoff-model-screening.md).
 #
 # Counts step: the agent sees how many in-neighbours took each action.
 #
@@ -20,7 +23,7 @@
 # labelled relative to now, so the prompt does not reveal the round number t.
 # Numbers ({payoff}, {uHL}, ...) are printed with at most two decimals.
 #
-# Open questions for Abdul:
+# Decided by Abdul, 7 Nov 2026: all three points below stay as drafted.
 #  - The rule is stated as a formula with its two end points. A full table of payoffs
 #    by number of high neighbours would be more concrete, but makes low's dominance
 #    easier to read off.

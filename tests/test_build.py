@@ -284,6 +284,12 @@ def test_build_configs_agree_on_shared_sections():
 
 
 def test_gpu_scripts_stop_without_abdul_inputs():
+    need = ("model_confirmed", "prompts_approved", "modal_account", "pilot_rule")
     cfg = build.load("core.yaml")
-    with pytest.raises(SystemExit):
-        build.require_inputs(cfg, ("model_confirmed", "prompts_approved", "modal_account"))
+    build.require_inputs(cfg, need)                      # all recorded (7 Nov 2026)
+    for k, blank in (("model_confirmed", False), ("modal_account", None), ("pilot_rule", None),
+                     ("prompts_approved", {"counts": True, "cheap_talk": False})):
+        c = build.load("core.yaml")
+        c["inputs"][k] = blank
+        with pytest.raises(SystemExit):
+            build.require_inputs(c, need)

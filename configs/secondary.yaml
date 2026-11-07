@@ -7,7 +7,7 @@ inputs:
   model_confirmed: true     # Abdul, 7 Nov 2026: Llama 3.1 8B Instruct
   prompts_approved:         # GPU runs need both templates approved
     cheap_talk: true        # Abdul approved the rewording (messages are about the NEXT bid), 7 Nov 2026
-    counts: false           # counts.txt as drafted for screening: not yet confirmed by Abdul
+    counts: true            # Abdul approved counts.txt as drafted, 7 Nov 2026
   pilot_rule: all_low_fallback   # Abdul, 7 Nov 2026: the one fallback in configs/pilot.yaml; otherwise no tuning
   modal_account: teammate   # Abdul, 7 Nov 2026: a teammate's workspace, never Abdul's own
   forbidden_workspaces: [abdulmusthakin]   # GPU scripts refuse to run in these
