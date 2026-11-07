@@ -121,3 +121,33 @@ def test_collect_writes_only_under_the_extra_tree(tmp_path, monkeypatch):
     assert (root / "figures" / "fig2.png").exists()
     after = {p: p.stat().st_mtime for p in core_tables.glob("*")} if core_tables.exists() else {}
     assert before == after
+
+
+def test_max_runs_runs_a_prefix_and_resumes(tmp_path):
+    cfg = build.load("extra-scale.yaml")
+    c = Condition("extra_test", 8, 12, "counts", 12, graph="random_regular", T=3, runs=7,
+                  graph_kwargs=(("d", 4), ("seed", 5)))
+    be = build.scripted("coin", cfg)
+    out = run_condition(c, be, tmp_path, max_runs=5, log=lambda *a: None)
+    assert sorted(p.name for p in out.glob("run_*")) == [f"run_{r:03d}.jsonl.gz" for r in range(5)]
+    first = load_runs(out).actions.copy()
+    run_condition(c, be, tmp_path, log=lambda *a: None)
+    data = load_runs(out)
+    assert data.R == 7 and (data.actions[:5] == first).all()
+    man = json.loads((tmp_path / "extra_test" / "manifest.json").read_text())
+    assert [s["runs"] for s in man["conditions"][c.name]["sessions"]] == [[0, 1, 2, 3, 4], [5, 6]]
+    # the same 7 runs in one go give the same logs (lockstep batching does not matter)
+    out2 = run_condition(c, be, tmp_path / "again", log=lambda *a: None)
+    assert (load_runs(out2).actions == data.actions).all()
+
+
+def test_core_pilot_payoff_check(tmp_path):
+    cfg = build.load("extra-scale.yaml")
+    with pytest.raises(SystemExit):
+        build.check_core_pilot_payoffs(cfg, tmp_path / "missing.json")
+    p = tmp_path / "summary.json"
+    p.write_text(json.dumps({"frozen_payoffs": dict(cfg["payoffs"])}))
+    assert build.check_core_pilot_payoffs(cfg, p) == cfg["payoffs"]
+    p.write_text(json.dumps({"frozen_payoffs": {**cfg["payoffs"], "uLH": 11}}))
+    with pytest.raises(SystemExit):
+        build.check_core_pilot_payoffs(cfg, p)

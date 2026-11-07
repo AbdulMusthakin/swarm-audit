@@ -187,11 +187,14 @@ def update_manifest(arm_dir: Path, cond: Condition, entry: dict) -> None:
 
 
 def run_condition(cond: Condition, backend: Backend, runs_root: Path, chunk: int | None = None,
-                  extra_manifest: dict | None = None, log=print) -> Path:
+                  extra_manifest: dict | None = None, log=print, max_runs: int | None = None) -> Path:
     """Run every unfinished run of `cond`, `chunk` runs at a time in lockstep (all at
-    once by default), writing each run's log as it completes. Returns the folder."""
+    once by default), writing each run's log as it completes. Returns the folder.
+    max_runs: run only the first that many unfinished runs (e.g. a benchmark)."""
     out = runs_root / cond.arm / cond.name
     todo = [r for r in range(cond.runs) if not run_file(out, r).exists()]
+    if max_runs is not None:
+        todo = todo[:max_runs]
     if len(todo) < cond.runs:
         log(f"{cond.name}: {cond.runs - len(todo)} runs already logged, {len(todo)} to run")
     chunk = chunk or max(len(todo), 1)
@@ -205,7 +208,12 @@ def run_condition(cond: Condition, backend: Backend, runs_root: Path, chunk: int
             n_dec += len(lines[r])
         log(f"{cond.name}: runs {part[0]}..{part[-1]} done ({time.time() - t0:.1f}s)")
     summary = summarise_condition(out, cond)
+    man_path = runs_root / cond.arm / "manifest.json"
+    prev = json.loads(man_path.read_text())["conditions"].get(cond.name, {}) if man_path.exists() else {}
+    sessions = prev.get("sessions", []) + [{"runs": todo, "seconds": round(time.time() - t0, 2),
+                                            "decisions": n_dec, **(extra_manifest or {}).get("session", {})}]
     update_manifest(runs_root / cond.arm, cond, {
+        "sessions": sessions,
         "condition": {**asdict(cond), "name": cond.name},
         "backend": backend.describe(), "git_commit": git_commit(),
         "seconds_this_session": round(time.time() - t0, 2), "decisions_this_session": n_dec,

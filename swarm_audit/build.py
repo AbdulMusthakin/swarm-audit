@@ -495,6 +495,22 @@ def numerical_floor(cfg: dict) -> float:
 PLAN_FILE = RESULTS / "serving" / "g4_plan.json"
 
 
+def check_core_pilot_payoffs(cfg: dict, summary: Path | None = None) -> dict:
+    """For configs with check_core_pilot (extra arms): the payoffs must equal the core
+    pilot's frozen payoffs in results/pilot/summary.json. Prompts show the payoffs, so
+    this gates the audit as well as the runs. Returns the frozen payoffs."""
+    path = summary or RESULTS / "pilot" / "summary.json"
+    if not path.exists():
+        raise SystemExit("The core pilot (G6) has not frozen the payoffs yet (no "
+                         "results/pilot/summary.json): merge the core branch once it has.")
+    frozen = json.loads(path.read_text()).get("frozen_payoffs")
+    if frozen is None:
+        raise SystemExit("The core pilot did not freeze the payoffs: ask Abdul")
+    if {k: float(v) for k, v in frozen.items()} != {k: float(v) for k, v in cfg["payoffs"].items()}:
+        raise SystemExit(f"config payoffs {cfg['payoffs']} differ from the core's frozen {frozen}")
+    return frozen
+
+
 def check_in_plan(arm: str, cond_names: list[str]) -> None:
     """Core and second-topology arms run only as the G4 plan allows."""
     if not PLAN_FILE.exists():
