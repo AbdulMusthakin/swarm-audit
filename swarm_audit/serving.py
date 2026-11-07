@@ -252,18 +252,40 @@ def hf_label_logprobs(hf_id: str, revision: str,
 # ------------------------------------------------------------------------- logging
 
 
+def _find_logged(log_name: str, function: str, meta: dict, prompts: list[list[int]]) -> Any:
+    """The output of the latest logged call with the same function, metadata and prompt
+    token ids, or None. Used to resume a run without repeating finished GPU calls."""
+    for path in sorted(LOG_DIR.glob(f"*_{log_name}.jsonl"), reverse=True):
+        for line in reversed(path.read_text().splitlines()):
+            e = json.loads(line)
+            if e.get("function") != function or any(e.get(k) != v for k, v in meta.items()):
+                continue
+            if [p["ids"] for p in e.get("prompts", [])] == prompts:
+                return e["output"]
+    return None
+
+
 def call_logged(fn: Any, *args: Any, log_name: str, meta: dict, prompt_ids: list[str] | None = None,
                 prompts: list[list[int]] | None = None, **kwargs: Any) -> Any:
     """Call a Modal function (`fn.remote`) or a local callable, and append the call, its
-    inputs and its outputs to logs/serving/<date>_<log_name>.jsonl."""
+    inputs and its outputs to logs/serving/<date>_<log_name>.jsonl.
+
+    With SWARM_AUDIT_RESUME=1, an identical call already in the log (same function,
+    metadata and prompt token ids) is not repeated: its logged output is returned."""
     LOG_DIR.mkdir(parents=True, exist_ok=True)
+    fname = getattr(fn, "__name__", str(fn))
+    if os.environ.get("SWARM_AUDIT_RESUME") == "1":
+        out = _find_logged(log_name, fname, meta, prompts or [])
+        if out is not None:
+            print(f"resumed from log: {log_name} {meta.get('call')}", flush=True)
+            return out
     t0 = time.time()
     remote = getattr(fn, "remote", None)
     out = remote(*args, **kwargs) if remote else fn(*args, **kwargs)
     entry = {
         "time": _dt.datetime.now(_dt.timezone.utc).isoformat(),
         "seconds": round(time.time() - t0, 3),
-        "function": getattr(fn, "__name__", str(fn)),
+        "function": fname,
         **meta,
         "prompts": [
             {"prompt_id": pid, "n_tokens": len(p),
