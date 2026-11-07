@@ -57,16 +57,21 @@ LOG_DIR = REPO_ROOT / "logs" / "serving"
 
 app = modal.App(APP_NAME)
 
+# The Modal secret holding HF_TOKEN (needed for gated models). Its name is baked into
+# the image's environment so that the container defines the functions with the same
+# secrets as the client; otherwise Modal refuses to start them.
+_hf_secret = os.environ.get("SWARM_AUDIT_HF_SECRET", "")
+
 image = (
     modal.Image.debian_slim(python_version="3.12")
     .uv_pip_install(f"vllm=={VLLM_VERSION}", "huggingface_hub")
-    .env({"HF_HOME": HF_HOME, "TOKENIZERS_PARALLELISM": "false"})
+    .env({"HF_HOME": HF_HOME, "TOKENIZERS_PARALLELISM": "false",
+          "SWARM_AUDIT_HF_SECRET": _hf_secret})
     .add_local_python_source("swarm_audit")
 )
 
 weights = modal.Volume.from_name("swarm-audit-weights", create_if_missing=True)
 
-_hf_secret = os.environ.get("SWARM_AUDIT_HF_SECRET")
 secrets = [modal.Secret.from_name(_hf_secret)] if _hf_secret else []
 
 # Weight files only: skip duplicate Mistral-format and original/ checkpoints.
