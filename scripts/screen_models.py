@@ -354,11 +354,26 @@ def main() -> None:
     ap.add_argument("--out", default=str(REPO / "results" / "screening"))
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--summarise-only", action="store_true")
+    ap.add_argument("--merge", nargs="*", metavar="DIR",
+                    help="merge screening.csv and validation.json from these run folders "
+                         "(one per model, run in parallel) into --out, then summarise")
     args = ap.parse_args()
 
     cfg = load_config(args.config)
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
+    if args.merge:
+        rows: list[dict] = []
+        vals: dict = {}
+        for d in map(Path, args.merge):
+            rows += list(csv.DictReader(open(d / "screening.csv")))
+            vals.update(json.loads((d / "validation.json").read_text()))
+        with open(out_dir / "screening.csv", "w", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=CSV_FIELDS)
+            w.writeheader()
+            w.writerows(rows)
+        (out_dir / "validation.json").write_text(json.dumps(vals, indent=2, default=str) + "\n")
+        args.summarise_only = True
     if args.summarise_only:
         write_summary(out_dir, cfg)
         print(f"wrote {out_dir / 'summary.md'}")
