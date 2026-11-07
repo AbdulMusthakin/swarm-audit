@@ -8,6 +8,43 @@ For Claude Code, working in this repository. Read this file in full before start
 
 **Branch:** start from this branch (`build-handoff`), which contains the screening code. Work on your own branch and push as you go.
 
+## Status when this hand-off was last updated (7 Nov 2026, about 15:00 UTC)
+
+The previous session stopped here because of usage limits. **The build (§§3–9) has not started.** Only the screening exists.
+
+- **Branch.** This file and the final screening results are on `claude/hand-off-review-tzsnyk`, which is `build-handoff` plus the last screening commit (`88a3f56`). Start from it, or merge it into `build-handoff` first. `build-handoff` alone lacks the merged results for all four models.
+- **Tests.** `pytest` passes 25 tests (screening only). The §8 tests are not written yet.
+- **Screening finished for four models.** See `results/screening/summary.md` and `recommendation.md`. All numbers below come from real runs on a Modal L4, with the draft prompts.
+
+  | model | unsaturated | neighbour | signal | p_valid | vLLM vs transformers |
+  |---|---|---|---|---|---|
+  | Qwen3.5-9B | 1.00 | 0.149 | 0.020 ✗ | 0.999 | 0.024 |
+  | Ministral-3-8B | 0.98 | 0.292 | 0.027 ✗ | 0.984 | 0.054 |
+  | OLMo-3-7B | 0.66 | 0.405 | 0.112 | 1.000 | 0.031 |
+  | Llama 3.1 8B | 1.00 | 0.236 | 0.051 | 0.999 | not run |
+
+  - **Recommended main model: Llama 3.1 8B Instruct.** It is the only model that passes every behavioural bar without saturating anywhere. Its signal responsiveness is only just over the 0.05 bar. **Abdul has not confirmed this yet** (§1, input 1).
+  - OLMo-3-7B: low is absorbing on the cheap-talk step (P(H) = 0.000 in all 16 states after its own low bid).
+  - Qwen3.5-9B and Ministral fail the signal bar.
+  - Not run, because no L4 became free before the time box: Llama's transformers check, and Ministral's check of vLLM's two methods against each other. Under G3 both are informational only.
+- **Numerics, for G3.** Every vLLM-vs-transformers gap is a whole number of bf16 logit steps (0.125 in log-odds, at most 2). vLLM's two read-out methods agree to within 7e-7 on Qwen3.5. On OLMo, which vLLM runs through its transformers backend, they differed by one step, so batch composition can change vLLM's numbers. G3 matters, and `VLLM_BATCH_INVARIANT=1` is the likely fix.
+- **Already in place:** the `swarm-audit-weights` Modal volume in Abdul's workspace caches the weights of all four models; `serving.py` (vLLM 0.32, `logprob_token_ids`, transformers reference, call log with resume).
+
+## Notes for a cloud session (learned the hard way)
+
+- **Network.** The `swarm-audit` cloud environment allows the Hugging Face hosts, `api.modal.com`, `input-plane.us-east.modal.com` (Modal function calls) and `duot2hadvvkdh.cloudfront.net` (large Modal results). If a call hangs or fails with a 403, run `curl -sS "$HTTPS_PROXY/__agentproxy/status"`, look at `recentRelayFailures` for the refused host, and ask for it to be allowed.
+- **Modal client.** Install it with `pip install "modal[api-proxy-support]"`; without it, the client cannot use the proxy.
+- **Modal sign-in.** `modal token new` loses its connection through the proxy, so use `python scripts/modal_login.py` instead. It prints a link and keeps waiting through dropped connections. Abdul should open the link in a private window, already signed in to the right Modal account; otherwise he gets "Token flow associated with different user".
+- **Hugging Face token.** It is in the Modal secret `huggingface` in Abdul's workspace. Set `SWARM_AUDIT_HF_SECRET=huggingface` for every run; `serving.py` bakes the name into the image so client and container agree. For a gated model's tokenizer on CPU, run `python scripts/screen_tokenizers.py --via-modal`, which caches it in `~/.cache/swarm-audit/tokenizers/`.
+- **GPU waits and interruptions.**
+  - Waits of 10–20 minutes for an L4 were common.
+  - Containers scale down after 60 s idle, so a later call can wait again.
+  - The harness kills a background command at its time limit, so run each long job as its own background command.
+  - After an interruption, rerun with `SWARM_AUDIT_RESUME=1`: calls already in `logs/serving/` are replayed, not repeated.
+  - Stop leftover apps with `modal app stop -y <app id>`.
+- **Persistence.** `logs/` is git-ignored and disappears with the container. Commit anything needed under `results/`. The repository's stop hook asks for a commit and push at the end of every turn.
+- **Modal account.** Abdul let the screening use his own Modal account (workspace `abdulmusthakin`). Ask him again before the build's GPU runs (§1, input 4).
+
 ## 0. Read first
 
 1. `docs/handoff-model-screening.md`: what already exists (`game.py`, `ladder.py`, `tokens.py`, `serving.py`, the prompt drafts, the tokenizer screen).
@@ -21,7 +58,7 @@ For Claude Code, working in this repository. Read this file in full before start
 
 Build everything that runs on CPU without waiting for these. Stop and ask before any GPU run that needs one of them.
 
-1. **The main model.** It comes from the screening. Until then, develop against the scripted policies (§6) and, for prompt plumbing, the CPU stand-in used in screening.
+1. **The main model.** It comes from the screening, which recommends Llama 3.1 8B Instruct (see the status section above); Abdul has not yet confirmed it. Until then, develop against the scripted policies (§6) and, for prompt plumbing, the CPU stand-in used in screening.
 2. **Approved prompt templates** (`swarm_audit/prompts/counts.txt`, `cheap_talk.txt`). Open questions are listed at the top of each file. Two matter most for this build:
    - Does "I'll bid high" refer to this round's bid (sent with it) or next round's? The current draft leaves this open.
    - Do agents see their own past messages? The current draft shows them. This decides whether the signal-aware state has 36 or 108 values (§5), and how many prompts arm 4b enumerates.
