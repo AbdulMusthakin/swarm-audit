@@ -1,58 +1,82 @@
-## Recommendation (provisional, for Abdul to decide)
+## Recommendation (for Abdul to decide)
 
-**Status, 7 Nov 2026.** Done: the tokenizer screen, label choice and L4 sizing for every
-non-gated candidate. Not done: the screening grid and the exactness check. The GPU work
-is blocked because this environment has no Modal credentials, and the hand-off says to
-use a teammate's account, not Abdul's. So nothing below rests on model behaviour yet. The
-pipeline has only been checked end to end on CPU with a 0.6B stand-in model, and those
-numbers are not reported here.
+**Status, 7 Nov 2026, 14:50 UTC.** All four models were screened on Modal L4s (vLLM
+0.32, bf16) with the full grid of 104 prompts. Exactness checks:
 
-**Hard requirements (section 3), as far as they can be checked without a GPU:**
+- **Qwen3.5-9B and OLMo-3-7B:** both checks ran (against transformers, and against
+  vLLM's second method).
+- **Ministral-3-8B:** the transformers check ran. No L4 became free for the cross-method
+  check before the time box ended.
+- **Llama 3.1 8B:** neither check ran, for the same reason.
 
-1. *No reasoning before the answer.* Holds for every candidate by construction: the reply
-   is prefilled with `Bid:`, so the action is the first generated token. Qwen3/3.5 also
-   need `enable_thinking=False`; the rendered prompt shows the empty think block.
-   Gemma 4 has thinking off by default, and its generation prompt opens no thought
+The runs were finished from the per-call logs (`SWARM_AUDIT_RESUME=1`), so no model was
+queried twice.
+
+**Hard requirements.**
+
+1. *No reasoning before the action:* met by construction. The reply is prefilled with
+   `Bid:`, Qwen's empty think block is confirmed, and Gemma and Llama open no thought
    channel.
-2. *Single-token labels.* Every screened model passes with ` H`/` L` for bids and
-   ` high`/` low`/` none` for messages, at the position where they are generated. Labels
-   without the leading space merge with the colon for Qwen and OLMo, and ` 1`/` 2`/` 3`
-   split into two tokens for every model. For Ministral, the Hugging Face tokenizer gives
-   the same ids as Mistral's reference tokenizer (`mistral_common`) on all 104 grid prompts.
-3. *Fits on one L4 in bf16.* Language weights are 13.6–16.7 GiB, against the L4's 24 GB.
-   Qwen3.5-9B is the tightest. vLLM's reported KV-cache capacity at load will confirm this
-   (`Server.info`, logged in `validation.json`).
-4. *Licence.* All candidates are Apache-2.0 and ungated, except Llama 3.1 8B. Llama is
-   gated, needs Abdul's Hugging Face token, and was not screened.
+2. *Single-token labels:* every model uses ` H`/` L` and ` high`/` low`/` none`.
+3. *Fits on one L4 in bf16 with KV cache:* met by all four. KV capacity at load was
+   22,032 tokens (Ministral) to 62,832 tokens (Qwen3.5), against prompts of at most
+   about 680 tokens.
+4. *Licence:* Apache-2.0 for three models. Llama is under the Llama 3.1 licence, and
+   Abdul's access was approved.
 
-**Shortlist: Qwen3.5-9B, Ministral-3-8B-Instruct-2512, OLMo-3-7B-Instruct.** These are the
-newest dense ~8B instruct models in three families, and all three are ungated. Gemma-4-E4B
-is held in reserve: it stores 8B parameters, but about 2.9B of those are per-layer
-embeddings, so it is effectively a 4B model. Llama 3.1 8B is held in reserve until a token
-is available; nothing newer at ≤ 9B exists in that family. Qwen3-8B is the fallback if
-Qwen3.5-9B does not leave enough KV cache on the L4.
+**Exactness.** No model meets the suggested 0.01. The cause is bf16, not the way the
+probabilities are read out.
 
-**Provisional preference.** Main model: Qwen3.5-9B, if it clears the bars and the
-exactness check. It is the newest and most capable model at this size, and Qwen models are
-widely used in multi-agent LLM work, which helps comparison. Second family: OLMo-3-7B. Its
-weights, data and training code are all open, which suits a paper about auditing, and its
-tokenizer passed every check Qwen did. Ministral-3-8B is the alternative second family. This
-preference rests only on the facts above. Once the grid has run, the decision rule I suggest
-is this. Among the models that pass exactness (≤ 0.01) and have p_valid that isn't tiny,
-pick as main the one that is unsaturated in the most states, provided it meets both
-responsiveness bars. The second family is the best remaining model from a different family.
-If the grid shows Qwen3.5-9B saturated or unresponsive, this ranking should change.
+- Every vLLM-vs-transformers difference is a whole number of steps of 0.125 in the
+  log-odds of H (at most 2 steps). 0.125 is the bf16 spacing for logits between 16 and
+  32. So both engines produce the same logits up to bf16 rounding, and P(H) itself
+  lives on a grid about 3 percentage points wide near 0.5.
+- vLLM's two read-out methods agree to within 7e-7 for Qwen3.5.
+- For OLMo they differ by one step (0.022). OLMo runs on vLLM's transformers backend,
+  so a different batch can flip one rounding.
 
-**To run the GPU part** (about 10 L4-minutes per model expected; the worst case is capped
-by container timeouts at $1.60 for three models, under the $3 cap):
+Before the main runs, I suggest:
 
-    modal token set --token-id ... --token-secret ...      # the teammate's workspace
-    python scripts/screen_models.py --dry-run               # labels, prompt counts, cost bound
-    python scripts/screen_models.py                         # the three shortlisted models
-    python scripts/screen_models.py --summarise-only        # rebuild this summary
+- run vLLM with `VLLM_BATCH_INVARIANT=1`, so a history gets the same K_i whether it is
+  queried in a unit test or in a swarm batch;
+- either compute the LM head in fp32, or accept a tolerance of about two bf16 steps.
+
+Which one is a design decision for Abdul.
+
+**Behaviour.** P(H) by own last bid is in `screening.csv`.
+
+- **Qwen3.5-9B:** unsaturated everywhere, but low P(H) overall (0.07–0.50). Neighbour
+  responsiveness passes only barely (0.149). It **fails the signal bar** (0.020).
+- **Ministral-3-8B:** unsaturated (0.98) with strong neighbour responsiveness (0.29). It
+  **fails the signal bar** (0.027), and its bid p_valid dips to 0.94.
+- **OLMo-3-7B:** passes every bar on paper (unsaturated 0.66, neighbour 0.41, signal
+  0.11). But on the cheap-talk step P(H) is 0.000 in all 16 states after its own low
+  bid. Low is absorbing on the key step, so swarm runs would lock into all-low
+  consensus, which is the hand-off's "saturated" failure.
+- **Llama 3.1 8B:** the only model that **passes every behavioural bar without
+  saturating anywhere**: unsaturated 1.00, neighbour 0.24, signal 0.051 (just over 0.05),
+  p_valid 0.999. Its exactness checks were not run.
+
+**Recommendation.**
+
+- **Main model: Llama 3.1 8B Instruct.** Run its transformers check first; I expect the
+  same bf16-step pattern as the others. Its signal responsiveness is only just over the
+  bar, so watch it in the Friday-style pilot.
+- **Second family: Ministral-3-8B-Instruct-2512.** It is responsive and unsaturated, but
+  weak on signals.
+- **Alternative second family: OLMo-3-7B,** if Abdul prefers a fully open model and can
+  accept low being absorbing on the cheap-talk step. A prompt change might fix that, but
+  the prompt is still Abdul's to review.
+
+Qwen3.5-9B, the provisional favourite before the GPU runs, is not recommended. It is the
+least responsive to neighbours, fails the signal bar, and stays at low P(H) throughout.
+
+**Reproduce:**
+
+    python scripts/screen_tokenizers.py --via-modal       # SWARM_AUDIT_HF_SECRET=huggingface
+    python scripts/screen_models.py --models <name> --out results/screening/runs/<name>
+    python scripts/screen_models.py --merge results/screening/runs/*
 
 **Prompt templates.** `swarm_audit/prompts/counts.txt` and `cheap_talk.txt` are drafts for
-Abdul's review. They list open questions at the top: payoff formula vs table, last
-payoff only, "unknown number of rounds", the agent's own past messages, and who receives
-messages on a directed graph. Rendered examples for each model are in
-`results/screening/prompts/`.
+Abdul's review, with the open questions listed at the top. Every number above depends on
+them.
