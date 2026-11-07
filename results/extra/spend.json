@@ -78,5 +78,21 @@
   "usd": 0.1333,
   "time": "2026-11-07T21:46:49.906093+00:00",
   "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "audit/cheap_talk_d2_enumerated",
+  "seconds": 10.1,
+  "containers": 1,
+  "usd": 0.0022,
+  "time": "2026-11-07T21:47:30.774129+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-07T21:47:30.776972+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
  }
 ]
