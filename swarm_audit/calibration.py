@@ -152,21 +152,71 @@ def _jsonable(x):
     return str(x)
 
 
-def require_g5(kernel_fingerprint: str, channels=CHANNELS, folder: Path | None = None) -> None:
-    """Block a core launch unless G5 passed on every channel under the same kernel."""
+def _load(path: Path) -> dict | None:
+    import json
+
+    return json.loads(path.read_text()) if path.exists() else None
+
+
+def write_exception(channel: str, gate: dict, approved_by: str, date: str, decision: str,
+                    evidence: list[str], folder: Path | None = None) -> Path:
+    """Record an approved exception to a failed G5 (Abdul's decision), bound to the exact
+    runs and kernel of the failed record. The failed record itself is left unchanged."""
     import json
 
     folder = Path(folder or GATES_DIR)
-    problems = []
-    for ch in channels:
-        p = folder / f"G5_{ch}.json"
-        if not p.exists():
-            problems.append(f"{ch}: no G5 record")
-            continue
-        rec = json.loads(p.read_text())
-        if not rec.get("pass"):
-            problems.append(f"{ch}: G5 failed ({rec.get('required')})")
-        elif rec.get("kernel_fingerprint") != kernel_fingerprint:
-            problems.append(f"{ch}: G5 passed under a different kernel (stale)")
+    if gate.get("pass"):
+        raise ValueError("G5 passed: no exception needed")
+    if not gate["required"].get("per_decision"):
+        raise ValueError("a per-decision failure cannot be excepted")
+    rec = {"gate": "G5", "channel": channel, "exception": True, "approved_by": approved_by,
+           "date": date, "decision": decision, "evidence": evidence,
+           "applies_to": {"kernel_fingerprint": gate["kernel_fingerprint"],
+                          "run_fingerprint": gate["run_fingerprint"], "runs": gate["runs"]},
+           "requires": "a passing confirmation (G5_<channel>_confirmation.json) before the "
+                       f"{channel} core launches"}
+    path = folder / f"G5_{channel}_exception.json"
+    path.write_text(json.dumps(rec, indent=1) + "\n")
+    with open(folder / "history.jsonl", "a") as fh:
+        fh.write(json.dumps(rec) + "\n")
+    return path
+
+
+def _channel_ok(ch: str, kernel_fingerprint: str, folder: Path, problems: list) -> None:
+    rec = _load(folder / f"G5_{ch}.json")
+    if rec is None:
+        problems.append(f"{ch}: no G5 record")
+        return
+    if rec.get("kernel_fingerprint") != kernel_fingerprint:
+        problems.append(f"{ch}: G5 ran under a different kernel (stale)")
+        return
+    if rec.get("pass"):
+        return
+    exc = _load(folder / f"G5_{ch}_exception.json")
+    conf = _load(folder / f"G5_{ch}_confirmation.json")
+    if exc is None or exc["applies_to"]["kernel_fingerprint"] != kernel_fingerprint \
+            or exc["applies_to"]["run_fingerprint"] != rec.get("run_fingerprint"):
+        problems.append(f"{ch}: G5 failed ({rec.get('required')}) and no matching approved "
+                        "exception")
+    elif conf is None:
+        problems.append(f"{ch}: G5 excepted by {exc['approved_by']}, but the confirmation "
+                        "has not run")
+    elif not conf.get("pass") or conf.get("kernel_fingerprint") != kernel_fingerprint:
+        problems.append(f"{ch}: the confirmation failed or is stale: paused (Abdul, rule 3)")
+
+
+def require_g5(kernel_fingerprint: str, arm_channel: str = "cheap_talk",
+               folder: Path | None = None) -> None:
+    """Block a core launch unless G5 allows it (review C3; Abdul's decision, 7 Nov 2026).
+
+    counts core: counts G5 passed under the same kernel.
+    cheap-talk core: counts G5 passed, and cheap-talk G5 passed or was excepted by an
+    approved exception bound to the same runs and kernel together with a passing
+    confirmation. A failed confirmation pauses the cheap-talk core only."""
+    folder = Path(folder or GATES_DIR)
+    problems: list[str] = []
+    _channel_ok("counts", kernel_fingerprint, folder, problems)
+    if arm_channel == "cheap_talk":
+        _channel_ok("cheap_talk", kernel_fingerprint, folder, problems)
     if problems:
         raise SystemExit("Stopping before the core launch (gate G5): " + "; ".join(problems))

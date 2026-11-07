@@ -196,8 +196,16 @@ sampling variation: mean y 5.82 against 5.47 (about 1.2 standard errors);
 largest CDF gap at y ≤ 5 (0.32 observed vs 0.52 exact).
 Under the null, P(p < 0.01) = 1%, and about 2% for at least one of the two G5 per-run tests.
 
-**Status:** by the hand-off and review C3, a failed G5 stops the core launch; nothing has
-been rerun or loosened. Abdul decides how to proceed.
+**Decision (Abdul, 7 Nov 2026):** G5 cheap talk is recorded as **"per-decision PASS; per-run
+p = 0.0076, attributed to chance after diagnostics"**. An independent check (branch
+`independent-check`) reproduced G5 exactly and found no wiring, sampling or draw problem
+(logged uniforms uniform and independent, KS p = 0.85 and 0.40). The failed record is kept
+unchanged; the approved exception is `results/gates/G5_cheap_talk_exception.json`, bound to
+the same 50 runs and kernel. The core arms launch. As a disclosed confirmation, arm 4b runs
+once more with fresh seeds (run indices 50–99, same table); its per-run test is reported on
+the new 50 and on all 100 pooled, with the original 50 kept. If the new or pooled test
+fails, the cheap-talk core is paused (not counts). Launch checks enforce this
+(`calibration.require_g5`).
 
 ## Drift panel: not run
 
