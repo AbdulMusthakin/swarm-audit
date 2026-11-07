@@ -28,6 +28,8 @@ from swarm_audit.swarm import run_condition  # noqa: E402
 
 
 def check_pilot_frozen(cfg: dict) -> None:
+    # Also applied to the extra arms with check_core_pilot: true (they use the core's
+    # frozen payoffs, docs/handoff-extra-arms.md section 3).
     """Core arms launch only after G6 has frozen the payoffs (results/pilot/summary.json)."""
     path = REPO / "results" / "pilot" / "summary.json"
     if not path.exists():
@@ -47,9 +49,13 @@ def main() -> None:
     ap.add_argument("--n", type=int, nargs="*")
     ap.add_argument("--backend", default="modal")
     ap.add_argument("--chunk", type=int, help="runs per lockstep batch (default: all)")
-    ap.add_argument("--runs-root", default=str(REPO / "results" / "runs"))
+    ap.add_argument("--max-runs", type=int,
+                    help="run only the first that many unfinished runs (arm 8's 5-run benchmark)")
+    ap.add_argument("--runs-root", help="default: <results_dir>/runs (results/runs)")
     args = ap.parse_args()
     cfg = build.load(args.config)
+    if args.runs_root is None:
+        args.runs_root = str(build.results_root(cfg) / "runs")
     if cfg.get("approved") is False:
         raise SystemExit("this arm needs Abdul's approval (approved: false in the config)")
     # approved: if_budget (arm 7) is enforced through the G4 plan below.
@@ -59,7 +65,7 @@ def main() -> None:
     if args.backend.startswith("scripted:"):
         be = build.scripted(args.backend.split(":", 1)[1], cfg)
         for c in conds:
-            run_condition(c, be, root, args.chunk)
+            run_condition(c, be, root, args.chunk, max_runs=args.max_runs)
         return
 
     need = ("model_confirmed", "prompts_approved", "modal_account")
@@ -69,6 +75,9 @@ def main() -> None:
         need += ("pilot_rule",)
         check_pilot_frozen(cfg)
         build.check_in_plan(args.arm, [c.name for c in conds])
+    elif cfg.get("check_core_pilot"):
+        need += ("pilot_rule",)
+        build.check_core_pilot_payoffs(cfg)
     build.check_cost(cfg, cfg["serving"]["timeout_minutes"] * len(conds))
     with build.gpu_session(cfg, need):
         be, _ = build.modal_backend(cfg, log_name=f"swarm_{args.arm}")
@@ -77,7 +86,11 @@ def main() -> None:
             t0 = time.time()
             start = build.panel_outputs(be, panel)
             mixer = build.PanelMixer(be, panel, min_batch=c.n * min(c.runs, args.chunk or c.runs))
-            run_condition(c, mixer, root, args.chunk, extra_manifest={"drift_panel_start": start})
+            extra = {"drift_panel_start": start}
+            if cfg.get("results_dir"):   # extra arms: record the workspace and the model
+                extra.update(workspace=build.current_workspace(), model=cfg["model"],
+                             session={"started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(t0))})
+            run_condition(c, mixer, root, args.chunk, extra_manifest=extra, max_runs=args.max_runs)
             end = build.panel_outputs(be, panel)
             drift = {"start_vs_end": build.panel_max_change(start, end),
                      "start_vs_mixed": (build.panel_max_change(start, mixer.mixed)
