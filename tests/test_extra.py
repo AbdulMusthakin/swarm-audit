@@ -89,3 +89,35 @@ def test_results_paths_default_to_core_and_follow_results_dir(tmp_path, monkeypa
     build.record_spend("test", 3600, cfg)
     assert build.spent_usd(cfg) == pytest.approx(core["serving"]["l4_usd_per_hour"])
     assert json.loads(build.spend_file(cfg).read_text())[0]["what"] == "test"
+
+
+def test_collect_writes_only_under_the_extra_tree(tmp_path, monkeypatch):
+    import importlib.util
+    import sys
+
+    from swarm_audit import analysis, prediction  # noqa: F401
+    from swarm_audit.analysis import analyse_condition, to_jsonable
+    from swarm_audit.audit import fit_table
+
+    spec = importlib.util.spec_from_file_location("analyse_script", build.REPO_ROOT / "scripts" / "analyse.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    cfg = build.load("extra-scale.yaml")
+    be = build.scripted("copy", cfg)
+    c = Condition("extra_test", 8, 8, "counts", 8, graph="random_regular", T=6, runs=6,
+                  graph_kwargs=(("d", 4), ("seed", 3)))
+    out = run_condition(c, be, tmp_path / "runs", log=lambda *a: None)
+    from swarm_audit.analysis import Tables
+    t = fit_table(be, "counts", 4, "actions", 4, 2, build.ptest(cfg), True)
+    data = load_runs(out)
+    res = analyse_condition(data, graph_of(data), Tables(t, None, None), 500, 1, 50, build.ptest(cfg))
+    root = tmp_path / "extra"
+    (root / "analysis" / "extra_test").mkdir(parents=True)
+    (root / "analysis" / "extra_test" / f"{c.name}.json").write_text(json.dumps(to_jsonable(res)))
+    core_tables = build.RESULTS / "tables"
+    before = {p: p.stat().st_mtime for p in core_tables.glob("*")} if core_tables.exists() else {}
+    mod.collect(root)
+    assert (root / "tables" / "scores.md").exists() and (root / "tables" / "defects.md").exists()
+    assert (root / "figures" / "fig2.png").exists()
+    after = {p: p.stat().st_mtime for p in core_tables.glob("*")} if core_tables.exists() else {}
+    assert before == after
