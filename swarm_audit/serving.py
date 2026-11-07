@@ -50,6 +50,13 @@ APP_NAME = "swarm-audit-serving"
 VLLM_VERSION = os.environ.get("SWARM_AUDIT_VLLM_VERSION", "0.32.0")
 GPU = os.environ.get("SWARM_AUDIT_GPU", "L4")
 TIMEOUT_S = int(float(os.environ.get("SWARM_AUDIT_TIMEOUT_MIN", "20")) * 60)
+# Build hand-off section 4: batch invariance (vLLM >= 0.32 beta, compute capability >= 8.0;
+# the L4 is 8.9) is off by default until gate G3 decides. It is baked into the image
+# environment, so the client and the container agree on it.
+BATCH_INVARIANT = os.environ.get("SWARM_AUDIT_BATCH_INVARIANT", "0") == "1"
+# More than one container only when an arm is split across containers, up to the
+# account's GPU concurrency limit.
+MAX_CONTAINERS = int(os.environ.get("SWARM_AUDIT_MAX_CONTAINERS", "1"))
 CACHE = "/cache"
 HF_HOME = f"{CACHE}/hf"
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -66,7 +73,9 @@ image = (
     modal.Image.debian_slim(python_version="3.12")
     .uv_pip_install(f"vllm=={VLLM_VERSION}", "huggingface_hub")
     .env({"HF_HOME": HF_HOME, "TOKENIZERS_PARALLELISM": "false",
-          "SWARM_AUDIT_HF_SECRET": _hf_secret})
+          "SWARM_AUDIT_HF_SECRET": _hf_secret,
+          "SWARM_AUDIT_BATCH_INVARIANT": "1" if BATCH_INVARIANT else "0",
+          **({"VLLM_BATCH_INVARIANT": "1"} if BATCH_INVARIANT else {})})
     .add_local_python_source("swarm_audit")
 )
 
@@ -117,7 +126,7 @@ def _result(raw: list[float], sampled: int | None = None) -> dict:
 
 
 @app.cls(image=image, gpu=GPU, volumes={CACHE: weights}, secrets=secrets,
-         timeout=TIMEOUT_S, scaledown_window=60, max_containers=1)
+         timeout=TIMEOUT_S, scaledown_window=60, max_containers=MAX_CONTAINERS)
 class Server:
     hf_id: str = modal.parameter()
     revision: str = modal.parameter()
@@ -153,7 +162,8 @@ class Server:
                 "kv_cache_tokens": kv_tokens,
                 "gpu": torch.cuda.get_device_name(0),
                 "gpu_mem_gb": torch.cuda.get_device_properties(0).total_memory / 1e9,
-                "load_seconds": self.load_seconds, "engine_kwargs": self.engine_kwargs}
+                "load_seconds": self.load_seconds, "engine_kwargs": self.engine_kwargs,
+                "batch_invariant": os.environ.get("VLLM_BATCH_INVARIANT") == "1"}
 
     @modal.method()
     def label_logprobs(self, prompts: list[list[int]], allowed_token_ids: list[int],

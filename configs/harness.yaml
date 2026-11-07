@@ -1,0 +1,25 @@
+# Harness check, arm 1 / gate G2 (docs/handoff-build.md sections 4 and 6): scripted
+# policies through the same swarm, audit, prediction and analysis code as the LLM.
+# CPU only. Audit sizes, p_test, T and the analysis settings match core.yaml.
+
+T: 20
+payoffs: {uLH: 12, uHH: 10, uLL: 4, uHL: 0}
+p_test: {L_min: 1, L_max: 19, p_own_H: 0.5, p_neighbour_H: 0.5, seed: 20261108}
+own_signal_in_state: true
+audit:
+  actions: {n_fit: 100, n_score: 50}
+  signal: {n_fit: 50, n_score: 25}
+seeds: {base_seed: 20261107}
+analysis: {n_model: 20000, bootstrap: 2000, noise_floor_draws: 1000, ks_sims: 20000, seed: 7}
+
+arm_id: 1
+graph: cycle
+n: [4, 10]
+runs: 200
+# Each policy on the channels where it is defined. Coin, Copy and Two-round ignore
+# signals (uniform messages on cheap talk); Hidden signal needs cheap talk.
+policies:
+  coin:          [counts, cheap_talk]
+  copy:          [counts, cheap_talk]
+  two_round:     [counts]
+  hidden_signal: [cheap_talk]
