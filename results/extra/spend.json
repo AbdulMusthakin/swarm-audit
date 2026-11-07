@@ -46,5 +46,21 @@
   "usd": 0.1333,
   "time": "2026-11-07T19:39:31.097893+00:00",
   "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "extra_rr4/counts_n100_random_regular_d4_seed20261108_full",
+  "seconds": 6673.1,
+  "containers": 1,
+  "usd": 1.4829,
+  "time": "2026-11-07T21:31:18.380786+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-07T21:31:18.383181+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
  }
 ]
