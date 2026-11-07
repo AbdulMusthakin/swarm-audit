@@ -164,10 +164,12 @@ class Server:
             kv_tokens = cc.num_gpu_blocks * cc.block_size
         except Exception:
             kv_tokens = None
-        return {"vllm": vllm.__version__, "torch": torch.__version__,
+        # Plain str/float only: torch.__version__ is a TorchVersion, which the client
+        # cannot unpickle without torch installed.
+        return {"vllm": str(vllm.__version__), "torch": str(torch.__version__),
                 "kv_cache_tokens": kv_tokens,
-                "gpu": torch.cuda.get_device_name(0),
-                "gpu_mem_gb": torch.cuda.get_device_properties(0).total_memory / 1e9,
+                "gpu": str(torch.cuda.get_device_name(0)),
+                "gpu_mem_gb": float(torch.cuda.get_device_properties(0).total_memory / 1e9),
                 "load_seconds": self.load_seconds, "engine_kwargs": self.engine_kwargs,
                 "batch_invariant": os.environ.get("VLLM_BATCH_INVARIANT") == "1"}
 
@@ -262,7 +264,7 @@ def hf_label_logprobs(hf_id: str, revision: str,
     load_s = time.time() - t0
     out = [hf_logprobs(model, prompts, ids) for prompts, ids in batches]
     return {"results": out, "transformers": transformers.__version__,
-            "torch": torch.__version__, "load_seconds": load_s}
+            "torch": str(torch.__version__), "load_seconds": load_s}
 
 
 # ------------------------------------------------------------------------- logging

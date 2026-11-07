@@ -106,7 +106,7 @@ def modal_backend(cfg: dict, log_name: str) -> tuple[LLMBackend, Any]:
     eng = {"max_model_len": srv["max_model_len"],
            "gpu_memory_utilization": srv["gpu_memory_utilization"],
            "enforce_eager": srv["enforce_eager"], **m.get("engine_kwargs", {})}
-    if srv.get("deployed"):
+    if use_deployed(cfg):
         import modal
 
         server = modal.Cls.from_name(serving.APP_NAME, "Server")(
@@ -322,14 +322,14 @@ def gpu_session(cfg: dict, need: tuple[str, ...]):
     os.environ.setdefault("SWARM_AUDIT_SCALEDOWN_S", str(srv.get("scaledown_window_s", 60)))
     os.environ.setdefault("SWARM_AUDIT_TIMEOUT_MIN", str(srv["timeout_minutes"]))
 
-    if srv.get("deployed"):
+    if use_deployed(cfg):
         check_deployed(cfg)
 
     @contextmanager
     def ctx():
         import modal
 
-        if srv.get("deployed"):       # the deployed app outlives this script
+        if use_deployed(cfg):       # the deployed app outlives this script
             try:
                 yield
             finally:                  # its GPU idles up to scaledown_window_s afterwards
@@ -452,6 +452,14 @@ def set_config_line(key: str, value: str, folder: Path = REPO_ROOT / "configs",
             raise ValueError(f"no `{key}:` line in {p}")
         line = f"{m.group(1)}{key}: {value}" + (f"   # {note}" if note else "")
         p.write_text(s[:m.start()] + line + s[m.end():])
+
+
+def use_deployed(cfg: dict) -> bool:
+    """serving.deployed, unless SWARM_AUDIT_DEPLOYED=0/1 overrides it for one script."""
+    import os
+
+    env = os.environ.get("SWARM_AUDIT_DEPLOYED")
+    return bool(cfg["serving"].get("deployed")) if env is None else env == "1"
 
 
 def numerical_floor(cfg: dict) -> float:
