@@ -1,0 +1,47 @@
+{
+ "gate": "G5",
+ "channel": "counts",
+ "pass": true,
+ "required": {
+  "per_decision": true,
+  "per_run": true
+ },
+ "floor": 0.0,
+ "runs": 50,
+ "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc",
+ "run_fingerprint": "3252df9057a63a2ee05738b4d84743c31bec34be33dc0c59622e9eb85347cf2c",
+ "table_fingerprints": {
+  "actions": "4882f6867946dc2c370c955a047bd2cd2f07deb47ab258b09eb015f1f589d5b3"
+ },
+ "finding_not_gate": null,
+ "folder": "results/runs/calibration_counts/counts_n4_cycle_last1",
+ "git_commit": "1c659864b6d64b3e14c85275b697863e49bb2b62",
+ "time": "2026-11-07T19:26:03.859598+00:00",
+ "result": {
+  "per_decision": {
+   "pass": true,
+   "decisions": 4000,
+   "floor": 0.0,
+   "max_abs_diff_p_H": 0.0,
+   "max_abs_diff_signal": 0.0,
+   "worst": null,
+   "states_seen": 7,
+   "states_with_several_prompts": {},
+   "states_whose_prompt_differs_from_table": []
+  },
+  "per_run": {
+   "pass": true,
+   "gap": 0.09342474464638084,
+   "p_value": 0.3927303634818259,
+   "alpha": 0.01,
+   "rule": "discrete Monte Carlo p-value (1 + #{null >= gap}) / (1 + sims) > alpha",
+   "threshold_q99": 0.19999949263259345,
+   "sims": 20000,
+   "runs": 50,
+   "chain": "actions_only",
+   "exact_mean_y": 12.060256537099761,
+   "swarm_mean_y": 12.62,
+   "n_profiles": 16
+  }
+ }
+}

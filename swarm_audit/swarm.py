@@ -325,6 +325,7 @@ def load_runs(folder: Path) -> RunData:
                    sigs if cheap else None, sig, st_sig,
                    meta={"folder": str(folder), "fingerprint": prov.get("fingerprint"),
                          "kernel_fingerprint": prov.get("kernel_fingerprint"),
+                         "design": prov.get("payload", {}).get("design", {}),
                          **({"graph_kwargs": first["graph_kwargs"]} if "graph_kwargs" in first else {})})
 
 

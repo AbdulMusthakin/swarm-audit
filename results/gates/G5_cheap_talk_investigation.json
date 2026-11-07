@@ -1,0 +1,93 @@
+{
+ "runs_folder": "results/runs/calibration_cheap_talk/cheap_talk_n4_cycle_last1",
+ "table": "results/audit/llama-3.1-8b/cheap_talk_d2_enumerated_signal.json",
+ "decisions": 4000,
+ "1_sampling": {
+  "action_mismatches": 0,
+  "signal_mismatches": 0,
+  "pass": true
+ },
+ "2_wiring": {
+  "state_mismatches": 0,
+  "pass": true
+ },
+ "3_draws": {
+  "u_action_ks_p": 0.8540037497261783,
+  "u_signal_ks_p": 0.39539122913073876
+ },
+ "4_end_to_end": {
+  "sim_runs": 20000,
+  "gap": 0.006979233617676717,
+  "p_value": 0.09538092381523695,
+  "sim_mean_y": 5.44135,
+  "exact_mean_y": 5.471501977436345,
+  "max_abs_diff_in_law_of_y": 0.005602243022951231
+ },
+ "5_observed": {
+  "runs": 50,
+  "mean_y": 5.82,
+  "sd_y": 2.0171711855558354,
+  "exact_sd_y": 2.1377778763324815,
+  "largest_cdf_gap_at_k": 5,
+  "empirical_cdf_at_k": 0.32,
+  "exact_cdf_at_k": 0.522861576438623,
+  "mean_X_t_swarm": [
+   0.585,
+   0.255,
+   0.255,
+   0.235,
+   0.315,
+   0.31,
+   0.245,
+   0.265,
+   0.295,
+   0.295,
+   0.27,
+   0.245,
+   0.25,
+   0.3,
+   0.235,
+   0.29,
+   0.31,
+   0.28,
+   0.235,
+   0.34
+  ],
+  "mean_X_t_exact": [
+   0.562,
+   0.3,
+   0.27,
+   0.272,
+   0.273,
+   0.274,
+   0.274,
+   0.274,
+   0.274,
+   0.274,
+   0.274,
+   0.274,
+   0.274,
+   0.274,
+   0.274,
+   0.274,
+   0.274,
+   0.274,
+   0.274,
+   0.274
+  ],
+  "per_run_test": {
+   "pass": false,
+   "gap": 0.20286157643862296,
+   "p_value": 0.00759962001899905,
+   "alpha": 0.01,
+   "rule": "discrete Monte Carlo p-value (1 + #{null >= gap}) / (1 + sims) > alpha",
+   "threshold_q99": 0.197138423561377,
+   "sims": 20000,
+   "runs": 50,
+   "chain": "signal_aware",
+   "exact_mean_y": 5.471501977436345,
+   "swarm_mean_y": 5.82,
+   "n_profiles": 1296
+  }
+ }
+}
