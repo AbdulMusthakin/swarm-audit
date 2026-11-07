@@ -90,7 +90,8 @@ def test_g4_plan_stops_when_even_the_minimum_does_not_fit():
 
 
 def test_spent_money_counts_against_the_cap():
-    assert _plan(0.002, 0.006, spent=19.99)["status"] == "stop"
+    cap = build.load("core.yaml")["serving"]["cost_cap_usd"]
+    assert _plan(0.002, 0.006, spent=cap - 0.01)["status"] == "stop"
 
 
 def test_set_config_line_keeps_comments(tmp_path):
