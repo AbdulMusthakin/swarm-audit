@@ -185,6 +185,13 @@ def results_root(cfg: dict | None = None) -> Path:
     return REPO_ROOT / cfg["results_dir"]
 
 
+def serving_dir(cfg: dict | None = None) -> Path:
+    """Where a config's serving checks go: <results root>/serving, plus `serving_subdir`
+    if set (arm 9's OLMo checks sit beside Llama's in results/extra/serving/olmo-3-7b)."""
+    d = results_root(cfg) / "serving"
+    return d / cfg["serving_subdir"] if cfg and cfg.get("serving_subdir") else d
+
+
 def table_dir(cfg: dict, backend_name: str) -> Path:
     return results_root(cfg) / "audit" / backend_name.replace(":", "_")
 
