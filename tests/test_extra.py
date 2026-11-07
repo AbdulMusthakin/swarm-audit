@@ -52,6 +52,10 @@ def test_condition_graph_kwargs_and_unchanged_core_names(tmp_path):
                         log=lambda *a: None)
     data = load_runs(out)
     assert data.meta["graph_kwargs"] == {"d": 4, "seed": 3}
+    provenance = json.loads((out / "provenance.json").read_text())
+    assert data.meta["fingerprint"] == provenance["fingerprint"]
+    assert data.meta["kernel_fingerprint"] == provenance["kernel_fingerprint"]
+    assert data.meta["design"] == provenance["payload"]["design"]
     assert graph_of(data).in_neighbours == c.make_graph().in_neighbours
     # core runs carry no graph_kwargs field, so their logs are unchanged
     out2 = run_condition(Condition("core_counts", 5, 4, "counts", 4, T=2, runs=1),
@@ -128,14 +132,22 @@ def test_max_runs_runs_a_prefix_and_resumes(tmp_path):
     c = Condition("extra_test", 8, 12, "counts", 12, graph="random_regular", T=3, runs=7,
                   graph_kwargs=(("d", 4), ("seed", 5)))
     be = build.scripted("coin", cfg)
-    out = run_condition(c, be, tmp_path, max_runs=5, log=lambda *a: None)
+    out = run_condition(c, be, tmp_path, max_runs=5, log=lambda *a: None,
+                        extra_manifest={"workspace": "test", "session": {"started": "first"}})
+    original_provenance = (out / "provenance.json").read_bytes()
     assert sorted(p.name for p in out.glob("run_*")) == [f"run_{r:03d}.jsonl.gz" for r in range(5)]
     first = load_runs(out).actions.copy()
     run_condition(c, be, tmp_path, log=lambda *a: None)
     data = load_runs(out)
     assert data.R == 7 and (data.actions[:5] == first).all()
     man = json.loads((tmp_path / "extra_test" / "manifest.json").read_text())
-    assert [s["runs"] for s in man["conditions"][c.name]["sessions"]] == [[0, 1, 2, 3, 4], [5, 6]]
+    entry = man["conditions"][c.name]
+    assert [s["runs"] for s in entry["sessions"]] == [[0, 1, 2, 3, 4], [5, 6]]
+    assert [s["runs_added"] for s in entry["sessions"]] == [5, 2]
+    assert entry["sessions"][0]["started"] == "first"
+    assert entry["sessions"][0]["workspace"] == "test"
+    assert entry["provenance"] == json.loads(original_provenance)
+    assert (out / "provenance.json").read_bytes() == original_provenance
     # the same 7 runs in one go give the same logs (lockstep batching does not matter)
     out2 = run_condition(c, be, tmp_path / "again", log=lambda *a: None)
     assert (load_runs(out2).actions == data.actions).all()

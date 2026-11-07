@@ -1,0 +1,85 @@
+{
+ "server": {
+  "vllm": "0.32.0",
+  "torch": "2.13.0+cu130",
+  "kv_cache_tokens": 31200,
+  "gpu": "NVIDIA L4",
+  "gpu_mem_gb": 23.689363456,
+  "load_seconds": 49.47939920425415,
+  "engine_kwargs": {
+   "model": "meta-llama/Llama-3.1-8B-Instruct",
+   "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+   "dtype": "bfloat16",
+   "max_model_len": 4096,
+   "gpu_memory_utilization": 0.9,
+   "enforce_eager": true,
+   "enable_prefix_caching": true,
+   "seed": 0
+  },
+  "batch_invariant": true
+ },
+ "benchmark_single_runs": {
+  "counts_n10_cycle_full": {
+   "decisions": 200,
+   "seconds": 22.212682008743286,
+   "decisions_per_s": 9.00386544593204,
+   "usd_per_run": 0.004936151557498509,
+   "prompt_tokens_round_T": {
+    "min": 780,
+    "max": 780
+   },
+   "fits_max_model_len": true
+  },
+  "cheap_talk_n20_cycle_full": {
+   "decisions": 400,
+   "seconds": 99.60173296928406,
+   "decisions_per_s": 4.015994381577227,
+   "usd_per_run": 0.02213371843761868,
+   "prompt_tokens_round_T": {
+    "min": 1571,
+    "max": 1616
+   },
+   "fits_max_model_len": true
+  }
+ },
+ "batched_seconds_per_decision": {
+  "counts": 0.0891252133846283,
+  "cheap_talk": 0.45004177951812746
+ },
+ "signal_responsiveness": {
+  "d4": {
+   "signal_responsiveness_length1_mean": 0.055284065452479714,
+   "signal_responsiveness_length5_mean": 0.022457479812774368,
+   "by_own_last_length1": {
+    "H": 0.0586882579441243,
+    "L": 0.05187987296083513
+   },
+   "bar": 0.05
+  },
+  "d2": {
+   "signal_responsiveness_length1_mean": 0.03786814984999434,
+   "signal_responsiveness_length5_mean": 0.03828653627969985,
+   "by_own_last_length1": {
+    "H": 0.026606347532449837,
+    "L": 0.04912995216753885
+   },
+   "bar": 0.05
+  }
+ },
+ "plan": {
+  "status": "go",
+  "steps": [],
+  "signal_audit": {
+   "n_fit": 50,
+   "n_score": 25
+  },
+  "projected_hours": 8.521193459093636,
+  "projected_usd": 6.816954767274909,
+  "margin": 1.25,
+  "spent_usd": 1.5527,
+  "cap_usd": 40.0,
+  "max_gpu_hours": 12
+ },
+ "spent_so_far_usd": 1.5527,
+ "cap_usd": 20.0
+}

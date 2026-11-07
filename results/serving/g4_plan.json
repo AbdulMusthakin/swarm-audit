@@ -1,0 +1,201 @@
+{
+ "status": "go",
+ "steps": [],
+ "signal_audit": {
+  "n_fit": 50,
+  "n_score": 25
+ },
+ "run": [
+  {
+   "arm": "core_counts",
+   "condition": "counts_n10_cycle_full",
+   "channel": "counts",
+   "decisions": 10000,
+   "seconds": 891.252133846283,
+   "cut_tag": "n10"
+  },
+  {
+   "arm": "drift/core_counts",
+   "condition": "counts_n10_cycle_full",
+   "channel": "cheap_talk",
+   "decisions": 408,
+   "seconds": 183.61704604339602,
+   "cut_tag": "n10"
+  },
+  {
+   "arm": "core_counts",
+   "condition": "counts_n20_cycle_full",
+   "channel": "counts",
+   "decisions": 20000,
+   "seconds": 1782.504267692566,
+   "cut_tag": "n20"
+  },
+  {
+   "arm": "drift/core_counts",
+   "condition": "counts_n20_cycle_full",
+   "channel": "cheap_talk",
+   "decisions": 408,
+   "seconds": 183.61704604339602,
+   "cut_tag": "n20"
+  },
+  {
+   "arm": "core_cheap_talk",
+   "condition": "cheap_talk_n10_cycle_full",
+   "channel": "cheap_talk",
+   "decisions": 10000,
+   "seconds": 4500.417795181274,
+   "cut_tag": "n10"
+  },
+  {
+   "arm": "drift/core_cheap_talk",
+   "condition": "cheap_talk_n10_cycle_full",
+   "channel": "cheap_talk",
+   "decisions": 408,
+   "seconds": 183.61704604339602,
+   "cut_tag": "n10"
+  },
+  {
+   "arm": "core_cheap_talk",
+   "condition": "cheap_talk_n20_cycle_full",
+   "channel": "cheap_talk",
+   "decisions": 20000,
+   "seconds": 9000.835590362549,
+   "cut_tag": "n20"
+  },
+  {
+   "arm": "drift/core_cheap_talk",
+   "condition": "cheap_talk_n20_cycle_full",
+   "channel": "cheap_talk",
+   "decisions": 408,
+   "seconds": 183.61704604339602,
+   "cut_tag": "n20"
+  },
+  {
+   "arm": "calibration_counts",
+   "condition": "counts_n4_cycle_last1",
+   "channel": "counts",
+   "decisions": 4000,
+   "seconds": 356.5008535385132,
+   "cut_tag": null
+  },
+  {
+   "arm": "drift/calibration_counts",
+   "condition": "counts_n4_cycle_last1",
+   "channel": "cheap_talk",
+   "decisions": 408,
+   "seconds": 183.61704604339602,
+   "cut_tag": null
+  },
+  {
+   "arm": "calibration_cheap_talk",
+   "condition": "cheap_talk_n4_cycle_last1",
+   "channel": "cheap_talk",
+   "decisions": 4000,
+   "seconds": 1800.1671180725098,
+   "cut_tag": null
+  },
+  {
+   "arm": "drift/calibration_cheap_talk",
+   "condition": "cheap_talk_n4_cycle_last1",
+   "channel": "cheap_talk",
+   "decisions": 408,
+   "seconds": 183.61704604339602,
+   "cut_tag": null
+  },
+  {
+   "arm": "audit",
+   "condition": "counts_d2",
+   "channel": "counts",
+   "decisions": 902,
+   "seconds": 80.39094247293473,
+   "cut_tag": null
+  },
+  {
+   "arm": "audit",
+   "condition": "cheap_talk_d2_signal",
+   "channel": "cheap_talk",
+   "decisions": 8102,
+   "seconds": 3646.2384976558687,
+   "cut_tag": null
+  },
+  {
+   "arm": "audit",
+   "condition": "counts_d2_enumerated",
+   "channel": "counts",
+   "decisions": 7,
+   "seconds": 0.6238764936923981,
+   "cut_tag": null
+  },
+  {
+   "arm": "audit",
+   "condition": "cheap_talk_d2_enumerated",
+   "channel": "cheap_talk",
+   "decisions": 109,
+   "seconds": 49.05455396747589,
+   "cut_tag": null
+  },
+  {
+   "arm": "pilot",
+   "condition": "counts_n10",
+   "channel": "counts",
+   "decisions": 1000,
+   "seconds": 89.1252133846283,
+   "cut_tag": null
+  },
+  {
+   "arm": "second_topology_counts",
+   "condition": "counts_n10_complete_full",
+   "channel": "counts",
+   "decisions": 10000,
+   "seconds": 891.252133846283,
+   "cut_tag": "arm7"
+  },
+  {
+   "arm": "drift/second_topology_counts",
+   "condition": "counts_n10_complete_full",
+   "channel": "cheap_talk",
+   "decisions": 408,
+   "seconds": 183.61704604339602,
+   "cut_tag": "arm7"
+  },
+  {
+   "arm": "second_topology_cheap_talk",
+   "condition": "cheap_talk_n10_complete_full",
+   "channel": "cheap_talk",
+   "decisions": 10000,
+   "seconds": 4500.417795181274,
+   "cut_tag": "arm7"
+  },
+  {
+   "arm": "drift/second_topology_cheap_talk",
+   "condition": "cheap_talk_n10_complete_full",
+   "channel": "cheap_talk",
+   "decisions": 408,
+   "seconds": 183.61704604339602,
+   "cut_tag": "arm7"
+  },
+  {
+   "arm": "audit",
+   "condition": "counts_d9_actions",
+   "channel": "counts",
+   "decisions": 3002,
+   "seconds": 267.5538905806541,
+   "cut_tag": "arm7"
+  },
+  {
+   "arm": "audit",
+   "condition": "cheap_talk_d9_actions",
+   "channel": "cheap_talk",
+   "decisions": 3002,
+   "seconds": 1351.0254221134187,
+   "cut_tag": "arm7"
+  }
+ ],
+ "projected_hours": 8.521193459093636,
+ "projected_usd": 6.816954767274909,
+ "margin": 1.25,
+ "spent_usd": 1.5527,
+ "cap_usd": 40.0,
+ "max_gpu_hours": 12,
+ "cut": []
+}

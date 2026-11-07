@@ -23,7 +23,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from swarm_audit import build, decisions  # noqa: E402
+from swarm_audit import build, calibration, decisions  # noqa: E402
+from swarm_audit.provenance import fingerprint, kernel_identity  # noqa: E402
 from swarm_audit.swarm import run_condition  # noqa: E402
 
 
@@ -81,6 +82,8 @@ def main() -> None:
     build.check_cost(cfg, cfg["serving"]["timeout_minutes"] * len(conds))
     with build.gpu_session(cfg, need):
         be, _ = build.modal_backend(cfg, log_name=f"swarm_{args.arm}")
+        if args.arm.startswith(("core", "second")):   # review C3: G5 must have passed
+            calibration.require_g5(fingerprint(kernel_identity(be)))
         panel = build.drift_panel(cfg)
         for c in conds:
             t0 = time.time()

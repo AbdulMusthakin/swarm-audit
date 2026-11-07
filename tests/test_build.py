@@ -293,3 +293,19 @@ def test_gpu_scripts_stop_without_abdul_inputs():
         c["inputs"][k] = blank
         with pytest.raises(SystemExit):
             build.require_inputs(c, need)
+
+
+def test_g5_per_run_degenerate_match_passes_and_mismatch_fails():
+    from swarm_audit.swarm import RunData
+
+    def data(y_high):              # 50 runs on a 4-cycle; all agents H (1) or L (0) throughout
+        A = np.full((50, 20, 4), y_high, np.int8)
+        z = np.zeros((50, 20, 4))
+        return RunData("counts", 4, "cycle", 20, np.arange(50), A, z, z,
+                       np.full((50, 20, 4), "START", object), np.full((50, 20, 4), "", object))
+    lk_all_H = {key(s): 1.0 for s in all_actions_states(2)}           # point mass on y = 20
+    chain = ActionsChain(lk_all_H, 2)
+    ok = calibration.per_run(data(1), chain, cycle(4), sims=2000)
+    assert ok["gap"] == 0 and ok["p_value"] == 1.0 and ok["pass"]
+    bad = calibration.per_run(data(0), chain, cycle(4), sims=2000)
+    assert bad["gap"] == 1 and bad["p_value"] < 0.01 and not bad["pass"]

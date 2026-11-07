@@ -147,8 +147,37 @@ def delta_t(X_swarm: np.ndarray, law_model: np.ndarray) -> np.ndarray:
     return tv(binned_law(X_swarm), law_model)
 
 
+def null_reference(X_pool: np.ndarray, law_ref: np.ndarray, R: int, draws: int = 1000,
+                   q: float = 0.95, rng: np.random.Generator | None = None,
+                   reference: str = "") -> dict:
+    """The null distribution of the observed statistic (review C4): Delta_t between R
+    whole runs drawn from the model (from `X_pool`, a simulation pool kept separate from
+    the one that estimated `law_ref`) and the same fixed reference law `law_ref` (T, 5)
+    used for the swarm. Returns the q-quantile per round (pointwise) and of the maximum
+    over rounds (simultaneous)."""
+    rng = rng or np.random.default_rng(1)
+    M = len(X_pool)
+    b = bin_index(X_pool)                           # (M, T), whole trajectories
+    T = b.shape[1]
+    d = np.empty((draws, T))
+    for j in range(draws):
+        idx = rng.integers(M, size=R)
+        for t in range(T):
+            p1 = np.bincount(b[idx, t], minlength=5) / R
+            d[j, t] = 0.5 * np.abs(p1 - law_ref[t]).sum()
+    return {"per_round": np.quantile(d, q, axis=0),
+            "max_over_rounds": float(np.quantile(d.max(axis=1), q)), "q": q,
+            "draws": draws, "R": R, "null_pool_runs": M, "reference": reference,
+            "definition": "q-quantile of the binned TV between R whole runs from a separate "
+                          "model pool and the fixed reference law; per_round is pointwise, "
+                          "max_over_rounds is simultaneous"}
+
+
 def noise_floor(X_model: np.ndarray, R: int, draws: int = 1000, q: float = 0.95,
                 rng: np.random.Generator | None = None) -> dict:
+    """SUPERSEDED for Delta_t (review C4): the TV between two R-run model samples. It is a
+    two-small-sample variability reference, not the null of the observed comparison
+    (swarm against a fixed law); kept only for reference."""
     """95th percentile of the binned TV between two independent samples of R runs from
     the model, per round, and of its maximum over rounds (a simultaneous floor)."""
     rng = rng or np.random.default_rng(1)
@@ -171,14 +200,30 @@ def ks_gap(y_obs: np.ndarray, G: np.ndarray) -> float:
     return float(np.abs(cdf_from_samples(np.asarray(y_obs), len(G) - 1) - G).max())
 
 
-def ks_threshold(p_y: np.ndarray, R: int, sims: int = 20000, q: float = 0.99,
-                 rng: np.random.Generator | None = None) -> float:
-    """q-quantile of ks_gap over `sims` simulated sets of R runs drawn from the law p_y."""
+def ks_null_gaps(p_y: np.ndarray, R: int, sims: int = 20000,
+                 rng: np.random.Generator | None = None) -> np.ndarray:
+    """ks_gap for `sims` simulated sets of R runs drawn from the law p_y."""
     rng = rng or np.random.default_rng(2)
     G = cdf_from_law(p_y)
     counts = rng.multinomial(R, p_y / p_y.sum(), size=sims)            # (sims, K+1)
     emp = np.cumsum(counts, axis=1) / R
-    return float(np.quantile(np.abs(emp - G[None, :]).max(axis=1), q))
+    return np.abs(emp - G[None, :]).max(axis=1)
+
+
+def ks_threshold(p_y: np.ndarray, R: int, sims: int = 20000, q: float = 0.99,
+                 rng: np.random.Generator | None = None) -> float:
+    """q-quantile of ks_gap over `sims` simulated sets of R runs drawn from the law p_y."""
+    return float(np.quantile(ks_null_gaps(p_y, R, sims, rng), q))
+
+
+TIE_EPS = 1e-12
+
+
+def mc_pvalue(observed: float, null: np.ndarray) -> float:
+    """Discrete Monte Carlo p-value: (1 + #{null >= observed}) / (1 + len(null)).
+    Ties count as at least as extreme, so a perfectly matched point mass (observed 0,
+    every null value 0) gives p = 1 (review C5)."""
+    return float((1 + np.sum(null >= observed - TIE_EPS)) / (1 + len(null)))
 
 
 # ------------------------------------------------------------------------- defects

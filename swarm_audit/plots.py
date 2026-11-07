@@ -73,9 +73,14 @@ def figure1(res: dict, path: Path, title: str = "") -> None:
     delta = res["scores"]["delta"].get("actions_only")
     if delta is not None:
         a2.plot(t, delta, color=INK, linewidth=2, linestyle="--", label="measured Δ_t (actions-only)")
-    a2.axhline(1.0, color=INK2, linewidth=0.8, linestyle=":")
+        fl = res["scores"]["floor"].get("actions_only")
+        if fl is not None:
+            a2.plot(t, fl["per_round"], color=INK2, linewidth=1, linestyle=":",
+                    label="null 95% (pointwise)")
+            a2.axhline(fl["max_over_rounds"], color=INK2, linewidth=1, linestyle="-.",
+                       label="null 95% of max over rounds (simultaneous)")
     a2.set_xlabel("round t", color=INK2, fontsize=9)
-    a2.set_ylabel("TV distance (bound capped at 1)", color=INK2, fontsize=9)
+    a2.set_ylabel("TV distance (bound: estimate, capped at 1)", color=INK2, fontsize=9)
     a2.set_ylim(0, 1.05)
     a2.legend(frameon=False, fontsize=7, loc="center right")
     for ax in (a1, a2):

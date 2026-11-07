@@ -43,6 +43,7 @@ import numpy as np
 from .game import ACTIONS, SIGNALS
 from .ladder import History, Record
 from .policies import Backend, Query
+from .provenance import table_provenance
 from .states import (START, State, all_actions_states, all_signal_states, key, parse,
                      record_for_state, sig_compositions, to_actions)
 
@@ -258,6 +259,9 @@ def fit_table(backend: Backend, channel: str, d: int, kind: str, n_fit: int, n_s
               keep_histories: bool = False) -> AuditTable:
     """Fit kappa on p_test histories and keep a disjoint scoring set (different seeds)."""
     states = table_states(channel, d, kind, own_signal)
+    prov = table_provenance(backend, {"source": "p_test", "channel": channel, "d": d,
+                                      "kind": kind, "own_signal": own_signal, "n_fit": n_fit,
+                                      "n_score": n_score, "p_test": pt.__dict__})
     tag = f"{channel}|{kind}|d{d}|own{int(own_signal)}"
     plan: list[tuple[str, str, History]] = []   # (state key, set, history)
     for idx, s in enumerate(states):
@@ -283,7 +287,8 @@ def fit_table(backend: Backend, channel: str, d: int, kind: str, n_fit: int, n_s
             e.pop("fit_sha"), e.pop("score_sha")
     t = AuditTable(channel, d, kind, "p_test", own_signal, entries,
                    {"n_fit": n_fit, "n_score": n_score, "p_test": pt.__dict__,
-                    "backend": backend.describe(), "queries": len(plan)})
+                    "backend": backend.describe(), "queries": len(plan),
+                    "provenance": prov})
     for k, ek in t.eps_state().items():
         entries[k]["eps"] = ek
     return t
@@ -295,6 +300,9 @@ def enumerated_table(backend: Backend, channel: str, d: int, kind: str,
     exactly (the prompt is a function of the state). Each state's history is the single
     record that realises it."""
     states = table_states(channel, d, kind, own_signal)
+    prov = table_provenance(backend, {"source": "enumerated", "channel": channel, "d": d,
+                                      "kind": kind, "own_signal": own_signal,
+                                      "last_k": last_k})
     hists = [() if s == START else (record_for_state(s, d),) for s in states]
     outs = backend.query([Query(channel, h, d, last_k) for h in hists])
     entries = {}
@@ -307,7 +315,8 @@ def enumerated_table(backend: Backend, channel: str, d: int, kind: str,
                            # the raw kernel output, so gate G5 compares like with like
                            "raw": {"p_H": o.p_H, "sig": o.sig}}
     return AuditTable(channel, d, kind, "enumerated", own_signal, entries,
-                      {"last_k": last_k, "backend": backend.describe(), "queries": len(states)})
+                      {"last_k": last_k, "backend": backend.describe(), "queries": len(states),
+                       "provenance": prov})
 
 
 def derive_actions_table(sig: AuditTable, scheme: str = "primary") -> AuditTable:
@@ -331,8 +340,14 @@ def derive_actions_table(sig: AuditTable, scheme: str = "primary") -> AuditTable
                 var += w ** 2 * f.var(ddof=1) / len(f)
         entries[s] = {"kappa": float(kap), "n": sum(sig.entries[sp]["n"] for sp in ws),
                       "se": float(np.sqrt(var)), "eps": eps, "fit": [], "score": []}
+    src = sig.meta.get("provenance", {})
+    prov = {**src, "design": {**src.get("design", {}), "derived": scheme}}
+    if "kernel" in src:
+        from .provenance import fingerprint
+
+        prov["fingerprint"] = fingerprint({"kernel": src["kernel"], "design": prov["design"]})
     return AuditTable(sig.channel, sig.d, "actions", f"derived:{scheme}", sig.own_signal,
-                      entries, {"from": sig.source, "scheme": scheme})
+                      entries, {"from": sig.source, "scheme": scheme, "provenance": prov})
 
 
 def order0(table: AuditTable, pt: PTest = PTest()) -> float:

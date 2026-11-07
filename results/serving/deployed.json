@@ -1,7 +1,7 @@
 {
  "app": "swarm-audit-serving",
  "workspace": "aliyusufbelal",
- "code_sha256": "30cf92b42d03e94db27cbf7b15a3426c80c88ca723af357e06aa28fc0f158c00",
+ "code_sha256": "7e5b3b5089c7bcd0807fae2b14f8226fec4c2954f5d15f77afb3371dbe04afd9",
  "settings": {
   "batch_invariant": true,
   "scaledown_window_s": 600,
@@ -10,6 +10,6 @@
   "vllm_version": "0.32.0",
   "gpu": "L4"
  },
- "git_commit": "bf632746c611958de241699e20c685853c5da375",
- "time": "2026-11-07T18:11:45.826859+00:00"
+ "git_commit": "64bafb82915d6bd26c415032f357724de4edde87",
+ "time": "2026-11-07T19:21:48.521582+00:00"
 }
