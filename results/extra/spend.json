@@ -62,5 +62,21 @@
   "usd": 0.1333,
   "time": "2026-11-07T21:31:18.383181+00:00",
   "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "G3 batch_invariant=True",
+  "seconds": 893.5,
+  "containers": 1,
+  "usd": 0.1986,
+  "time": "2026-11-07T21:46:49.904968+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-07T21:46:49.906093+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
  }
 ]

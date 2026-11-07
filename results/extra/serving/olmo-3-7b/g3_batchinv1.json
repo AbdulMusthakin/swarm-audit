@@ -1,0 +1,24 @@
+{
+ "batch_invariant": true,
+ "prompts": 48,
+ "others": 448,
+ "max_abs_diff_p_H": 0.0,
+ "max_abs_diff_signal": 0.0,
+ "by_pair": {
+  "alone_vs_batch": 0.0,
+  "alone_vs_warm": 0.0,
+  "batch_vs_warm": 0.0
+ },
+ "seconds": {
+  "alone": 748.4954566955566,
+  "batch": 132.72705101966858,
+  "warm": 12.260578870773315,
+  "total": 893.483617067337
+ },
+ "throughput_prompts_per_s_batch": 3.7369925436413007,
+ "workspace": "sensomichele",
+ "model": {
+  "hf_id": "allenai/Olmo-3-7B-Instruct",
+  "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc"
+ }
+}
