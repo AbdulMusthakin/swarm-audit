@@ -57,16 +57,21 @@ LOG_DIR = REPO_ROOT / "logs" / "serving"
 
 app = modal.App(APP_NAME)
 
+# The Modal secret holding HF_TOKEN (needed for gated models). Its name is baked into
+# the image's environment so that the container defines the functions with the same
+# secrets as the client; otherwise Modal refuses to start them.
+_hf_secret = os.environ.get("SWARM_AUDIT_HF_SECRET", "")
+
 image = (
     modal.Image.debian_slim(python_version="3.12")
     .uv_pip_install(f"vllm=={VLLM_VERSION}", "huggingface_hub")
-    .env({"HF_HOME": HF_HOME, "TOKENIZERS_PARALLELISM": "false"})
+    .env({"HF_HOME": HF_HOME, "TOKENIZERS_PARALLELISM": "false",
+          "SWARM_AUDIT_HF_SECRET": _hf_secret})
     .add_local_python_source("swarm_audit")
 )
 
 weights = modal.Volume.from_name("swarm-audit-weights", create_if_missing=True)
 
-_hf_secret = os.environ.get("SWARM_AUDIT_HF_SECRET")
 secrets = [modal.Secret.from_name(_hf_secret)] if _hf_secret else []
 
 # Weight files only: skip duplicate Mistral-format and original/ checkpoints.
@@ -86,6 +91,21 @@ def download_weights(hf_id: str, revision: str) -> dict:
     weights.commit()
     size = sum(f.stat().st_size for f in Path(path).rglob("*") if f.is_file())
     return {"path": path, "gb": size / 1e9, "seconds": time.time() - t0}
+
+
+_TOKENIZER_FILES = ["tokenizer*", "*.jinja", "special_tokens_map.json", "config.json",
+                    "generation_config.json", "tekken.json"]
+
+
+@app.function(image=image, secrets=secrets, cpu=1, memory=2048, timeout=600)
+def tokenizer_files(hf_id: str, revision: str) -> dict:
+    """Tokenizer and chat-template files of a model, fetched with the Modal HF secret.
+
+    Lets the CPU-side tokenizer screen run on gated models without a local HF token."""
+    from huggingface_hub import snapshot_download
+
+    path = Path(snapshot_download(hf_id, revision=revision, allow_patterns=_TOKENIZER_FILES))
+    return {str(f.relative_to(path)): f.read_bytes() for f in path.rglob("*") if f.is_file()}
 
 
 def _result(raw: list[float], sampled: int | None = None) -> dict:
@@ -232,18 +252,40 @@ def hf_label_logprobs(hf_id: str, revision: str,
 # ------------------------------------------------------------------------- logging
 
 
+def _find_logged(log_name: str, function: str, meta: dict, prompts: list[list[int]]) -> Any:
+    """The output of the latest logged call with the same function, metadata and prompt
+    token ids, or None. Used to resume a run without repeating finished GPU calls."""
+    for path in sorted(LOG_DIR.glob(f"*_{log_name}.jsonl"), reverse=True):
+        for line in reversed(path.read_text().splitlines()):
+            e = json.loads(line)
+            if e.get("function") != function or any(e.get(k) != v for k, v in meta.items()):
+                continue
+            if [p["ids"] for p in e.get("prompts", [])] == prompts:
+                return e["output"]
+    return None
+
+
 def call_logged(fn: Any, *args: Any, log_name: str, meta: dict, prompt_ids: list[str] | None = None,
                 prompts: list[list[int]] | None = None, **kwargs: Any) -> Any:
     """Call a Modal function (`fn.remote`) or a local callable, and append the call, its
-    inputs and its outputs to logs/serving/<date>_<log_name>.jsonl."""
+    inputs and its outputs to logs/serving/<date>_<log_name>.jsonl.
+
+    With SWARM_AUDIT_RESUME=1, an identical call already in the log (same function,
+    metadata and prompt token ids) is not repeated: its logged output is returned."""
     LOG_DIR.mkdir(parents=True, exist_ok=True)
+    fname = getattr(fn, "__name__", str(fn))
+    if os.environ.get("SWARM_AUDIT_RESUME") == "1":
+        out = _find_logged(log_name, fname, meta, prompts or [])
+        if out is not None:
+            print(f"resumed from log: {log_name} {meta.get('call')}", flush=True)
+            return out
     t0 = time.time()
     remote = getattr(fn, "remote", None)
     out = remote(*args, **kwargs) if remote else fn(*args, **kwargs)
     entry = {
         "time": _dt.datetime.now(_dt.timezone.utc).isoformat(),
         "seconds": round(time.time() - t0, 3),
-        "function": getattr(fn, "__name__", str(fn)),
+        "function": fname,
         **meta,
         "prompts": [
             {"prompt_id": pid, "n_tokens": len(p),

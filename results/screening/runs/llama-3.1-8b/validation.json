@@ -1,0 +1,65 @@
+{
+  "llama-3.1-8b": {
+    "model": "llama-3.1-8b",
+    "hf_id": "meta-llama/Llama-3.1-8B-Instruct",
+    "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+    "method": "logprob_token_ids",
+    "n_action_prompts": 0,
+    "n_signal_prompts": 0,
+    "max_abs_diff_p_H": null,
+    "max_abs_diff_signal": null,
+    "max_abs_diff_p_valid": null,
+    "tolerance": 0.01,
+    "passes": null,
+    "checks_skipped": [
+      "transformers reference",
+      "cross-method"
+    ],
+    "max_abs_diff_p_H_vs_allowed_token_ids": null,
+    "labels": {
+      "actions": "_H/_L",
+      "signals": "_high/_low/_none",
+      "action_ids": [
+        473,
+        445
+      ],
+      "signal_ids": [
+        1579,
+        3428,
+        7000
+      ]
+    },
+    "prepare": {
+      "download": {
+        "path": "/__modal/volumes/vo-1kPxNuVhDBAb1SrW6nCDPv/hf/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+        "gb": 16.069722669,
+        "seconds": 53.667158365249634
+      },
+      "server": {
+        "vllm": "0.32.0",
+        "torch": "2.13.0+cu130",
+        "kv_cache_tokens": 31072,
+        "gpu": "NVIDIA L4",
+        "gpu_mem_gb": 23.689363456,
+        "load_seconds": 44.11936688423157,
+        "engine_kwargs": {
+          "model": "meta-llama/Llama-3.1-8B-Instruct",
+          "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+          "dtype": "bfloat16",
+          "max_model_len": 4096,
+          "gpu_memory_utilization": 0.9,
+          "enforce_eager": true,
+          "enable_prefix_caching": true,
+          "seed": 0
+        }
+      }
+    },
+    "reference_env": {
+      "transformers": null,
+      "torch": null,
+      "load_seconds": null,
+      "note": null
+    },
+    "comparisons": []
+  }
+}

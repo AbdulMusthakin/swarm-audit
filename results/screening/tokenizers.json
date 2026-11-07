@@ -460,7 +460,114 @@
     "name": "llama-3.1-8b",
     "hf_id": "meta-llama/Llama-3.1-8B-Instruct",
     "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
-    "error": "OSError: You are trying to access a gated repo."
+    "params": {
+      "billion": {
+        "language": 8.03
+      },
+      "total_billion": 8.03,
+      "bf16_gib_language": 15.0,
+      "bf16_gib_total": 15.0,
+      "note": "Hub API total; headers not readable (gated)"
+    },
+    "actions": {
+      "H/L": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "'H' is not one token here (tail tokens [95292])",
+          "'L' is not one token here (tail tokens [70333])"
+        ]
+      },
+      "_H/_L": {
+        "ok": true,
+        "ids": [
+          473,
+          445
+        ],
+        "problems": []
+      },
+      "high/low": {
+        "ok": true,
+        "ids": [
+          12156,
+          10516
+        ],
+        "problems": []
+      },
+      "_high/_low": {
+        "ok": true,
+        "ids": [
+          1579,
+          3428
+        ],
+        "problems": []
+      },
+      "A/B": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "'A' is not one token here (tail tokens [56748])",
+          "'B' is not one token here (tail tokens [82368])"
+        ]
+      },
+      "_A/_B": {
+        "ok": true,
+        "ids": [
+          362,
+          426
+        ],
+        "problems": []
+      }
+    },
+    "signals": {
+      "1/2/3": {
+        "ok": true,
+        "ids": [
+          16,
+          17,
+          18
+        ],
+        "problems": []
+      },
+      "_1/_2/_3": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "' 1' is not one token here (tail tokens [25, 220, 16])",
+          "' 2' is not one token here (tail tokens [25, 220, 17])",
+          "' 3' is not one token here (tail tokens [25, 220, 18])"
+        ]
+      },
+      "high/low/none": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "'none' is not one token here (tail tokens [22627])"
+        ]
+      },
+      "_high/_low/_none": {
+        "ok": true,
+        "ids": [
+          1579,
+          3428,
+          7000
+        ],
+        "problems": []
+      }
+    },
+    "signals_checked_after": "_H/_L",
+    "chosen": [
+      "_H/_L",
+      "_high/_low/_none"
+    ],
+    "prompt_tokens": {
+      "min": 312,
+      "max": 646
+    },
+    "chat_kwargs": {},
+    "think_block_in_prompt": false,
+    "empty_think_block": false,
+    "template_mentions_thinking": false
   },
   {
     "name": "qwen3-8b",

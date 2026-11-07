@@ -129,7 +129,8 @@ def _unzip(prompts) -> tuple[list[str], list[list[int]]]:
 # ---------------------------------------------------------------------- one model
 
 
-def screen_one(model_cfg: dict, cfg: dict, backend: Any, method: str) -> tuple[list[dict], dict]:
+def screen_one(model_cfg: dict, cfg: dict, backend: Any, method: str, reference: bool = True,
+               cross_check: bool = True) -> tuple[list[dict], dict]:
     params = payoff_params(cfg)
     states = build_grid(cfg)
     tok = load_tokenizer(model_cfg)
@@ -186,8 +187,11 @@ def screen_one(model_cfg: dict, cfg: dict, backend: Any, method: str) -> tuple[l
     sub_t = cheap[:: max(1, len(cheap) // v["n_cheap_talk"])][: v["n_cheap_talk"]]
     sub_a = sub_c + sub_t
     sub_s = [sig_prompts["H"][sig_index[p.state.prompt_id]] for p in sub_t]
-    ref = backend.reference([(sub_a, act_ids), (sub_s, sig_ids)], "reference")
-    ref_a, ref_s = ref["results"]
+    ref: dict = {}
+    ref_a, ref_s = [], []
+    if reference:
+        ref = backend.reference([(sub_a, act_ids), (sub_s, sig_ids)], "reference")
+        ref_a, ref_s = ref["results"]
     by_pid = {r["prompt_id"]: r for r in rows}
     sig_by_pid = {sig_prompts["H"][i][0]: sig["H"][i] for i in range(len(cheap))}
     comp = []
@@ -205,7 +209,7 @@ def screen_one(model_cfg: dict, cfg: dict, backend: Any, method: str) -> tuple[l
                      "abs_diff_p_valid": abs(vr["p_valid"] - rr["p_valid"])})
     other = "allowed_token_ids" if method == "logprob_token_ids" else "logprob_token_ids"
     cross = None
-    if isinstance(backend, ModalBackend):
+    if cross_check and isinstance(backend, ModalBackend):
         alt = backend.label_probs(sub_a, act_ids, other, "cross_method")
         cross = max(abs(by_pid[p.state.prompt_id]["p_H"] - r["probs"][0])
                     for p, r in zip(sub_a, alt))
@@ -215,9 +219,13 @@ def screen_one(model_cfg: dict, cfg: dict, backend: Any, method: str) -> tuple[l
         "model": model_cfg["name"], "hf_id": model_cfg["hf_id"],
         "revision": model_cfg.get("revision"), "method": method,
         "n_action_prompts": len(act_diffs), "n_signal_prompts": len(sig_diffs),
-        "max_abs_diff_p_H": max(act_diffs), "max_abs_diff_signal": max(sig_diffs),
-        "max_abs_diff_p_valid": max(c["abs_diff_p_valid"] for c in comp),
-        "tolerance": v["tolerance"], "passes": max(act_diffs) <= v["tolerance"],
+        "max_abs_diff_p_H": max(act_diffs, default=None),
+        "max_abs_diff_signal": max(sig_diffs, default=None),
+        "max_abs_diff_p_valid": max((c["abs_diff_p_valid"] for c in comp), default=None),
+        "tolerance": v["tolerance"],
+        "passes": max(act_diffs) <= v["tolerance"] if act_diffs else None,
+        "checks_skipped": [n for n, on in (("transformers reference", reference),
+                                           ("cross-method", cross_check)) if not on],
         f"max_abs_diff_p_H_vs_{other}": cross,
         "labels": {"actions": a_set, "signals": s_set, "action_ids": act_ids,
                    "signal_ids": sig_ids},
@@ -298,7 +306,12 @@ def write_summary(out_dir: Path, cfg: dict) -> None:
               f"| p_valid (message) mean / min | {_fmt(s.get('p_valid_sig_mean'))} / {_fmt(s.get('p_valid_sig_min'))} |",
               f"| exactness: max abs diff in P(H), vLLM vs transformers | {_fmt(val.get('max_abs_diff_p_H'), 4)} ({val.get('n_action_prompts', 0)} prompts) |",
               f"| exactness: max abs diff in message probs | {_fmt(val.get('max_abs_diff_signal'), 4)} ({val.get('n_signal_prompts', 0)} prompts) |",
+              f"| vLLM's two methods (logprob_token_ids vs allowed_token_ids): max abs diff in P(H) | {_fmt(val.get('max_abs_diff_p_H_vs_allowed_token_ids'), 7)} |",
+              f"| KV-cache capacity on the L4 (tokens) | {(val.get('prepare') or {}).get('server', {}).get('kv_cache_tokens', '–')} |",
               ""]
+        if val.get("checks_skipped"):
+            L += [f"Not run for this model: {', '.join(val['checks_skipped'])} "
+                  "(no L4 became available before the time box ended).", ""]
         neigh = s["neighbour"]
         L += ["Neighbour responsiveness |P(H | f=1) − P(H | f=0)| (counts step; length 5 is the",
               "mean over the fillers):", "", "| own last | d | length 1 | length 5 (mean) |",
@@ -336,7 +349,7 @@ def write_summary(out_dir: Path, cfg: dict) -> None:
             mark = lambda ok: "" if ok else " ✗"  # noqa: E731
             L.append(f"| {name} | {_fmt(un)}{mark(un is not None and un >= 0.5)} | "
                      f"{_fmt(ne)}{mark(ne >= 0.1)} | {_fmt(si)}{mark(si >= 0.05)} | "
-                     f"{_fmt(pv)} | {_fmt(ex, 4)}{mark(ex is not None and ex <= 0.01)} |")
+                     f"{_fmt(pv)} | {'not run' if ex is None else _fmt(ex, 4) + mark(ex <= 0.01)} |")
     rec = out_dir / "recommendation.md"
     L += ["", rec.read_text().strip() if rec.exists() else "## Recommendation\n\nNot written yet."]
     (out_dir / "summary.md").write_text("\n".join(L) + "\n")
@@ -354,11 +367,30 @@ def main() -> None:
     ap.add_argument("--out", default=str(REPO / "results" / "screening"))
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--summarise-only", action="store_true")
+    ap.add_argument("--no-reference", action="store_true",
+                    help="skip the transformers exactness check (reported as not run)")
+    ap.add_argument("--no-cross-check", action="store_true",
+                    help="skip the check against vLLM's second method")
+    ap.add_argument("--merge", nargs="*", metavar="DIR",
+                    help="merge screening.csv and validation.json from these run folders "
+                         "(one per model, run in parallel) into --out, then summarise")
     args = ap.parse_args()
 
     cfg = load_config(args.config)
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
+    if args.merge:
+        rows: list[dict] = []
+        vals: dict = {}
+        for d in map(Path, args.merge):
+            rows += list(csv.DictReader(open(d / "screening.csv")))
+            vals.update(json.loads((d / "validation.json").read_text()))
+        with open(out_dir / "screening.csv", "w", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=CSV_FIELDS)
+            w.writeheader()
+            w.writerows(rows)
+        (out_dir / "validation.json").write_text(json.dumps(vals, indent=2, default=str) + "\n")
+        args.summarise_only = True
     if args.summarise_only:
         write_summary(out_dir, cfg)
         print(f"wrote {out_dir / 'summary.md'}")
@@ -406,7 +438,8 @@ def main() -> None:
             backend = (LocalBackend(m["hf_id"]) if args.backend == "local"
                        else ModalBackend(m, srv))
             method = srv["method"] if args.backend == "modal" else "local-transformers"
-            rows, val = screen_one(m, cfg, backend, method)
+            rows, val = screen_one(m, cfg, backend, method, reference=not args.no_reference,
+                                   cross_check=not args.no_cross_check)
             all_rows.extend(rows)
             validations[m["name"]] = val
             with open(csv_path, "w", newline="") as fh:
@@ -414,7 +447,7 @@ def main() -> None:
                 w.writeheader()
                 w.writerows(all_rows)
             val_path.write_text(json.dumps(validations, indent=2, default=str) + "\n")
-            print(f"   max |dP(H)| vs transformers: {val['max_abs_diff_p_H']:.4g}", flush=True)
+            print(f"   max |dP(H)| vs transformers: {val['max_abs_diff_p_H']}", flush=True)
 
     if args.backend == "modal":
         import modal

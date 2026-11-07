@@ -114,9 +114,36 @@ def build_grid(cfg: dict) -> list[State]:
 # ----------------------------------------------------------------------- labels
 
 
+LOCAL_TOKENIZERS = Path.home() / ".cache" / "swarm-audit" / "tokenizers"
+
+
+def local_tokenizer_dir(model_cfg: dict) -> Path:
+    """Where `fetch_tokenizer_via_modal` puts a gated model's tokenizer files."""
+    return (LOCAL_TOKENIZERS / model_cfg["hf_id"].replace("/", "--")
+            / str(model_cfg.get("revision") or "main"))
+
+
+def fetch_tokenizer_via_modal(model_cfg: dict) -> Path:
+    """Download a gated model's tokenizer files through Modal (uses the Modal HF secret
+    named by SWARM_AUDIT_HF_SECRET). Needs an active `app.run()` context."""
+    from .serving import tokenizer_files
+
+    files = tokenizer_files.remote(model_cfg["hf_id"], model_cfg["revision"])
+    d = local_tokenizer_dir(model_cfg)
+    for rel, data in files.items():
+        (d / rel).parent.mkdir(parents=True, exist_ok=True)
+        (d / rel).write_bytes(data)
+    return d
+
+
 def load_tokenizer(model_cfg: dict) -> Any:
+    """The model's tokenizer: from a local copy fetched via Modal if there is one,
+    else from the Hugging Face Hub at the pinned revision."""
     from transformers import AutoTokenizer
 
+    local = local_tokenizer_dir(model_cfg)
+    if local.exists():
+        return AutoTokenizer.from_pretrained(str(local), **model_cfg.get("tokenizer_kwargs", {}))
     return AutoTokenizer.from_pretrained(
         model_cfg["hf_id"], revision=model_cfg.get("revision"),
         **model_cfg.get("tokenizer_kwargs", {}),

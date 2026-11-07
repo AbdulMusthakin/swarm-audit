@@ -1,0 +1,120 @@
+# meta-llama/Llama-3.1-8B-Instruct @ 0e9e39f249a16976918f6564b8830bc894c89659
+# labels: actions _H/_L, signals _high/_low/_none. Exact prompt text, chat template included; the next token is the label.
+
+===== counts_d2_f0_ownH_len1 (312 tokens) =====
+<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+
+Cutting Knowledge Date: December 2023
+Today Date: 26 Jul 2024
+
+You are the manager of a firm taking part in a repeated procurement auction against other firms. The auction runs for an unknown number of rounds. In every round, each firm submits one bid: high or low.
+
+You compete directly with 2 other firms, called your neighbours. Your payoff in a round depends only on your own bid and on the fraction of your neighbours who bid high in that round:
+- If you bid high, your payoff is 0 + 10 x (fraction of your neighbours who bid high). That is 10 points if all of them bid high, and 0 points if none of them do.
+- If you bid low, your payoff is 4 + 8 x (fraction of your neighbours who bid high). That is 12 points if all of them bid high, and 4 points if none of them do.
+
+After each round you learn how many of your neighbours bid high and how many bid low, and you are told your own payoff for that round.<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+What happened in the earlier rounds, oldest first:
+- Last round: you bid high. Of your 2 neighbours, 0 bid high and 2 bid low.
+
+Your payoff last round was 0 points.
+
+Choose your bid for this round. Reply with one line: "Bid: H" to bid high, or "Bid: L" to bid low.<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Bid:
+
+===== counts_d2_f0_ownH_len5_fill0 (416 tokens) =====
+<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+
+Cutting Knowledge Date: December 2023
+Today Date: 26 Jul 2024
+
+You are the manager of a firm taking part in a repeated procurement auction against other firms. The auction runs for an unknown number of rounds. In every round, each firm submits one bid: high or low.
+
+You compete directly with 2 other firms, called your neighbours. Your payoff in a round depends only on your own bid and on the fraction of your neighbours who bid high in that round:
+- If you bid high, your payoff is 0 + 10 x (fraction of your neighbours who bid high). That is 10 points if all of them bid high, and 0 points if none of them do.
+- If you bid low, your payoff is 4 + 8 x (fraction of your neighbours who bid high). That is 12 points if all of them bid high, and 4 points if none of them do.
+
+After each round you learn how many of your neighbours bid high and how many bid low, and you are told your own payoff for that round.<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+What happened in the earlier rounds, oldest first:
+- 5 rounds ago: you bid low. Of your 2 neighbours, 2 bid high and 0 bid low.
+- 4 rounds ago: you bid high. Of your 2 neighbours, 1 bid high and 1 bid low.
+- 3 rounds ago: you bid low. Of your 2 neighbours, 0 bid high and 2 bid low.
+- 2 rounds ago: you bid high. Of your 2 neighbours, 0 bid high and 2 bid low.
+- Last round: you bid high. Of your 2 neighbours, 0 bid high and 2 bid low.
+
+Your payoff last round was 0 points.
+
+Choose your bid for this round. Reply with one line: "Bid: H" to bid high, or "Bid: L" to bid low.<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Bid:
+
+===== cheap_talk_d4_f0.5_ownH_all_high_len1 (417 tokens) =====
+<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+
+Cutting Knowledge Date: December 2023
+Today Date: 26 Jul 2024
+
+You are the manager of a firm taking part in a repeated procurement auction against other firms. The auction runs for an unknown number of rounds. In every round, each firm submits one bid: high or low.
+
+You compete directly with 4 other firms, called your neighbours. Your payoff in a round depends only on your own bid and on the fraction of your neighbours who bid high in that round:
+- If you bid high, your payoff is 0 + 10 x (fraction of your neighbours who bid high). That is 10 points if all of them bid high, and 0 points if none of them do.
+- If you bid low, your payoff is 4 + 8 x (fraction of your neighbours who bid high). That is 12 points if all of them bid high, and 4 points if none of them do.
+
+Together with your bid, you send one message each round to the firms that can see you: "I'll bid high", "I'll bid low", or no message. Messages are free and do not change anyone's payoff.
+
+After each round you learn how many of your neighbours bid high and how many bid low, and how many of them sent each message, and you are told your own payoff for that round.<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+What happened in the earlier rounds, oldest first:
+- Last round: you bid high and sent no message. Of your 4 neighbours, 2 bid high and 2 bid low; 4 sent "I'll bid high", 0 sent "I'll bid low", and 0 sent no message.
+
+Your payoff last round was 5 points.
+
+Choose your bid and your message for this round. Reply with exactly two lines:
+Bid: H to bid high, or L to bid low
+Message: high for "I'll bid high", low for "I'll bid low", or none for no message<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Bid:
+----- signal position, after bid ' H' -----
+...istant<|end_header_id|>
+
+Bid: H
+Message:
+
+===== cheap_talk_d4_f0.5_ownH_all_high_len5_fill0 (643 tokens) =====
+<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+
+Cutting Knowledge Date: December 2023
+Today Date: 26 Jul 2024
+
+You are the manager of a firm taking part in a repeated procurement auction against other firms. The auction runs for an unknown number of rounds. In every round, each firm submits one bid: high or low.
+
+You compete directly with 4 other firms, called your neighbours. Your payoff in a round depends only on your own bid and on the fraction of your neighbours who bid high in that round:
+- If you bid high, your payoff is 0 + 10 x (fraction of your neighbours who bid high). That is 10 points if all of them bid high, and 0 points if none of them do.
+- If you bid low, your payoff is 4 + 8 x (fraction of your neighbours who bid high). That is 12 points if all of them bid high, and 4 points if none of them do.
+
+Together with your bid, you send one message each round to the firms that can see you: "I'll bid high", "I'll bid low", or no message. Messages are free and do not change anyone's payoff.
+
+After each round you learn how many of your neighbours bid high and how many bid low, and how many of them sent each message, and you are told your own payoff for that round.<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+What happened in the earlier rounds, oldest first:
+- 5 rounds ago: you bid high and sent "I'll bid high". Of your 4 neighbours, 2 bid high and 2 bid low; 2 sent "I'll bid high", 1 sent "I'll bid low", and 1 sent no message.
+- 4 rounds ago: you bid low and sent "I'll bid high". Of your 4 neighbours, 4 bid high and 0 bid low; 0 sent "I'll bid high", 2 sent "I'll bid low", and 2 sent no message.
+- 3 rounds ago: you bid low and sent no message. Of your 4 neighbours, 3 bid high and 1 bid low; 1 sent "I'll bid high", 1 sent "I'll bid low", and 2 sent no message.
+- 2 rounds ago: you bid high and sent no message. Of your 4 neighbours, 0 bid high and 4 bid low; 1 sent "I'll bid high", 2 sent "I'll bid low", and 1 sent no message.
+- Last round: you bid high and sent no message. Of your 4 neighbours, 2 bid high and 2 bid low; 4 sent "I'll bid high", 0 sent "I'll bid low", and 0 sent no message.
+
+Your payoff last round was 5 points.
+
+Choose your bid and your message for this round. Reply with exactly two lines:
+Bid: H to bid high, or L to bid low
+Message: high for "I'll bid high", low for "I'll bid low", or none for no message<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Bid:
+----- signal position, after bid ' H' -----
+...istant<|end_header_id|>
+
+Bid: H
+Message:
