@@ -1,0 +1,46 @@
+{
+  "observed_high_share": 0.1796875,
+  "counts_games": 96,
+  "most_frequent_history": [
+    {
+      "bid": "L",
+      "neighbour_high": 0
+    }
+  ],
+  "dominant_history_audit_p_high": 0.12506447568614576,
+  "dominant_history_live_p_high": 0.1872341542058884,
+  "dominant_history_live_calls": 1628,
+  "dominant_history_live_high_bids": 286,
+  "results": {
+    "frozen_audit": {
+      "mean": 0.14626844869681677,
+      "crps": 0.061747823086245934,
+      "cdf_sup": 0.1974126071528669
+    },
+    "first_audit_half": {
+      "mean": 0.13689348242109609,
+      "crps": 0.06437743968348816,
+      "cdf_sup": 0.23801978582324557
+    },
+    "second_audit_half": {
+      "mean": 0.15515257670112806,
+      "crps": 0.059767152087837526,
+      "cdf_sup": 0.15896261284433777
+    },
+    "replace_dominant_state_from_calibration_only": {
+      "mean": 0.18875358648310647,
+      "crps": 0.05703149774145829,
+      "cdf_sup": 0.054173413062500564
+    },
+    "replace_all_states_from_calibration_only": {
+      "mean": 0.18734293228511364,
+      "crps": 0.056907043290081734,
+      "cdf_sup": 0.046892200946523466
+    }
+  },
+  "request_counts": {
+    "audit": 3712,
+    "counts": 3097
+  },
+  "logged_usd": 0.081126
+}

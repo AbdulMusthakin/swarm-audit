@@ -1,0 +1,43 @@
+{
+ "workspace": "sensomichele",
+ "secret": "huggingface",
+ "model": "meta-llama/Llama-3.1-8B-Instruct",
+ "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+ "weights": {
+  "path": "/__modal/volumes/vo-voSPOxNEoUJ2MVAmxX2GyZ/hf/hub/models--meta-llama--Llama-3.1-8B-Instruct/snapshots/0e9e39f249a16976918f6564b8830bc894c89659",
+  "gb": 16.069722669,
+  "seconds": 56.15449047088623
+ },
+ "seconds": 78.9,
+ "label_check": {
+  "pass": true,
+  "action_ids": [
+   473,
+   445
+  ],
+  "signal_ids": [
+   1579,
+   3428,
+   7000
+  ],
+  "configured": {
+   "actions": [
+    473,
+    445
+   ],
+   "signals": [
+    1579,
+    3428,
+    7000
+   ]
+  },
+  "problems": [],
+  "prompts_checked": 148,
+  "signal_positions_checked": 250,
+  "max_prompt_tokens": {
+   "counts": 780,
+   "cheap_talk": 1616
+  },
+  "max_model_len": 4096
+ }
+}

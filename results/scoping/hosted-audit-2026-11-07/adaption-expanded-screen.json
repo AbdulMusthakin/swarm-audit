@@ -1,0 +1,161 @@
+{
+  "collected": {
+    "total_attempts": 743,
+    "valid_audit_draws": 587,
+    "status_counts": {
+      "completed": 587,
+      "429": 156
+    },
+    "input_tokens": 136313,
+    "output_tokens": 1720,
+    "holdout_games": 0
+  },
+  "balanced_subset": {
+    "rule": "Draw indexes 0 through 3 for every audit history, selected on completeness under rate limiting",
+    "draws": 464,
+    "histories": 116,
+    "repetitions": 4,
+    "counts_only_high_bids": 3,
+    "communicating_joint_outputs": {
+      "LN": 149,
+      "LL": 121,
+      "LH": 132,
+      "HN": 4,
+      "HH": 28,
+      "HL": 2
+    },
+    "matched_contrast": {
+      "strata": [
+        {
+          "own_bid": "H",
+          "neighbour_high_bids": 0,
+          "own_signal": "H",
+          "high_bids_after_high_messages": 0,
+          "high_bids_after_low_messages": 0
+        },
+        {
+          "own_bid": "H",
+          "neighbour_high_bids": 0,
+          "own_signal": "L",
+          "high_bids_after_high_messages": 0,
+          "high_bids_after_low_messages": 0
+        },
+        {
+          "own_bid": "H",
+          "neighbour_high_bids": 0,
+          "own_signal": "N",
+          "high_bids_after_high_messages": 0,
+          "high_bids_after_low_messages": 0
+        },
+        {
+          "own_bid": "H",
+          "neighbour_high_bids": 1,
+          "own_signal": "H",
+          "high_bids_after_high_messages": 2,
+          "high_bids_after_low_messages": 0
+        },
+        {
+          "own_bid": "H",
+          "neighbour_high_bids": 1,
+          "own_signal": "L",
+          "high_bids_after_high_messages": 0,
+          "high_bids_after_low_messages": 4
+        },
+        {
+          "own_bid": "H",
+          "neighbour_high_bids": 1,
+          "own_signal": "N",
+          "high_bids_after_high_messages": 0,
+          "high_bids_after_low_messages": 0
+        },
+        {
+          "own_bid": "H",
+          "neighbour_high_bids": 2,
+          "own_signal": "H",
+          "high_bids_after_high_messages": 0,
+          "high_bids_after_low_messages": 0
+        },
+        {
+          "own_bid": "H",
+          "neighbour_high_bids": 2,
+          "own_signal": "L",
+          "high_bids_after_high_messages": 0,
+          "high_bids_after_low_messages": 1
+        },
+        {
+          "own_bid": "H",
+          "neighbour_high_bids": 2,
+          "own_signal": "N",
+          "high_bids_after_high_messages": 2,
+          "high_bids_after_low_messages": 0
+        },
+        {
+          "own_bid": "L",
+          "neighbour_high_bids": 0,
+          "own_signal": "H",
+          "high_bids_after_high_messages": 0,
+          "high_bids_after_low_messages": 0
+        },
+        {
+          "own_bid": "L",
+          "neighbour_high_bids": 0,
+          "own_signal": "L",
+          "high_bids_after_high_messages": 1,
+          "high_bids_after_low_messages": 0
+        },
+        {
+          "own_bid": "L",
+          "neighbour_high_bids": 0,
+          "own_signal": "N",
+          "high_bids_after_high_messages": 0,
+          "high_bids_after_low_messages": 0
+        },
+        {
+          "own_bid": "L",
+          "neighbour_high_bids": 1,
+          "own_signal": "H",
+          "high_bids_after_high_messages": 1,
+          "high_bids_after_low_messages": 0
+        },
+        {
+          "own_bid": "L",
+          "neighbour_high_bids": 1,
+          "own_signal": "L",
+          "high_bids_after_high_messages": 2,
+          "high_bids_after_low_messages": 0
+        },
+        {
+          "own_bid": "L",
+          "neighbour_high_bids": 1,
+          "own_signal": "N",
+          "high_bids_after_high_messages": 0,
+          "high_bids_after_low_messages": 0
+        },
+        {
+          "own_bid": "L",
+          "neighbour_high_bids": 2,
+          "own_signal": "H",
+          "high_bids_after_high_messages": 0,
+          "high_bids_after_low_messages": 0
+        },
+        {
+          "own_bid": "L",
+          "neighbour_high_bids": 2,
+          "own_signal": "L",
+          "high_bids_after_high_messages": 1,
+          "high_bids_after_low_messages": 0
+        },
+        {
+          "own_bid": "L",
+          "neighbour_high_bids": 2,
+          "own_signal": "N",
+          "high_bids_after_high_messages": 0,
+          "high_bids_after_low_messages": 0
+        }
+      ],
+      "per_side": 72,
+      "high_bids_after_high_messages": 9,
+      "high_bids_after_low_messages": 5
+    }
+  }
+}

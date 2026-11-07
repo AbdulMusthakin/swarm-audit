@@ -56,6 +56,8 @@ def main() -> None:
         tables = build.build_tables(be, cfg, args.channel, args.d, args.enumerated, args.actions_only)
         build.save_tables(tables, build.table_dir(cfg, be.name), t)
         return
+    if cfg.get("check_core_pilot"):
+        build.check_core_pilot_payoffs(cfg)
     build.check_cost(cfg, cfg["serving"]["timeout_minutes"])
     with build.gpu_session(cfg, ("model_confirmed", "prompts_approved", "modal_account")):
         be, _ = build.modal_backend(cfg, log_name=f"audit_{t}")

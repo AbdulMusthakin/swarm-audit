@@ -5,7 +5,7 @@ import shutil
 
 import pytest
 
-from swarm_audit import ladder
+from swarm_audit import ladder, provenance
 from swarm_audit.audit import fit_table
 from swarm_audit.game import PayoffParams
 from swarm_audit.policies import ScriptedBackend
@@ -33,6 +33,35 @@ def test_identical_resume_keeps_the_original_provenance(tmp_path):
     assert man["provenance"] == json.loads(prov_bytes)
     assert [s["runs_added"] for s in man["sessions"]] == [2, 2]
     assert len(list(out.glob("run_*.jsonl.gz"))) == 4
+
+
+def test_core_runs_from_before_graph_kwargs_can_resume(tmp_path, monkeypatch):
+    current_payload = provenance.run_payload
+
+    def legacy_payload(cond, backend):
+        payload = current_payload(cond, backend)
+        payload["design"].pop("graph_kwargs", None)
+        return payload
+
+    with monkeypatch.context() as patch:
+        patch.setattr(provenance, "run_payload", legacy_payload)
+        out = run_condition(_cond(2), _be(), tmp_path, **QUIET)
+    original = (out / "provenance.json").read_bytes()
+    run_condition(_cond(4), _be(), tmp_path, **QUIET)
+    assert (out / "provenance.json").read_bytes() == original
+    assert load_runs(out).R == 4
+
+
+def test_graph_parameters_are_part_of_run_provenance(tmp_path):
+    cond = Condition("rr", 8, 1, "counts", 10, graph="random_regular", T=3,
+                     runs=1, graph_kwargs=(("d", 4), ("seed", 3)))
+    out = run_condition(cond, _be(), tmp_path, **QUIET)
+    # Check the same folder directly so moving or renaming it cannot hide a
+    # change of graph.
+    changed = Condition("rr", 8, 1, "counts", 10, graph="random_regular", T=3,
+                        runs=1, graph_kwargs=(("d", 4), ("seed", 4)))
+    with pytest.raises(ProvenanceError, match="graph_kwargs"):
+        provenance.bind_run_provenance(out, changed, _be(), None)
 
 
 def test_payoff_change_cannot_resume(tmp_path):

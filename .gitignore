@@ -24,3 +24,4 @@ logs/*
 setup-paper/*.log
 report/*.log
 results/spend.lock
+results/extra/spend.lock

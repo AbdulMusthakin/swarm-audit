@@ -1,0 +1,94 @@
+[
+  {
+    "provider": "parasail/bf16",
+    "attempts": 24,
+    "valid": 24,
+    "http_statuses": {
+      "200": 24
+    },
+    "median_repeat_tv": 0.19231734196864336,
+    "max_repeat_tv": 0.4085112669849005
+  },
+  {
+    "provider": "dekallm/bf16",
+    "attempts": 24,
+    "valid": 24,
+    "http_statuses": {
+      "200": 24
+    },
+    "median_repeat_tv": 0.13223536888612333,
+    "max_repeat_tv": 0.7971850485208556
+  },
+  {
+    "provider": "novita/bf16",
+    "attempts": 24,
+    "valid": 3,
+    "http_statuses": {
+      "429": 21,
+      "200": 3
+    },
+    "median_repeat_tv": null,
+    "max_repeat_tv": null
+  },
+  {
+    "provider": "nextbit/bf16",
+    "attempts": 24,
+    "valid": 24,
+    "http_statuses": {
+      "200": 24
+    },
+    "median_repeat_tv": 0.045218949631357086,
+    "max_repeat_tv": 0.4460894052051272
+  },
+  {
+    "provider": "io-net/bf16",
+    "attempts": 6,
+    "valid": 0,
+    "http_statuses": {
+      "404": 6
+    },
+    "median_repeat_tv": null,
+    "max_repeat_tv": null
+  },
+  {
+    "provider": "venice/bf16",
+    "attempts": 24,
+    "valid": 24,
+    "http_statuses": {
+      "200": 24
+    },
+    "median_repeat_tv": 0.011880913229629666,
+    "max_repeat_tv": 0.25327645856348135
+  },
+  {
+    "provider": "google-vertex/global",
+    "attempts": 24,
+    "valid": 22,
+    "http_statuses": {
+      "200": 22,
+      "None": 2
+    },
+    "median_repeat_tv": 0.02987918044860928,
+    "max_repeat_tv": 0.18413404303976097
+  },
+  {
+    "provider": "cloudflare",
+    "attempts": 24,
+    "valid": 24,
+    "http_statuses": {
+      "200": 24
+    },
+    "median_repeat_tv": 0.0781787610123913,
+    "max_repeat_tv": 0.4076773909012473
+  },
+  {
+    "provider": "darkbloom",
+    "attempts": 24,
+    "valid": 24,
+    "http_statuses": {
+      "200": 24
+    },
+    "median_repeat_tv": 0.0,
+    "max_repeat_tv": 0.21531440109474806
+  }
+]

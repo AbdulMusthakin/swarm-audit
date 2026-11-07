@@ -1,0 +1,12 @@
+{
+ "d": 4,
+ "channel": "counts",
+ "pass": true,
+ "action_ids": [
+  473,
+  445
+ ],
+ "problems": [],
+ "prompts_checked": 66,
+ "max_prompt_tokens": 782
+}

@@ -35,6 +35,8 @@ def main() -> None:
     ap.add_argument("--config", default="core.yaml")
     args = ap.parse_args()
     cfg = build.load(args.config)
+    if cfg.get("results_dir"):   # it writes the core's G4 plan and results/serving files
+        raise SystemExit("benchmark.py is the core's G4 and writes core files; not for an extra config")
     root = REPO / "results" / "runs"
     conds = [Condition("benchmark", 90, 10, "counts", 10, runs=1, T=cfg["T"], params=build.params(cfg)),
              Condition("benchmark", 90, 20, "cheap_talk", 20, runs=1, T=cfg["T"], params=build.params(cfg))]

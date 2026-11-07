@@ -1,0 +1,15 @@
+{
+ "app": "swarm-audit-serving",
+ "workspace": "sensomichele",
+ "code_sha256": "3a14613e81383c7612048598465184dfbd7669a68f34bbf233c676938ffe9ca8",
+ "settings": {
+  "batch_invariant": true,
+  "scaledown_window_s": 600,
+  "max_containers": 1,
+  "timeout_minutes": 30,
+  "vllm_version": "0.32.0",
+  "gpu": "L4"
+ },
+ "git_commit": "335b48d1fb3254a10f7f2d49386616cb5fd8b2b5",
+ "time": "2026-11-07T18:55:16.449152+00:00"
+}
