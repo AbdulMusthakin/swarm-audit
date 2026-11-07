@@ -30,6 +30,7 @@ import numpy as np  # noqa: E402
 from swarm_audit import build, calibration, plots  # noqa: E402
 from swarm_audit.analysis import Tables, analyse_condition, to_jsonable  # noqa: E402
 from swarm_audit.prediction import ActionsChain, SignalChain  # noqa: E402
+from swarm_audit.provenance import check_tables_match_runs  # noqa: E402
 from swarm_audit.swarm import Condition, load_runs, run_condition  # noqa: E402
 from swarm_audit.topology import make  # noqa: E402
 
@@ -112,6 +113,7 @@ def main() -> None:
                                  cfg["seeds"]["base_seed"], build.params(cfg),
                                  cfg["own_signal_in_state"])
                 data = load_runs(run_condition(cond, be, runs_dir, log=lambda *a: None))
+                check_tables_match_runs(data.meta["kernel_fingerprint"], tables)
                 res = analyse_condition(data, g, tb, an["n_model"], an["seed"], an["bootstrap"], pt)
                 ok, obs = judge(policy, res)
                 name = f"{policy}/{ch}/n{n}"

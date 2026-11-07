@@ -28,6 +28,7 @@ sys.path.insert(0, str(REPO))
 
 from swarm_audit import build, calibration, plots  # noqa: E402
 from swarm_audit.analysis import analyse_condition, to_jsonable  # noqa: E402
+from swarm_audit.provenance import ProvenanceError, check_tables_match_runs  # noqa: E402
 from swarm_audit.swarm import load_runs  # noqa: E402
 from swarm_audit.topology import make  # noqa: E402
 
@@ -40,6 +41,12 @@ def one(args) -> None:
     data = load_runs(Path(args.runs))
     g = make(data.graph, data.n)
     tables = build.load_tables(Path(args.tables), args.tag)
+    try:   # review C2: tables must come from the runs' kernel (prompts, model, payoffs...)
+        check_tables_match_runs(data.meta.get("kernel_fingerprint"),
+                                {"actions": tables.actions, "signal": tables.signal,
+                                 "actions_equal": tables.actions_equal})
+    except ProvenanceError as e:
+        raise SystemExit(f"Stopping: {e}")
     arm = Path(args.runs).parent.name
     cond = Path(args.runs).name
     if args.gate_g5:
