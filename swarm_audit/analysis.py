@@ -22,6 +22,30 @@ from .swarm import RunData
 from .topology import Graph
 
 ROUND_BLOCKS = ((2, 7), (8, 13), (14, 20))
+
+# Review C6: what each number is, saved with every analysis.
+NOTES = {
+    "primary_contrast": "mean paired CRPS(actions-only) - CRPS(signal-aware) of y (high bids "
+                        "in rounds 16-20, normalised by 5n) on the cheap-talk n = 10 cycle "
+                        "runs with full history; positive favours the signal-aware forecast. "
+                        "Absolute CRPS of both is reported; n = 20 and other arms are secondary.",
+    "intervals": "95% percentile intervals from 2,000 resamples of whole swarm runs; they are "
+                 "conditional on the fitted audit tables (audit-estimation uncertainty is "
+                 "not included) and treat the model side as fixed.",
+    "held_out": "the fitted-from-swarm baseline is fitted on runs 1-25 and every predictor is "
+                "scored on the same runs 26-50; it uses swarm data, so it is not an audit.",
+    "delta_and_null": "Delta_t is the binned TV between the swarm's R runs and the predictor's "
+                      "fixed reference law (exact at n = 4, else 20,000 simulated runs). Its "
+                      "null reference draws R whole runs from a separate simulation pool "
+                      "against the same law; per_round is pointwise, max_over_rounds "
+                      "simultaneous. Empirical TV has sampling error.",
+    "bound": "B_t is an estimate of the Theorem 1 bound from logged defects with a whole-run "
+             "bootstrap interval; it is not a certified bound.",
+    "defect_shift": "decomposes the local expected one-step error eps(p_swarm) - eps(p_test), "
+                    "not the observed group TV gap; both terms can be negative.",
+    "defects": "actions_only is a binary-action TV; signal_aware is a six-outcome joint TV; "
+               "compare them only through one_step (action marginal).",
+}
 EXACT_MAX_N = 4
 
 
@@ -38,9 +62,10 @@ class Tables:
 @dataclass
 class ModelRuns:
     name: str
-    A: np.ndarray
+    A: np.ndarray                      # the pool that estimates the reference law
     exact: dict | None = None
     extra: dict = field(default_factory=dict)
+    null_pool: np.ndarray | None = None  # a separate pool for the null draws (review C4)
 
 
 def build_predictors(tables: Tables, g: Graph, T: int, n_model: int, seed: int,
@@ -61,7 +86,8 @@ def build_predictors(tables: Tables, g: Graph, T: int, n_model: int, seed: int,
                   "y": binom.pmf(np.arange(WINDOW * g.n + 1), WINDOW * g.n, ch.p)}
         elif exact and g.n <= EXACT_MAX_N:
             ex = exact_law(ch, g, T)
-        out[name] = ModelRuns(name, ch.simulate(g, T, n_model, rng), ex)
+        out[name] = ModelRuns(name, ch.simulate(g, T, n_model, rng), ex,
+                              null_pool=ch.simulate(g, T, n_model, rng))
     return out
 
 
@@ -86,17 +112,21 @@ def score_predictors(data: RunData, preds: dict[str, ModelRuns], B: int, rng) ->
             G = stats.cdf_from_law(m.exact["y"])
             law = stats.binned_law_exact(m.exact["X"])
             mean_F = float((np.arange(K + 1) * m.exact["y"]).sum() / K)
+            ref = "exact law"
         else:
             G = stats.cdf_from_samples(stats.high_count(m.A), K)
             law = stats.binned_law(stats.frac_high(m.A))
             mean_F = float(stats.final_split(m.A).mean())
+            ref = f"simulation of {len(m.A)} runs"
+        pool = m.null_pool if m.null_pool is not None else m.A
         c = stats.crps(G, y)
         res["G"][name] = G
         res["crps_per_run"][name] = c
         res["crps"][name] = stats.bootstrap_mean(c, B, rng)
         res["F_error"][name] = stats.bootstrap_diff_of_means(F, mean_F, B, rng)
         res["delta"][name] = stats.delta_t(Xs, law)
-        res["floor"][name] = stats.noise_floor(stats.frac_high(m.A), data.R, rng=rng)
+        res["floor"][name] = stats.null_reference(stats.frac_high(pool), law, data.R,
+                                                  rng=rng, reference=ref)
     if "actions_only" in preds and "signal_aware" in preds:
         D = res["crps_per_run"]["actions_only"] - res["crps_per_run"]["signal_aware"]
         res["paired_D"] = stats.bootstrap_mean(D, B, rng)
@@ -109,8 +139,15 @@ def analyse_condition(data: RunData, g: Graph, tables: Tables, n_model: int = 20
     rng = np.random.default_rng(seed)
     T = data.T
     preds = build_predictors(tables, g, T, n_model, seed + 1, pt=pt)
+    design = data.meta.get("design", {})
+    primary = (data.channel == "cheap_talk" and data.n == 10 and data.graph == "cycle"
+               and design.get("last_k", "missing") is None)
     out: dict = {"condition": {"channel": data.channel, "n": data.n, "graph": data.graph,
-                               "T": T, "runs": data.R}}
+                               "T": T, "runs": data.R, "last_k": design.get("last_k"),
+                               "run_fingerprint": data.meta.get("fingerprint"),
+                               "kernel_fingerprint": data.meta.get("kernel_fingerprint")},
+                 "is_primary_contrast": primary,
+                 "notes": NOTES}
     out["scores"] = score_predictors(data, preds, B, rng)
     out["X"] = {"swarm": _x_band(data.actions, B, rng),
                 **{k: {"mean": stats.frac_high(m.A).mean(0)} for k, m in preds.items()}}
@@ -128,6 +165,7 @@ def analyse_condition(data: RunData, g: Graph, tables: Tables, n_model: int = 20
     kap = tables.actions.lookup()
     dfx = stats.swarm_defects(data.p_H, data.state, kap)
     out["defects"] = {"actions_only": {
+        "measure": "binary-action TV, |p_H - kappa(H | s)|",
         "eps_swarm_round_agent": dfx.mean(0), "eps_swarm": float(dfx.mean()),
         "eps_test_pooled": tables.actions.eps_pooled(pt),
         "eps_test_state": tables.actions.eps_state(),
@@ -137,6 +175,8 @@ def analyse_condition(data: RunData, g: Graph, tables: Tables, n_model: int = 20
         kj = tables.signal.lookup()
         dfj = stats.swarm_defects_joint(data.joint(), data.state_sig, kj)
         out["defects"]["signal_aware"] = {
+            "measure": "six-outcome joint TV over (bid, message); not comparable with the "
+                       "binary measure: use one_step for a like-for-like comparison",
             "eps_swarm_round_agent": dfj.mean(0), "eps_swarm": float(dfj.mean()),
             "eps_test_pooled": tables.signal.eps_pooled(pt),
             "eps_test_state": tables.signal.eps_state(), "bound": stats.bound(dfj, B, rng)}
@@ -144,7 +184,8 @@ def analyse_condition(data: RunData, g: Graph, tables: Tables, n_model: int = 20
         # One-step (teacher-forced) comparison of P(H): signal-aware vs actions-only.
         kH = {k: float(np.sum(np.asarray(v)[0])) for k, v in kj.items()}
         one_sig = stats.swarm_defects(data.p_H, data.state_sig, kH)
-        out["one_step"] = {"label": "one-step (teacher-forced), not a group prediction",
+        out["one_step"] = {"label": "one-step (teacher-forced), not a group prediction; "
+                                    "both use the action marginal, so they are like for like",
                            "mean_abs_pH_signal_aware": float(one_sig.mean()),
                            "mean_abs_pH_actions_only": float(dfx.mean())}
 
@@ -164,9 +205,11 @@ def analyse_condition(data: RunData, g: Graph, tables: Tables, n_model: int = 20
         held = data.subset(test_idx)
         p2 = dict(preds)
         ch = sf.chain(g.regular_degree)
+        rng2 = np.random.default_rng(seed + 2)
         p2["fitted_from_swarm"] = ModelRuns(
-            "fitted_from_swarm", ch.simulate(g, T, n_model, np.random.default_rng(seed + 2)),
-            exact_law(ch, g, T) if g.n <= EXACT_MAX_N else None)
+            "fitted_from_swarm", ch.simulate(g, T, n_model, rng2),
+            exact_law(ch, g, T) if g.n <= EXACT_MAX_N else None,
+            null_pool=ch.simulate(g, T, n_model, rng2))
         sc = score_predictors(held, p2, B, rng)
         out["held_out"] = {"note": "runs 26-50 only; fitted_from_swarm uses swarm data "
                                    "(runs 1-25), so it is not an audit",

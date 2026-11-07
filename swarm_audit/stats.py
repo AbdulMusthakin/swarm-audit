@@ -147,8 +147,37 @@ def delta_t(X_swarm: np.ndarray, law_model: np.ndarray) -> np.ndarray:
     return tv(binned_law(X_swarm), law_model)
 
 
+def null_reference(X_pool: np.ndarray, law_ref: np.ndarray, R: int, draws: int = 1000,
+                   q: float = 0.95, rng: np.random.Generator | None = None,
+                   reference: str = "") -> dict:
+    """The null distribution of the observed statistic (review C4): Delta_t between R
+    whole runs drawn from the model (from `X_pool`, a simulation pool kept separate from
+    the one that estimated `law_ref`) and the same fixed reference law `law_ref` (T, 5)
+    used for the swarm. Returns the q-quantile per round (pointwise) and of the maximum
+    over rounds (simultaneous)."""
+    rng = rng or np.random.default_rng(1)
+    M = len(X_pool)
+    b = bin_index(X_pool)                           # (M, T), whole trajectories
+    T = b.shape[1]
+    d = np.empty((draws, T))
+    for j in range(draws):
+        idx = rng.integers(M, size=R)
+        for t in range(T):
+            p1 = np.bincount(b[idx, t], minlength=5) / R
+            d[j, t] = 0.5 * np.abs(p1 - law_ref[t]).sum()
+    return {"per_round": np.quantile(d, q, axis=0),
+            "max_over_rounds": float(np.quantile(d.max(axis=1), q)), "q": q,
+            "draws": draws, "R": R, "null_pool_runs": M, "reference": reference,
+            "definition": "q-quantile of the binned TV between R whole runs from a separate "
+                          "model pool and the fixed reference law; per_round is pointwise, "
+                          "max_over_rounds is simultaneous"}
+
+
 def noise_floor(X_model: np.ndarray, R: int, draws: int = 1000, q: float = 0.95,
                 rng: np.random.Generator | None = None) -> dict:
+    """SUPERSEDED for Delta_t (review C4): the TV between two R-run model samples. It is a
+    two-small-sample variability reference, not the null of the observed comparison
+    (swarm against a fixed law); kept only for reference."""
     """95th percentile of the binned TV between two independent samples of R runs from
     the model, per round, and of its maximum over rounds (a simultaneous floor)."""
     rng = rng or np.random.default_rng(1)

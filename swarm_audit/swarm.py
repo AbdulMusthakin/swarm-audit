@@ -313,7 +313,8 @@ def load_runs(folder: Path) -> RunData:
     return RunData(first["channel"], n, first["graph"], T, runs, acts, p_h, p_v, st, sha,
                    sigs if cheap else None, sig, st_sig,
                    meta={"folder": str(folder), "fingerprint": prov.get("fingerprint"),
-                         "kernel_fingerprint": prov.get("kernel_fingerprint")})
+                         "kernel_fingerprint": prov.get("kernel_fingerprint"),
+                         "design": prov.get("payload", {}).get("design", {})})
 
 
 assert ACTIONS == ("H", "L")
