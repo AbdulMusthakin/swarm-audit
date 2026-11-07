@@ -52,6 +52,8 @@ serving:
   batch_invariant: true   # set by check_serving.py --decide (G3)
   numerical_floor: 0.0   # the G3 floor; set by check_serving.py --decide
   max_containers: 1
+  deployed: true             # use the deployed server (scripts/deploy_server.py), kept warm between steps
+  scaledown_window_s: 600    # idle seconds before the GPU shuts down (Abdul, 7 Nov 2026: keep it warm)
   timeout_minutes: 30
   cost_cap_usd: 20.0         # for everything in the build hand-off
   l4_usd_per_hour: 0.80      # Modal list price; check before running

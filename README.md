@@ -42,6 +42,12 @@ never Abdul's: sign in with `python scripts/modal_login.py`, create the secret
 
     python scripts/check_harness.py                                   # G2, CPU
     SWARM_AUDIT_HF_SECRET=huggingface python scripts/setup_workspace.py   # weights, labels
+    SWARM_AUDIT_HF_SECRET=huggingface SWARM_AUDIT_BATCH_INVARIANT=1 python scripts/deploy_server.py
+                                                  # warm GPU shared by the steps below
+
+GPU steps run with `SWARM_AUDIT_HF_SECRET=huggingface SWARM_AUDIT_BATCH_INVARIANT=1`
+(batch invariance was chosen in G3). Stop the deployed server when done:
+`modal app stop swarm-audit-serving`.
     python scripts/check_serving.py --config core.yaml                # G3
     python scripts/benchmark.py --config core.yaml                    # G4
     python scripts/run_audit.py --config calibration.yaml --channel counts --enumerated
