@@ -28,8 +28,7 @@ sys.path.insert(0, str(REPO))
 
 from swarm_audit import build, calibration, plots  # noqa: E402
 from swarm_audit.analysis import analyse_condition, to_jsonable  # noqa: E402
-from swarm_audit.swarm import load_runs  # noqa: E402
-from swarm_audit.topology import make  # noqa: E402
+from swarm_audit.swarm import graph_of, load_runs  # noqa: E402
 
 OUT = REPO / "results" / "analysis"
 
@@ -38,7 +37,9 @@ def one(args) -> None:
     cfg = build.load(args.config)
     an = cfg["analysis"]
     data = load_runs(Path(args.runs))
-    g = make(data.graph, data.n)
+    g = graph_of(data)
+    root = build.results_root(cfg)
+    OUT = root / "analysis"
     tables = build.load_tables(Path(args.tables), args.tag)
     arm = Path(args.runs).parent.name
     cond = Path(args.runs).name
@@ -58,7 +59,7 @@ def one(args) -> None:
     path = OUT / arm / f"{cond}.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(to_jsonable(res)) + "\n")
-    plots.figure1(res, REPO / "results" / "figures" / f"fig1_{arm}_{cond}.png", f"{arm}: {cond}")
+    plots.figure1(res, root / "figures" / f"fig1_{arm}_{cond}.png", f"{arm}: {cond}")
     print(f"wrote {path}")
     sc = res["scores"]
     for k, v in sc["crps"].items():

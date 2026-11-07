@@ -56,14 +56,19 @@ class Condition:
     base_seed: int = 20261107
     params: PayoffParams = DEFAULT_PARAMS
     own_signal_in_state: bool = True
+    # Extra parameters of the graph kind, as sorted (name, value) pairs, e.g.
+    # (("d", 4), ("seed", 20261108)) for "random_regular" (extra arm 8). Empty for the
+    # cycle and the complete graph, whose names and logs are then unchanged.
+    graph_kwargs: tuple = ()
 
     @property
     def name(self) -> str:
         mem = "full" if self.last_k is None else f"last{self.last_k}"
-        return f"{self.channel}_n{self.n}_{self.graph}_{mem}"
+        extra = "".join(f"_{k}{v}" for k, v in self.graph_kwargs)
+        return f"{self.channel}_n{self.n}_{self.graph}{extra}_{mem}"
 
     def make_graph(self) -> Graph:
-        return make(self.graph, self.n)
+        return make(self.graph, self.n, **dict(self.graph_kwargs))
 
     def rng(self, run: int) -> np.random.Generator:
         ss = np.random.SeedSequence([self.base_seed, self.arm_id, self.condition_id, run])
@@ -130,6 +135,8 @@ def simulate(cond: Condition, backend: Backend, runs: Sequence[int]) -> dict[int
                        "prompt_sha256": o.prompt_sha256, "n_tokens": o.n_tokens,
                        "p_H": o.p_H, "logprob_H": o.logprob_H, "logprob_L": o.logprob_L,
                        "p_valid": o.p_valid, "u_action": u_a, "action": a}
+                if cond.graph_kwargs:
+                    row["graph_kwargs"] = dict(cond.graph_kwargs)
                 if cheap:
                     u_m = float(rngs[r].random())
                     m = sample_signal(u_m, o.sig[a])
@@ -297,7 +304,14 @@ def load_runs(folder: Path) -> RunData:
                 sig[ri, t, i, 1] = ln["sig_after_L"]
                 st_sig[ri, t, i] = ln["state_sig"]
     return RunData(first["channel"], n, first["graph"], T, runs, acts, p_h, p_v, st, sha,
-                   sigs if cheap else None, sig, st_sig, meta={"folder": str(folder)})
+                   sigs if cheap else None, sig, st_sig,
+                   meta={"folder": str(folder),
+                         **({"graph_kwargs": first["graph_kwargs"]} if "graph_kwargs" in first else {})})
+
+
+def graph_of(data: RunData) -> Graph:
+    """The graph the logged runs were played on (with its extra parameters, if any)."""
+    return make(data.graph, data.n, **data.meta.get("graph_kwargs", {}))
 
 
 assert ACTIONS == ("H", "L")

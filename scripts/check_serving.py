@@ -73,6 +73,8 @@ def decide(cfg: dict) -> None:
     """Apply the settled G3 rule (decisions.g3 in the configs) to the measured results."""
     from swarm_audit import decisions
 
+    if cfg.get("results_dir"):
+        raise SystemExit("--decide sets the core configs' G3 setting; not for an extra config")
     sdir = REPO / "results" / "serving"
     r0 = json.loads((sdir / "g3_batchinv0.json").read_text())
     p1 = sdir / "g3_batchinv1.json"
@@ -102,6 +104,9 @@ def main() -> None:
                     help="record that this run uses VLLM_BATCH_INVARIANT=1 (set the env var too)")
     ap.add_argument("--n", type=int, default=200)
     ap.add_argument("--others", type=int, default=1000)
+    ap.add_argument("--panel", action="store_true",
+                    help="also query the drift panel (build.drift_panel) alone and save its "
+                         "outputs, for comparing two accounts (extra arms, X3)")
     ap.add_argument("--decide", action="store_true",
                     help="apply the settled G3 rule to the measured results (no GPU)")
     args = ap.parse_args()
@@ -129,6 +134,7 @@ def main() -> None:
         t2 = time.time()
         warm = [vec(o) for o in be.query(test)]
         t_warm = time.time() - t2
+        panel = build.panel_outputs(be, build.drift_panel(cfg)) if args.panel else None
         sec = time.time() - t0
         build.record_spend(f"G3 batch_invariant={args.batch_invariant}", sec, cfg)
     diffs = {"alone_vs_batch": [], "alone_vs_warm": [], "batch_vs_warm": []}
@@ -143,8 +149,13 @@ def main() -> None:
            "by_pair": {k: float(max(float(x.max()) for x in v)) for k, v in diffs.items()},
            "seconds": {"alone": t_alone, "batch": t_batch, "warm": t_warm, "total": sec},
            "throughput_prompts_per_s_batch": len(allq) / t_batch}
-    out = REPO / "results" / "serving" / f"g3_batchinv{int(args.batch_invariant)}.json"
+    out = build.results_root(cfg) / "serving" / f"g3_batchinv{int(args.batch_invariant)}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
+    res["workspace"] = build.current_workspace()
+    res["model"] = {k: cfg["model"][k] for k in ("hf_id", "revision")}
+    if panel is not None:
+        (out.parent / "drift_panel.json").write_text(json.dumps(
+            {"workspace": res["workspace"], "model": res["model"], "outputs": panel}) + "\n")
     out.write_text(json.dumps(res, indent=1) + "\n")
     print(json.dumps(res, indent=1))
     print("Next: python scripts/check_serving.py --decide (the settled G3 rule picks the "

@@ -52,7 +52,8 @@ def conditions(cfg: dict, arm: str, ns: list[int] | None = None) -> list[Conditi
                              channel=a["channel"], n=int(n), graph=a["graph"], T=int(cfg["T"]),
                              last_k=a.get("last_k"), runs=int(a["runs"]),
                              base_seed=int(cfg["seeds"]["base_seed"]), params=params(cfg),
-                             own_signal_in_state=bool(cfg["own_signal_in_state"])))
+                             own_signal_in_state=bool(cfg["own_signal_in_state"]),
+                             graph_kwargs=tuple(sorted(a.get("graph_kwargs", {}).items()))))
     return out
 
 
@@ -158,8 +159,16 @@ def build_tables(backend: Backend, cfg: dict, channel: str, d: int, enumerated: 
             "actions_equal": derive_actions_table(sig, "equal")}
 
 
+def results_root(cfg: dict | None = None) -> Path:
+    """Where a config's outputs go: `results_dir` (relative to the repository), default
+    results/. The extra arms set results/extra (docs/handoff-extra-arms.md)."""
+    if cfg is None or not cfg.get("results_dir"):
+        return RESULTS
+    return REPO_ROOT / cfg["results_dir"]
+
+
 def table_dir(cfg: dict, backend_name: str) -> Path:
-    return RESULTS / "audit" / backend_name.replace(":", "_")
+    return results_root(cfg) / "audit" / backend_name.replace(":", "_")
 
 
 def save_tables(tables: dict[str, AuditTable], folder: Path, tag: str) -> None:
@@ -247,16 +256,23 @@ class PanelMixer:
 SPEND_FILE = RESULTS / "spend.json"
 
 
-def spent_usd() -> float:
+def spend_file(cfg: dict | None = None) -> Path:
+    """The spend ledger: results/spend.json, or <results_dir>/spend.json if set."""
+    return SPEND_FILE if cfg is None or not cfg.get("results_dir") else results_root(cfg) / "spend.json"
+
+
+def spent_usd(cfg: dict | None = None) -> float:
     """GPU spend recorded so far by the build scripts (results/spend.json)."""
-    if not SPEND_FILE.exists():
+    f = spend_file(cfg)
+    if not f.exists():
         return 0.0
-    return float(sum(e["usd"] for e in json.loads(SPEND_FILE.read_text())))
+    return float(sum(e["usd"] for e in json.loads(f.read_text())))
 
 
 def record_spend(what: str, seconds: float, cfg: dict, containers: int = 1) -> float:
     import datetime as dt
 
+    SPEND_FILE = spend_file(cfg)
     usd = seconds / 3600 * cfg["serving"]["l4_usd_per_hour"] * containers
     log = json.loads(SPEND_FILE.read_text()) if SPEND_FILE.exists() else []
     log.append({"what": what, "seconds": round(seconds, 1), "containers": containers,
@@ -271,7 +287,7 @@ def check_cost(cfg: dict, worst_minutes: float) -> None:
     """Stop if the worst case (every container to its time limit) would pass the cap."""
     srv = cfg["serving"]
     worst = worst_minutes / 60 * srv["l4_usd_per_hour"] * srv["max_containers"]
-    left = srv["cost_cap_usd"] - spent_usd()
+    left = srv["cost_cap_usd"] - spent_usd(cfg)
     print(f"worst-case GPU cost ${worst:.2f}; ${left:.2f} left of the ${srv['cost_cap_usd']:.2f} cap")
     if worst > left:
         raise SystemExit("Stopping: the worst-case cost would pass the cap. Ask Abdul.")
@@ -341,6 +357,11 @@ def gpu_session(cfg: dict, need: tuple[str, ...]):
 # ------------------------------------------------------------ the deployed server
 
 DEPLOY_FILE = RESULTS / "serving" / "deployed.json"
+
+
+def deploy_file(cfg: dict | None = None) -> Path:
+    """results/serving/deployed.json, or <results_dir>/serving/deployed.json if set."""
+    return DEPLOY_FILE if cfg is None or not cfg.get("results_dir") else results_root(cfg) / "serving" / "deployed.json"
 SERVER_CODE = ("serving.py", "tokens.py", "ladder.py", "game.py", "__init__.py")
 
 
@@ -366,6 +387,7 @@ def deploy_settings(cfg: dict) -> dict:
 def check_deployed(cfg: dict) -> None:
     """The deployed server must run this repository's serving code and settings, in the
     workspace that is signed in; otherwise redeploy (scripts/deploy_server.py)."""
+    DEPLOY_FILE = deploy_file(cfg)
     if not DEPLOY_FILE.exists():
         raise SystemExit("serving.deployed is true but nothing is deployed: run "
                          "scripts/deploy_server.py")

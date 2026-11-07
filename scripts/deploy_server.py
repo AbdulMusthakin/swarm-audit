@@ -31,7 +31,11 @@ from swarm_audit import build  # noqa: E402
 
 
 def main() -> None:
-    cfg = build.load("core.yaml")
+    import argparse
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--config", default="core.yaml")
+    cfg = build.load(ap.parse_args().config)
     srv = cfg["serving"]
     want = {"SWARM_AUDIT_HF_SECRET": "huggingface",
             "SWARM_AUDIT_BATCH_INVARIANT": "1" if srv["batch_invariant"] else "0"}
@@ -53,8 +57,9 @@ def main() -> None:
     rec = {"app": serving.APP_NAME, "workspace": ws, "code_sha256": build.server_code_sha(),
            "settings": build.deploy_settings(cfg), "git_commit": build_commit(),
            "time": dt.datetime.now(dt.timezone.utc).isoformat()}
-    build.DEPLOY_FILE.parent.mkdir(parents=True, exist_ok=True)
-    build.DEPLOY_FILE.write_text(json.dumps(rec, indent=1) + "\n")
+    out = build.deploy_file(cfg)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(rec, indent=1) + "\n")
     print(json.dumps(rec, indent=1))
 
 
