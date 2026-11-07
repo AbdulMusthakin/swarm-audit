@@ -27,7 +27,7 @@ def toy_tokenizer():
     return fast
 
 
-def fake_call(prompts, ids, kind):
+def fake_call(prompts, ids, kind, fresh=False):
     """Deterministic stand-in for Server.label_logprobs: the log-probabilities are a
     function of the prompt's token ids only, as the kernel K_i(. | h) should be."""
     out = []

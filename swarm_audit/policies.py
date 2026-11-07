@@ -60,6 +60,7 @@ class KernelOut:
     sig_logprobs: dict[str, tuple[float, float, float]] | None = None
     prompt_sha256: str | None = None
     n_tokens: int | None = None
+    replayed: bool = False        # True if served from the call log, not measured now
 
     def joint(self) -> np.ndarray:
         """K(a, m | h) as a 2 x 3 array (rows H, L; columns game.SIGNALS)."""
@@ -72,7 +73,7 @@ class KernelOut:
 class Backend(Protocol):
     name: str
 
-    def query(self, queries: Sequence[Query]) -> list[KernelOut]: ...
+    def query(self, queries: Sequence[Query], fresh: bool = False) -> list[KernelOut]: ...
 
     def describe(self) -> dict: ...
 
@@ -143,7 +144,7 @@ class ScriptedBackend:
         self.fn = POLICIES[self.policy]
         self.name = f"scripted:{self.policy}"
 
-    def query(self, queries: Sequence[Query]) -> list[KernelOut]:
+    def query(self, queries: Sequence[Query], fresh: bool = False) -> list[KernelOut]:
         out = []
         for qy in queries:
             p_h, sig = self.fn(qy.channel, qy.shown, qy.d)
@@ -166,9 +167,10 @@ class ScriptedBackend:
 
 # ------------------------------------------------------------------------ LLM backend
 
-# call(prompts as token-id lists, allowed token ids, kind) -> one dict per prompt with
-# "logprobs" (raw, one per allowed id), "probs" (renormalised) and "p_valid".
-ServerCall = Callable[[list[list[int]], list[int], str], list[dict]]
+# call(prompts as token-id lists, allowed token ids, kind, fresh=...) -> one dict per
+# prompt with "logprobs" (raw, one per allowed id), "probs" (renormalised), "p_valid",
+# and optionally "replayed". fresh=True must never be answered from a cache.
+ServerCall = Callable[..., list[dict]]
 
 
 @dataclass
@@ -212,23 +214,24 @@ class LLMBackend:
                                      f"this prompt (prompt ends {text[-40:]!r})")
         return toks
 
-    def query(self, queries: Sequence[Query]) -> list[KernelOut]:
+    def query(self, queries: Sequence[Query], fresh: bool = False) -> list[KernelOut]:
         texts, sig_texts = zip(*(self._texts(qy) for qy in queries)) if queries else ((), ())
         act_tok = [self._encode(t, self.labels.actions, self.action_ids) for t in texts]
-        res = self.call(act_tok, list(self.action_ids), "action")
+        res = self.call(act_tok, list(self.action_ids), "action", fresh=fresh)
         outs = []
         for t, toks, r in zip(texts, act_tok, res):
             lp = r["logprobs"]
             outs.append(KernelOut(p_H=float(r["probs"][0]), p_valid=float(r["p_valid"]),
                                   logprob_H=float(lp[0]), logprob_L=float(lp[1]),
-                                  prompt_sha256=prompt_sha256(t), n_tokens=len(toks)))
+                                  prompt_sha256=prompt_sha256(t), n_tokens=len(toks),
+                                  replayed=bool(r.get("replayed", False))))
         cheap = [i for i, qy in enumerate(queries) if qy.channel == "cheap_talk"]
         if cheap:
             if self.signal_ids is None:
                 raise ValueError("cheap-talk queries need signal label ids")
             flat = [self._encode(s, self.labels.signals, self.signal_ids)
                     for i in cheap for s in sig_texts[i]]
-            sres = self.call(flat, list(self.signal_ids), "signal")
+            sres = self.call(flat, list(self.signal_ids), "signal", fresh=fresh)
             for j, i in enumerate(cheap):
                 rh, rl = sres[2 * j], sres[2 * j + 1]
                 o = outs[i]
@@ -236,6 +239,7 @@ class LLMBackend:
                 o.sig_p_valid = {"H": float(rh["p_valid"]), "L": float(rl["p_valid"])}
                 o.sig_logprobs = {"H": tuple(map(float, rh["logprobs"])),
                                   "L": tuple(map(float, rl["logprobs"]))}
+                o.replayed = o.replayed or bool(rh.get("replayed") or rl.get("replayed"))
         return outs
 
     def describe(self) -> dict:

@@ -39,7 +39,7 @@ def grids(seed: int | None = None) -> dict[int, list]:
 def measure(backend: Backend) -> dict:
     res = {}
     for d, states in grids().items():
-        outs = backend.query([Query("cheap_talk", s.history, s.d) for s in states])
+        outs = backend.query([Query("cheap_talk", s.history, s.d) for s in states], fresh=True)
         groups: dict[tuple, dict[str, float]] = {}
         rows = []
         for s, o in zip(states, outs):
