@@ -55,7 +55,7 @@ serving:
   deployed: true             # use the deployed server (scripts/deploy_server.py), kept warm between steps
   scaledown_window_s: 600    # idle seconds before the GPU shuts down (Abdul, 7 Nov 2026: keep it warm)
   timeout_minutes: 30
-  cost_cap_usd: 20.0         # for everything in the build hand-off
+  cost_cap_usd: 40.0   # Abdul raised the cap from $20 to $40 (about £30), 7 Nov 2026
   l4_usd_per_hour: 0.80      # Modal list price; check before running
 
 # Decisions settled in advance on 7 Nov 2026 (Abdul asked Claude to settle every open

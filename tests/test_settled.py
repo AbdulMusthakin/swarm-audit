@@ -90,7 +90,8 @@ def test_g4_plan_stops_when_even_the_minimum_does_not_fit():
 
 
 def test_spent_money_counts_against_the_cap():
-    assert _plan(0.002, 0.006, spent=19.99)["status"] == "stop"
+    cap = build.load("core.yaml")["serving"]["cost_cap_usd"]
+    assert _plan(0.002, 0.006, spent=cap - 0.01)["status"] == "stop"
 
 
 def test_set_config_line_keeps_comments(tmp_path):
@@ -133,3 +134,11 @@ def test_deployed_server_must_match(tmp_path, monkeypatch):
         (tmp_path / "deployed.json").write_text(json.dumps({**rec, k: v}))
         with pytest.raises(SystemExit):
             build.check_deployed(cfg)
+
+
+def test_deployed_override(monkeypatch):
+    cfg = build.load("core.yaml")
+    monkeypatch.delenv("SWARM_AUDIT_DEPLOYED", raising=False)
+    assert build.use_deployed(cfg) is True
+    monkeypatch.setenv("SWARM_AUDIT_DEPLOYED", "0")
+    assert build.use_deployed(cfg) is False

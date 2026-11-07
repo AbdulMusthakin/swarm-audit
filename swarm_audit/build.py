@@ -107,7 +107,7 @@ def modal_backend(cfg: dict, log_name: str) -> tuple[LLMBackend, Any]:
     eng = {"max_model_len": srv["max_model_len"],
            "gpu_memory_utilization": srv["gpu_memory_utilization"],
            "enforce_eager": srv["enforce_eager"], **m.get("engine_kwargs", {})}
-    if srv.get("deployed"):
+    if use_deployed(cfg):
         import modal
 
         server = modal.Cls.from_name(serving.APP_NAME, "Server")(
@@ -272,14 +272,18 @@ def spent_usd(cfg: dict | None = None) -> float:
 def record_spend(what: str, seconds: float, cfg: dict, containers: int = 1) -> float:
     import datetime as dt
 
+    import fcntl
+
     SPEND_FILE = spend_file(cfg)
     usd = seconds / 3600 * cfg["serving"]["l4_usd_per_hour"] * containers
-    log = json.loads(SPEND_FILE.read_text()) if SPEND_FILE.exists() else []
-    log.append({"what": what, "seconds": round(seconds, 1), "containers": containers,
-                "usd": round(usd, 4), "time": dt.datetime.now(dt.timezone.utc).isoformat(),
-                "note": "wall-clock estimate at the list price; check the Modal dashboard"})
     SPEND_FILE.parent.mkdir(parents=True, exist_ok=True)
-    SPEND_FILE.write_text(json.dumps(log, indent=1) + "\n")
+    with open(SPEND_FILE.with_suffix(".lock"), "w") as lock:   # GPU scripts may run at once
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        log = json.loads(SPEND_FILE.read_text()) if SPEND_FILE.exists() else []
+        log.append({"what": what, "seconds": round(seconds, 1), "containers": containers,
+                    "usd": round(usd, 4), "time": dt.datetime.now(dt.timezone.utc).isoformat(),
+                    "note": "wall-clock estimate at the list price; check the Modal dashboard"})
+        SPEND_FILE.write_text(json.dumps(log, indent=1) + "\n")
     return usd
 
 
@@ -334,14 +338,14 @@ def gpu_session(cfg: dict, need: tuple[str, ...]):
     os.environ.setdefault("SWARM_AUDIT_SCALEDOWN_S", str(srv.get("scaledown_window_s", 60)))
     os.environ.setdefault("SWARM_AUDIT_TIMEOUT_MIN", str(srv["timeout_minutes"]))
 
-    if srv.get("deployed"):
+    if use_deployed(cfg):
         check_deployed(cfg)
 
     @contextmanager
     def ctx():
         import modal
 
-        if srv.get("deployed"):       # the deployed app outlives this script
+        if use_deployed(cfg):       # the deployed app outlives this script
             try:
                 yield
             finally:                  # its GPU idles up to scaledown_window_s afterwards
@@ -470,6 +474,14 @@ def set_config_line(key: str, value: str, folder: Path = REPO_ROOT / "configs",
             raise ValueError(f"no `{key}:` line in {p}")
         line = f"{m.group(1)}{key}: {value}" + (f"   # {note}" if note else "")
         p.write_text(s[:m.start()] + line + s[m.end():])
+
+
+def use_deployed(cfg: dict) -> bool:
+    """serving.deployed, unless SWARM_AUDIT_DEPLOYED=0/1 overrides it for one script."""
+    import os
+
+    env = os.environ.get("SWARM_AUDIT_DEPLOYED")
+    return bool(cfg["serving"].get("deployed")) if env is None else env == "1"
 
 
 def numerical_floor(cfg: dict) -> float:
