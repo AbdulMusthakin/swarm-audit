@@ -70,8 +70,19 @@ def screen_model(model_cfg: dict, cfg: dict, states, params) -> dict:
 
     try:
         res["params"] = param_counts(model_cfg)
-    except Exception as e:
-        res["params"] = {"error": f"{type(e).__name__}: {str(e)[:120]}"}
+    except Exception as e:  # gated: headers unreadable; the Hub API total is public
+        try:
+            from huggingface_hub import HfApi
+
+            total = HfApi().model_info(model_cfg["hf_id"], revision=model_cfg.get("revision"),
+                                       expand=["safetensors"]).safetensors.total
+            res["params"] = {"billion": {"language": round(total / 1e9, 3)},
+                             "total_billion": round(total / 1e9, 3),
+                             "bf16_gib_language": round(total * 2 / 2**30, 1),
+                             "bf16_gib_total": round(total * 2 / 2**30, 1),
+                             "note": "Hub API total; headers not readable (gated)"}
+        except Exception:
+            res["params"] = {"error": f"{type(e).__name__}: {str(e)[:120]}"}
     screen = screen_label_sets(tok, model_cfg, cfg, states, params)
     res["actions"] = {n: {"ok": c.ok, "ids": c.ids, "problems": c.problems[:3]}
                       for n, c in screen["actions"].items()}
@@ -151,12 +162,27 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--config", default=str(REPO / "configs" / "screening.yaml"))
     ap.add_argument("--models", nargs="*", help="model names (default: all)")
+    ap.add_argument("--via-modal", action="store_true",
+                    help="fetch tokenizers of gated models through Modal, using the HF token "
+                         "in the Modal secret named by SWARM_AUDIT_HF_SECRET")
     args = ap.parse_args()
 
     cfg = load_config(args.config)
     params = payoff_params(cfg)
     states = build_grid(cfg)
     models = [m for m in cfg["models"] if not args.models or m["name"] in args.models]
+
+    gated = [m for m in models if m.get("gated")]
+    if args.via_modal and gated:
+        import modal
+
+        from swarm_audit.screening import fetch_tokenizer_via_modal
+        from swarm_audit.serving import app
+
+        with modal.enable_output(), app.run():
+            for m in gated:
+                print(f"fetching the {m['name']} tokenizer via Modal -> "
+                      f"{fetch_tokenizer_via_modal(m)}", flush=True)
 
     results = []
     for m in models:

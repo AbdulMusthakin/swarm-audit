@@ -88,6 +88,21 @@ def download_weights(hf_id: str, revision: str) -> dict:
     return {"path": path, "gb": size / 1e9, "seconds": time.time() - t0}
 
 
+_TOKENIZER_FILES = ["tokenizer*", "*.jinja", "special_tokens_map.json", "config.json",
+                    "generation_config.json", "tekken.json"]
+
+
+@app.function(image=image, secrets=secrets, cpu=1, memory=2048, timeout=600)
+def tokenizer_files(hf_id: str, revision: str) -> dict:
+    """Tokenizer and chat-template files of a model, fetched with the Modal HF secret.
+
+    Lets the CPU-side tokenizer screen run on gated models without a local HF token."""
+    from huggingface_hub import snapshot_download
+
+    path = Path(snapshot_download(hf_id, revision=revision, allow_patterns=_TOKENIZER_FILES))
+    return {str(f.relative_to(path)): f.read_bytes() for f in path.rglob("*") if f.is_file()}
+
+
 def _result(raw: list[float], sampled: int | None = None) -> dict:
     from swarm_audit.tokens import entropy_bits, renormalise
 
