@@ -89,11 +89,34 @@ build's own cap stays at $20 unless Abdul raises it.
 Still a stop for Abdul: a failed G5 (investigated and reported, never worked around), a
 G3 floor above 0.07, a plan that cannot fit arms 1–4b plus n = 10, and raising the cap.
 
-## G3, serving repeatability: not run
+## Workspace set-up: PASS
 
-Model confirmed (Llama 3.1 8B Instruct). Needs a teammate's Modal workspace, set up with
-`scripts/setup_workspace.py` (secret "huggingface", weights, final-prompt label check).
-Script: `scripts/check_serving.py`. The numerical floor will be recorded here.
+Teammate's Modal workspace `aliyusufbelal` (never Abdul's). Llama 3.1 8B Instruct
+(revision 0e9e39f) cached in the `swarm-audit-weights` volume (16.1 GB, 79 s on a CPU
+container). On the frozen prompts every label is one token with the configured id
+(actions 473/445, signals 1579/3428/7000) at 148 action and 250 signal positions. Longest
+prompts (19 past rounds): 780 tokens on counts, 1,616 on cheap talk (limit 4,096).
+`results/serving/workspace_setup.json`.
+
+## G3, serving repeatability: PASS — batch invariance on, numerical floor 0
+
+200 prompts (100 p_test audit prompts, 100 swarm-like prompts from rounds 1-20, both
+channels), each queried alone, inside a shuffled batch with 1,000 others, and again with
+a warm prefix cache. Largest difference between any two of these, over P(H) and every
+signal probability:
+
+| setting | max diff P(H) | max diff signals | throughput, 1,200-prompt batch |
+|---|---|---|---|
+| default | 0.0624 | 0.0621 | 4.82 prompts/s |
+| `VLLM_BATCH_INVARIANT=1` | **0** | **0** | 4.19 prompts/s (0.87 of default) |
+
+The default's 0.062 is about two bf16 steps in P(H), the pattern seen in screening. By
+the rule settled on 7 Nov (`check_serving.py --decide`), batch invariance is used and
+the **numerical floor is 0**: in G5 every logged probability must equal its table entry
+exactly. Throughput counts each cheap-talk query once although it needs three read-outs.
+vLLM warns that unseeded random sampling may not be batch invariant; that does not apply,
+since actions and signals are drawn in Python from the logged probabilities.
+`results/serving/g3_batchinv{0,1}.json`, `g3_decision.json`.
 
 ## G4, throughput benchmark: not run
 

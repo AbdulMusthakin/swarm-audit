@@ -49,8 +49,8 @@ serving:
   max_model_len: 4096
   gpu_memory_utilization: 0.90
   enforce_eager: true
-  batch_invariant: false     # VLLM_BATCH_INVARIANT=1; set by check_serving.py --decide (G3)
-  numerical_floor: null      # the G3 floor; set by check_serving.py --decide
+  batch_invariant: true   # set by check_serving.py --decide (G3)
+  numerical_floor: 0.0   # the G3 floor; set by check_serving.py --decide
   max_containers: 1
   timeout_minutes: 30
   cost_cap_usd: 20.0         # for everything in the build hand-off

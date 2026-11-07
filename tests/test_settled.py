@@ -109,5 +109,7 @@ def test_set_config_line_keeps_comments(tmp_path):
 
 def test_floor_must_be_set_before_model_runs():
     cfg = build.load("core.yaml")
+    assert build.numerical_floor(cfg) == 0.0          # set by G3 (7 Nov 2026)
+    cfg["serving"]["numerical_floor"] = None
     with pytest.raises(SystemExit):
         build.numerical_floor(cfg)

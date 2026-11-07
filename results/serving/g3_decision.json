@@ -1,0 +1,9 @@
+{
+ "status": "decided",
+ "batch_invariant": true,
+ "numerical_floor": 0.0,
+ "reason": "batch invariance: max 0 < 0.0624, throughput ratio 0.87",
+ "default_max": 0.06241874674751252,
+ "invariant_max": 0.0,
+ "max_floor": 0.07
+}
