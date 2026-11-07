@@ -213,6 +213,18 @@ the new 50 and on all 100 pooled, with the original 50 kept. If the new or poole
 fails, the cheap-talk core is paused (not counts). Launch checks enforce this
 (`calibration.require_g5`).
 
+**Confirmation: PASS** (`results/gates/G5_cheap_talk_confirmation.json`, `scripts/confirm_g5.py`).
+Arm 4b runs 50–99, fresh seeds, same table, drift 0; per decision exact (max difference 0,
+4,000 decisions).
+
+| runs | gap | MC p | mean y (exact 5.47) | per-run test |
+|---|---|---|---|---|
+| original 50 (runs 0–49) | 0.203 | 0.0076 | 5.82 | fail (kept; excepted) |
+| new 50 (runs 50–99) | 0.064 | 0.744 | 5.44 | pass |
+| all 100 pooled | 0.103 | 0.084 | 5.63 | pass |
+
+The cheap-talk core is therefore cleared under Abdul's rule 3.
+
 ## Drift panel: not run
 
 Recorded per condition in `results/runs/<arm>/<condition>/drift.json` by `scripts/run_swarm.py`.
