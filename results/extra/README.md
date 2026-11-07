@@ -18,7 +18,7 @@ Separate arms on a second Modal account. Nothing here feeds the core's primary c
 | X2, serving repeatability | not run | `results/extra/serving/` |
 | X3, cross-account drift panel | not run | `results/extra/serving/drift_panel.json` |
 | Arm 8, 100 agents, random 4-regular | graph saved (simple, connected, 200 edges, measured diameter 6; pair distances 1–6: 200/579/1412/1980/758/21; 1 triangle). Not run; also needs the core pilot's frozen payoffs (G6 has not run on the core branch) | `results/extra/graph_rr4_n100.json`, `runs/`, `audit/` |
-| Arm 9, OLMo-3-7B | trigger not checked yet | – |
+| Arm 9, OLMo-3-7B (conditional second-model extension) | trigger not checked yet; reading fixed in advance (below) | – |
 
 ## Code added (additive; core behaviour unchanged)
 
@@ -39,3 +39,13 @@ Separate arms on a second Modal account. Nothing here feeds the core's primary c
   repairs (fresh repeatability bypassing replay, cache identity, config fingerprints,
   final payoff freeze, G5 discrete-threshold fix, matched TV null) were not on the core
   branch at this merge; they will be merged, not re-implemented, when they land.
+
+## Arm 9 trigger: the reading, fixed before any result (7 Nov, about 19:00 UTC)
+
+`responsiveness.measure` reports two grids. The trigger uses **`d4.signal_responsiveness_length1_mean`**,
+the screening grid: the 0.05 bar and Llama's screening value 0.051 were defined on it, and
+the hand-off says "on the same grid". Arm 9 runs only if that number is **strictly below
+0.05**. The d = 2 and length-5 values are reported but do not decide. Source: the core's
+`results/serving/signal_responsiveness.json` if it exists when arm 8 finishes; otherwise
+measured on this account with the same function, and recorded as such. No responsiveness
+result for the final prompt existed on either branch when this was written.
