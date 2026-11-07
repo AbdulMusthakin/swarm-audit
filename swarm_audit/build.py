@@ -257,13 +257,17 @@ def spent_usd() -> float:
 def record_spend(what: str, seconds: float, cfg: dict, containers: int = 1) -> float:
     import datetime as dt
 
+    import fcntl
+
     usd = seconds / 3600 * cfg["serving"]["l4_usd_per_hour"] * containers
-    log = json.loads(SPEND_FILE.read_text()) if SPEND_FILE.exists() else []
-    log.append({"what": what, "seconds": round(seconds, 1), "containers": containers,
-                "usd": round(usd, 4), "time": dt.datetime.now(dt.timezone.utc).isoformat(),
-                "note": "wall-clock estimate at the list price; check the Modal dashboard"})
     SPEND_FILE.parent.mkdir(parents=True, exist_ok=True)
-    SPEND_FILE.write_text(json.dumps(log, indent=1) + "\n")
+    with open(SPEND_FILE.with_suffix(".lock"), "w") as lock:   # GPU scripts may run at once
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        log = json.loads(SPEND_FILE.read_text()) if SPEND_FILE.exists() else []
+        log.append({"what": what, "seconds": round(seconds, 1), "containers": containers,
+                    "usd": round(usd, 4), "time": dt.datetime.now(dt.timezone.utc).isoformat(),
+                    "note": "wall-clock estimate at the list price; check the Modal dashboard"})
+        SPEND_FILE.write_text(json.dumps(log, indent=1) + "\n")
     return usd
 
 
