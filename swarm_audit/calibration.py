@@ -33,13 +33,17 @@ def per_decision(data: RunData, table: AuditTable, floor: float = 0.0) -> dict:
     for idx in np.ndindex(st.shape):
         k = st[idx]
         n_dec += 1
-        dH = abs(data.p_H[idx] - table.kappa_H(k))
+        raw = table.entries[k].get("raw")   # enumerated tables keep the raw kernel output
+        dH = abs(data.p_H[idx] - (raw["p_H"] if raw else table.kappa_H(k)))
         if dH > max_pH:
             max_pH, worst = dH, {"state": k, "index": list(map(int, idx))}
         if sig:
-            J = table.kappa_joint(k)
-            for ai in range(2):
-                cond = J[ai] / J[ai].sum() if J[ai].sum() > 0 else None
+            if raw:
+                conds = [np.asarray(raw["sig"]["H"]), np.asarray(raw["sig"]["L"])]
+            else:
+                J = table.kappa_joint(k)
+                conds = [J[ai] / J[ai].sum() if J[ai].sum() > 0 else None for ai in range(2)]
+            for ai, cond in enumerate(conds):
                 if cond is not None:
                     max_sig = max(max_sig, float(np.abs(data.sig[idx][ai] - cond).max()))
     shas: dict[str, set] = defaultdict(set)

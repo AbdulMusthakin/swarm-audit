@@ -303,7 +303,9 @@ def enumerated_table(backend: Backend, channel: str, d: int, kind: str,
         entries[key(s)] = {"kappa": p, "se": 0.0 if kind == "actions" else
                            np.zeros((2, 3)).tolist(), "n": 1, "fit": [p], "score": [p],
                            "eps": 0.0, "prompt_sha256": o.prompt_sha256,
-                           "n_tokens": o.n_tokens}
+                           "n_tokens": o.n_tokens,
+                           # the raw kernel output, so gate G5 compares like with like
+                           "raw": {"p_H": o.p_H, "sig": o.sig}}
     return AuditTable(channel, d, kind, "enumerated", own_signal, entries,
                       {"last_k": last_k, "backend": backend.describe(), "queries": len(states)})
 
