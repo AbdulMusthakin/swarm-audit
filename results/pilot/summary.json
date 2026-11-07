@@ -1,0 +1,74 @@
+{
+ "rule": {
+  "name": "all_low_fallback",
+  "consensus_side": "L",
+  "by_round": 5,
+  "min_runs": 3,
+  "change": {
+   "uLH": 11
+  }
+ },
+ "payoffs_in_pilot": {
+  "uLH": 12,
+  "uHH": 10,
+  "uLL": 4,
+  "uHL": 0
+ },
+ "runs": 5,
+ "runs_meeting_condition": {
+  "tau_le_by_round": 0,
+  "unanimous_in_some_round_le_by_round": 0,
+  "three_rounds_completed_by_round": 0
+ },
+ "triggered": {
+  "tau_le_by_round": false,
+  "unanimous_in_some_round_le_by_round": false,
+  "three_rounds_completed_by_round": false
+ },
+ "apply_change": false,
+ "ambiguous": false,
+ "tau": [
+  null,
+  null,
+  null,
+  null,
+  null
+ ],
+ "side": [
+  "",
+  "",
+  "",
+  "",
+  ""
+ ],
+ "X_t_mean": [
+  0.66,
+  0.6399999999999999,
+  0.54,
+  0.64,
+  0.5,
+  0.54,
+  0.5,
+  0.44000000000000006,
+  0.58,
+  0.6599999999999999,
+  0.6,
+  0.52,
+  0.5599999999999999,
+  0.54,
+  0.56,
+  0.6199999999999999,
+  0.52,
+  0.6,
+  0.5799999999999998,
+  0.6599999999999999
+ ],
+ "note": "pilot runs never enter the analysis",
+ "frozen_payoffs": {
+  "uLH": 12,
+  "uHH": 10,
+  "uLL": 4,
+  "uHL": 0
+ },
+ "action": "no change; payoffs frozen as they are"
+}

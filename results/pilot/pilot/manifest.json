@@ -1,0 +1,67 @@
+{
+  "arm": "pilot",
+  "conditions": {
+    "counts_n10_cycle_full": {
+      "condition": {
+        "arm": "pilot",
+        "arm_id": 9,
+        "condition_id": 0,
+        "channel": "counts",
+        "n": 10,
+        "graph": "cycle",
+        "T": 20,
+        "last_k": null,
+        "runs": 5,
+        "base_seed": 20261107,
+        "params": {
+          "uLH": 12.0,
+          "uHH": 10.0,
+          "uLL": 4.0,
+          "uHL": 0.0
+        },
+        "own_signal_in_state": true,
+        "name": "counts_n10_cycle_full"
+      },
+      "backend": {
+        "backend": "llm",
+        "labels": [
+          " H",
+          " L",
+          " high",
+          " low",
+          " none"
+        ],
+        "action_ids": [
+          473,
+          445
+        ],
+        "signal_ids": [
+          1579,
+          3428,
+          7000
+        ],
+        "chat_kwargs": {},
+        "model": "llama-3.1-8b",
+        "hf_id": "meta-llama/Llama-3.1-8B-Instruct",
+        "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+        "vllm": "0.32.0",
+        "batch_invariant": true,
+        "engine_kwargs": {
+          "max_model_len": 4096,
+          "gpu_memory_utilization": 0.9,
+          "enforce_eager": true
+        }
+      },
+      "git_commit": "470c271fcd2a189be34881401f832be417d45ae8",
+      "seconds_this_session": 2050.08,
+      "decisions_this_session": 1000,
+      "summary": {
+        "runs_logged": 5,
+        "decisions": 1000,
+        "p_valid_below_0.9": 0,
+        "p_valid_flagged_examples": []
+      }
+    }
+  },
+  "updated": "2026-11-07T19:02:28.632824+00:00"
+}
