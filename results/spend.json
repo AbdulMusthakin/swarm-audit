@@ -38,5 +38,37 @@
   "usd": 0.6406,
   "time": "2026-11-07T19:20:54.225431+00:00",
   "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "audit/counts_d2_enumerated",
+  "seconds": 81.5,
+  "containers": 1,
+  "usd": 0.0181,
+  "time": "2026-11-07T19:23:32.663173+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-07T19:23:32.664595+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "audit/cheap_talk_d2_enumerated",
+  "seconds": 6.6,
+  "containers": 1,
+  "usd": 0.0015,
+  "time": "2026-11-07T19:23:42.977993+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-07T19:23:42.981162+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
  }
 ]
