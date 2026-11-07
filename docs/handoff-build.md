@@ -13,6 +13,7 @@ For Claude Code, working in this repository. Read this file in full before start
 1. `docs/handoff-model-screening.md`: what already exists (`game.py`, `ladder.py`, `tokens.py`, `serving.py`, the prompt drafts, the tokenizer screen).
 2. `results/screening/summary.md` and `results/screening/runs/*/summary.md`: the screening results so far.
 3. `setup-paper/sections/2-setup.tex` and `4-experiment.tex`: definitions and notation (`K_i`, `kappa_i`, `p_test`, `q`, `pi_k`, `rho_i`). Use the same names in code where natural.
+4. **The teammates' scoping study, if it is in the repo** (`scripts/abdul_openrouter_study.py`, `scripts/abdul_adaption_analysis.py` and their outputs). It ran the counts calibration on a hosted API (OpenRouter, Gemma 4 26B A4B, n = 4, 8 rounds), and the frozen audit missed. The cause was the serving, not the agents: for the most common history, the same prompt got P(H) = 12.5% in isolation and 18.7% during live games. Reuse their state enumeration, exact simulator and calibration test where they fit, and note the reuse in the README. Don't reuse their hosted-API backends.
 
 **This file supersedes the paper on the run matrix, the calibration arm, the replay step, the sampling protocol and the choice of graphs.** These changes follow an external review of the design on 7 November. Where the paper and this file disagree, follow this file. If something here contradicts the paper's *definitions*, stop and ask Abdul.
 
@@ -23,7 +24,7 @@ Build everything that runs on CPU without waiting for these. Stop and ask before
 1. **The main model.** It comes from the screening. Until then, develop against the scripted policies (§6) and, for prompt plumbing, the CPU stand-in used in screening.
 2. **Approved prompt templates** (`swarm_audit/prompts/counts.txt`, `cheap_talk.txt`). Open questions are listed at the top of each file. Two matter most for this build:
    - Does "I'll bid high" refer to this round's bid (sent with it) or next round's? The current draft leaves this open.
-   - Do agents see their own past messages? The current draft shows them. This decides whether the signal-aware state has 36 or 108 values (§5).
+   - Do agents see their own past messages? The current draft shows them. This decides whether the signal-aware state has 36 or 108 values (§5), and how many prompts arm 4b enumerates.
 3. **The pilot rule.** Either "no adjustment", or one rule for adjusting the payoffs, fixed before the pilot (§4, gate G6).
 4. **Whose Modal account** to use, as in the screening hand-off. Never use Abdul's own account without asking.
 
@@ -44,13 +45,16 @@ Build everything that runs on CPU without waiting for these. Stop and ask before
 | 2 | Serving check | Repeatability of probabilities (§4, G3) | — | — | About 200 prompts | Gate |
 | 3 | Audit tables | Actions-only and signal-aware tables (§5) | — | Degree 2 | See §5 | One table serves n = 10 and 20 |
 | 4 | Calibration | Counts, last round only | 4 | Cycle | 50 | Exact check (G5) |
+| 4b | Calibration | Cheap talk, last round only | 4 | Cycle | 50 | Agents forget nothing, so the signal-aware audit should be exact and the actions-only one need not be: the cleanest test of dropped signals (G5) |
 | 5 | Core | Counts | 10, 20 | Cycle | 50 each | Launch once G1–G6 pass |
 | 6 | Core | Cheap talk | 10, 20 | Cycle | 50 each | The key arm |
 | 7 | Second topology | Both channels, actions-only audit | 10 | Complete | 50 each | Only if Abdul approves after the G4 benchmark |
 
-**Cut order if time runs short:** arm 7, then n = 20 in both channels. Never cut arms 1–4.
+**Cut order if time runs short:** arm 7, then n = 20 in both channels. Never cut arms 1–4b.
 
-**Dropped:** the replay step, chain and star graphs, n = 40 and 100, the cheap-talk and k = 2 calibration arms, free text, the second model family and the 70B model. Leave their config files in place, with a comment at the top saying they are superseded by this hand-off.
+**Dropped:** the replay step, chain and star graphs, n = 40 and 100, the k = 2 calibration arm, free text, the second model family and the 70B model.
+
+**No hosted APIs.** Every scored run, audit and calibration uses the Modal vLLM server. The teammates' pilot showed that a hosted endpoint's probabilities can shift between isolated and live calls on identical prompts. Leave their config files in place, with a comment at the top saying they are superseded by this hand-off.
 
 ## 3. One decision, exactly
 
@@ -83,11 +87,14 @@ Report to Abdul after each gate. If a gate fails, stop and report; don't work ar
   - **If not,** repeat with batch invariance on. Report both maxima and the throughput of each. Abdul decides which to use, and the chosen setting's maximum difference is recorded as the numerical floor in `results/validation.md`.
   - The earlier vLLM-against-transformers check stays informational: every gap seen in screening was the logit difference landing one bf16 step (0.125) apart.
 - **G4, throughput benchmark.** One full core run each of counts at n = 10 and cheap talk at n = 20. Report decisions per second, prompt tokens at round 20, wall-clock time and dollars per run. Then extrapolate to the whole manifest and report before launching anything larger.
-- **G5, calibration (arm 4).** Cycle, n = 4, counts, last round only. The prompt is then a function of the coarse state, so query each distinct prompt once (6 states plus round 1) to get the table. Two checks:
-  - Every logged `p_H` in the 50 runs must equal the table entry for its state, up to the G3 floor. Also check that prompts with the same state are byte-identical.
-  - The law of X_t from the runs must agree with the exact law of the 16-state chain (§7), within the run-level bootstrap interval, at every t.
+- **G5, calibration (arms 4 and 4b).** Cycle, n = 4, last round only. The prompt is then a function of the state, so query each distinct prompt once to get the table: 6 states plus round 1 on counts; 36 or 108 signal-aware states plus round 1 on cheap talk. Two checks per arm:
+  - **Per decision:** every logged probability in the 50 runs (`p_H`, and on cheap talk both signal distributions) must equal the table entry for its state, up to the G3 floor. Prompts with the same state must also be byte-identical.
+  - **Per run** (the teammates' test): let y be the number of high bids in rounds 16–20, out of 20 decisions. Compute the largest gap between the empirical distribution function of y over the 50 runs and the exact one from the chain (§7). Compare it with the 99th percentile of the same statistic over 20,000 simulated sets of 50 runs from that chain. The gate passes if the gap is below that threshold.
 
-  A miss means investigating, not automatically fixing: differing prompt bytes, a leaked round number, the wiring, then sampling variation. Report what you find.
+  On arm 4b the gate uses the **signal-aware** chain. The actions-only chain's result there is a finding, not a gate.
+
+  A miss means investigating, not automatically fixing: differing prompt bytes, a leaked round number, drift (below), the wiring, then sampling variation. Report what you find.
+- **Drift panel, in every arm from G5 on.** Fix a panel of about 50 prompts: every calibration state, plus a spread of core audit prompts from both channels. Query the panel at the start and end of each arm, and mix it once into a full-size swarm batch. Any change beyond the G3 floor goes in `results/validation.md` and is reported to Abdul at once.
 - **G6, pilot.** If Abdul gives a payoff rule, apply it once, using 5 counts runs at n = 10, then freeze the settings for **both** channels. Temperature stays at 1. Save the pilot logs to `results/pilot/` and report them. Pilot runs never enter the analysis. With no rule, skip this gate.
 
 Launch the counts core (arm 5) as soon as G1–G6 pass, then the cheap-talk core (arm 6). Don't wait for Sunday.
@@ -108,12 +115,21 @@ All tables are fitted on synthetic histories from one agent alone. Swarm data ne
 - Flag this choice to Abdul in your first report; he may change it.
 
 **Sizes.** Two disjoint sets per state, from different seeds:
-- **Actions-only:** 100 histories to fit κ and 50 to score ε(p_test).
+- **Actions-only, counts:** 100 histories to fit κ and 50 to score ε(p_test).
 - **Signal-aware:** 50 to fit and 25 to score.
 
 At 108 states with three calls each, the signal-aware table is about 24,000 short calls, so report its cost in G4 before running it.
 
 **Fitting.** κ(H | s) is the mean of the logged `p_H` over the fitting histories in state s. For the signal-aware table, κ′(a, m | s′) is the mean of P(a | h) · P(m | h, a). Save per state: κ, the number of histories, its standard error, and every per-history probability.
+
+**Actions-only on cheap talk: derived, not separately queried.** Build it by marginalising the signal-aware table over the signal part of the state:
+
+    κ(H | s) = Σ_{s′ → s} w(s′ | s) κ′(H | s′)
+
+Here w(s′ | s) is the probability that p_test gives the signal part of s′, given s. So both predictors come from the same isolated prompts and are paired. This saves the separate actions-only cheap-talk audit. Score the derived table's ε(p_test) on the signal-aware scoring set, weighted the same way.
+- **Primary weights:** p_test's own, each message uniform, so the neighbour signal counts follow a multinomial.
+- **Sensitivity check** (the teammates' choice): equal weight on each observable signal configuration. Report both; Abdul picks if they disagree.
+- **Arm 4b:** the same construction from the enumerated last-round table.
 
 **Order-0 baseline.** κ₀(H) is the mean of `p_H` over the whole fitting set of that channel, weighted as p_test generates the states.
 
@@ -128,7 +144,7 @@ Make the backend an interface: given a batch of (step, history, d), return P(H) 
 | Two-round memory | Like Copy, but averaged over the last two rounds | Actions-only ε > 0, and the bound is above the measured Δ |
 | Hidden signal | On cheap talk: P(H) = 0.8 if any neighbour said "high" last round, else 0.2; agents say "high" with probability 0.7 after bidding H, 0.1 after L | Actions-only ε > 0; signal-aware ε = 0, and its chain's gap is inside the noise floor |
 
-Run each policy at n = 4 and 10 on the cycle with 200 runs. At n = 4, also compare with the exact 16-state law. Report a small table of expected against observed values.
+Run each policy at n = 4 and 10 on the cycle with 200 runs. At n = 4, also compare with the exact law (16 states, or 1,296 with signals). Report a small table of expected against observed values.
 
 ## 7. Prediction and analysis
 
@@ -139,20 +155,26 @@ Each predictor is simulated for 20,000 runs on CPU, using the same graph, T and 
 - **Actions-only, k = 1:** the chain on the last action profile, using κ(H | s).
 - **Signal-aware, k = 1 (cheap talk only):** the chain on the last action-and-signal profile, using κ′(a, m | s′). This is an autonomous prediction. Separately, report the *one-step* comparison: on the logged swarm histories, the mean |p_H − κ′(H | s′)| against the mean |p_H − κ(H | s)|. Label it as one-step (teacher-forced), not as a group prediction.
 - **Fitted from the swarm:** κ_swarm(s) is the mean of the **logged** `p_H` over agent-rounds in state s in runs 1–25 of the same condition. Score it on runs 26–50. Also score every other predictor on runs 26–50 in a separate table, and note that this baseline uses swarm data.
-- **Exact law at n = 4:** propagate the 16-state chain exactly, with START at round 1, and give the law of X_t for each t.
+- **Exact law at n = 4:** propagate the chain exactly, with START at round 1, and give the law of X_t for each t and of y. The actions-only chain has 16 states; the signal-aware chain on arm 4b has 6⁴ = 1,296 (each agent's last bid and message).
 
 ### Statistics (`swarm_audit/stats.py`)
 
 Per run:
 - **X_t**, the fraction bidding high in round t.
-- **F**, the mean of X_16 to X_20. This is the primary outcome.
+- **y**, the number of high bids in rounds 16–20 (the primary score uses its distribution), and **F** = y / 5n, the mean of X_16 to X_20.
 - **Edge disagreement**, the fraction of edges whose two ends bid differently, per round and averaged over rounds.
 - **Consensus:** the first t ≤ T − 2 with X_t = X_{t+1} = X_{t+2} ∈ {0, 1}, recorded with its side (high or low). Runs without one are censored at T. Report the event probability by side and a survival curve. Never average a time that can be infinite.
 
 ### Estimands
 
-- **Primary:** E_swarm F − E_model F for each predictor, with a 95% interval from resampling **whole swarm runs** (2,000 resamples). The model side is treated as fixed; say that intervals are conditional on the fitted table.
-- **Primary contrast:** on the cheap-talk swarm at n = 10, the actions-only predictor's error in F against the signal-aware predictor's.
+- **Score:** the continuous ranked probability score (CRPS) of each predictor for each swarm run r. Let y_r be the number of high bids in rounds 16–20, out of 5n decisions, and let G be the predictor's distribution function of y (from 20,000 chain runs, or exact at n = 4). Then
+
+      CRPS_r = (1 / 5n) Σ_{k=0}^{5n} (G(k) − 1[y_r ≤ k])²
+
+  Lower is better. It scores the whole predicted distribution, not only its mean. A signal that two agents share changes the spread of y, not its mean, so a mean-based score would miss it.
+- **Primary contrast:** on the cheap-talk swarm at n = 10, the paired difference D_r = CRPS_r(actions-only) − CRPS_r(signal-aware), averaged over runs. Give a 95% interval from resampling **whole swarm runs** (2,000 resamples). Positive values favour keeping the signals. Report each predictor's absolute CRPS alongside. The model side is treated as fixed; say that intervals are conditional on the fitted tables.
+- **Key secondary:** the same paired difference on arm 4b (n = 4, last round only), where no history is forgotten.
+- **Secondary:** E_swarm F − E_model F for each predictor, with the same bootstrap, where F is the mean of X_16 to X_20.
 - **Secondary:** counts against cheap talk; n = 10 against 20; edge disagreement; per-round curves of X_t.
 - **Binned gap Δ_t:** the total-variation distance between the swarm and model laws of X_t, in five fixed bins, [0, 0.2), [0.2, 0.4), [0.4, 0.6), [0.6, 0.8) and [0.8, 1]. Show it against a noise floor: the 95th percentile of the same distance between two independent samples of R runs from the model, over 1,000 draws.
 - **Defects:**
@@ -164,12 +186,13 @@ Per run:
       ε(p_swarm) − ε(p_test) = Σ_s [w_P(s) − w_Q(s)] e_Q(s) + Σ_s w_P(s) [e_P(s) − e_Q(s)]
 
   Here w_P and w_Q are the state frequencies under the swarm and under p_test, and e_P and e_Q are the mean defects within a state. The first term is changed state frequencies; the second is changed histories within a state. Compute it pooled, and for round blocks 2–7, 8–13 and 14–20.
+- **Shared-neighbour check:** agents i − 1 and i + 1 share neighbour i, so they see the same messages from it. For each round, compare how often the two bid alike in the swarm with each predictor's rate. Do the same for adjacent agents and for agents 3 or more apart as references. Use whole-run bootstrap intervals; on the 4-cycle, agents 2 apart share both neighbours. A swarm rate above the actions-only rate is the signature of a common signal the audit dropped.
 
 ### Figures and tables
 
 - **Figure 1:** X_t for the swarm against each predictor, with run-level bands. Put the bound in a separate panel, because its scale hides the measured gap.
-- **Figure 2:** ε(p_test) against ε(p_swarm) by channel and size, and actions-only against signal-aware defects on the same histories.
-- **Validation table:** G2's expected and observed results, G3's floor, G5's checks, the number of runs, and whether probabilities were logged or re-queried (always logged).
+- **Figure 2:** the paired CRPS differences (core n = 10 and 20, arm 4b) with intervals; ε(p_test) against ε(p_swarm) by channel and size; and actions-only against signal-aware defects on the same histories.
+- **Validation table:** G2's expected and observed results, G3's floor, G5's checks, the drift panel, the number of runs, and whether probabilities were logged or re-queried (always logged).
 
 ## 8. Code layout and tests
 
@@ -193,7 +216,9 @@ Per run:
 - `q`, `pi_k` and both state functions.
 - Calibration prompts: two histories with the same last round render byte-identical prompts, with no round number.
 - The synthetic generator: the last round equals the target state, and lengths stay in range.
-- The exact n = 4 law sums to 1 and matches a long simulation of the Copy policy.
+- The exact n = 4 law sums to 1 and matches a long simulation of the Copy policy; the 1,296-state law matches a simulation of the Hidden-signal policy.
+- CRPS on a hand-computed example, and CRPS = 0 when the prediction puts all its mass on the observed y.
+- The marginalisation weights w(s′ | s) sum to 1 for every s, under both weightings.
 
 ## 9. Outputs and persistence
 
@@ -224,7 +249,7 @@ Per run:
 
 - [ ] G1–G5 pass, and G6 is done or skipped, each reported to Abdul.
 - [ ] Audit tables fitted and scored; `results/audit/README.md` describes p_test.
-- [ ] Arms 4–6 run and committed; arm 7 only if approved.
-- [ ] Analysis run: primary outcome and contrast, Δ_t with noise floor, defects, bound, defect shift and baselines.
+- [ ] Arms 4, 4b, 5 and 6 run and committed; arm 7 only if approved.
+- [ ] Analysis run: paired CRPS (primary and arm 4b), mean errors, Δ_t with noise floor, defects, bound, defect shift, shared-neighbour check and baselines.
 - [ ] Figures 1–2 and the validation table written to `results/`.
 - [ ] `results/README.md` lists every output.
