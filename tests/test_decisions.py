@@ -61,7 +61,9 @@ def test_fallback_keeps_the_prisoners_dilemma_and_freezes_every_config(tmp_path)
 def test_inputs_recorded_and_prompts_not_yet_frozen():
     cfg = build.load("core.yaml")
     assert cfg["inputs"]["model_confirmed"] is True
-    assert cfg["inputs"]["prompts_approved"] is False     # until Abdul signs off the diff
+    assert cfg["inputs"]["prompts_approved"] == {"cheap_talk": True, "counts": False}
+    miss = build.missing_inputs(cfg, ("prompts_approved",))
+    assert len(miss) == 1 and miss[0].endswith("counts")
     assert cfg["inputs"]["pilot_rule"] == RULE["name"]
     assert "abdulmusthakin" in cfg["inputs"]["forbidden_workspaces"]
     assert cfg["model"]["hf_id"] == "meta-llama/Llama-3.1-8B-Instruct"

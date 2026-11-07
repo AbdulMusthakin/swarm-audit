@@ -1,5 +1,6 @@
-# DRAFT FOR ABDUL'S REVIEW. This prompt is part of the experimental design and has
-# not been approved. It was drafted for model screening (docs/handoff-model-screening.md).
+# APPROVED BY ABDUL, 7 Nov 2026 (frozen). This prompt is part of the experimental design:
+# change it only with Abdul's approval, and any change after the pilot is a new condition.
+# First drafted for model screening (docs/handoff-model-screening.md).
 #
 # Cheap-talk step: the agent sees its in-neighbours' action counts and signal counts.
 #

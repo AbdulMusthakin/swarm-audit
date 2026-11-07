@@ -68,7 +68,14 @@ INPUT_TEXT = {
 
 def missing_inputs(cfg: dict, need: tuple[str, ...]) -> list[str]:
     inp = cfg.get("inputs", {})
-    return [INPUT_TEXT[k] for k in need if not inp.get(k)]
+    out = []
+    for k in need:
+        v = inp.get(k)
+        if isinstance(v, dict):   # e.g. prompts_approved: one flag per template
+            out += [f"{INPUT_TEXT[k]}: {name}" for name, ok in v.items() if not ok]
+        elif not v:
+            out.append(INPUT_TEXT[k])
+    return out
 
 
 def require_inputs(cfg: dict, need: tuple[str, ...]) -> None:
