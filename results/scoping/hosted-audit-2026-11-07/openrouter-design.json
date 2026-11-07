@@ -1,0 +1,67 @@
+{
+  "agents": 4,
+  "analysis": "exact finite-state forecast, paired whole-game bootstrap, uniform and ordered action-only weights",
+  "arms": [
+    "counts",
+    "recent"
+  ],
+  "audit_estimator": "mean raw label probability across requests, renormalized over valid labels",
+  "audit_histories": 116,
+  "audit_repeats_per_history": 32,
+  "calibration_gate": "observed counts CDF sup distance at or below its 99th-percentile finite-sample predictive reference",
+  "games_per_arm": 96,
+  "labels": {
+    "false": {
+      "A": [
+        "H",
+        null
+      ],
+      "B": [
+        "L",
+        null
+      ]
+    },
+    "true": {
+      "A": [
+        "H",
+        "H"
+      ],
+      "B": [
+        "H",
+        "L"
+      ],
+      "C": [
+        "H",
+        "N"
+      ],
+      "D": [
+        "L",
+        "H"
+      ],
+      "E": [
+        "L",
+        "L"
+      ],
+      "F": [
+        "L",
+        "N"
+      ]
+    }
+  },
+  "live_policy": "sample a single token and reject tokens outside the exact labels",
+  "max_completion_tokens": 1,
+  "model": "google/gemma-4-26b-a4b-it",
+  "network": "bidirectional four-cycle",
+  "primary": "paired CRPS for final-three-round high-bid share in empty-start communicating games",
+  "prompt_hashes": {
+    "False": "bd71e5d5767ded11971c12b40ea030d19ead9f565df9d447cb5e0199cd8877df",
+    "True": "245e8bd31e502965cae0f9f6461659c04799ee52099311ebbbe7b77397a9fe6b"
+  },
+  "provider": "coreweave/bf16",
+  "repeat_gate": "median state split-half TV <= 0.03 and max sentinel split-half TV <= 0.12",
+  "rounds": 8,
+  "secondary": "three or more high bids in each of the final three rounds",
+  "sentinel_repeats": 0,
+  "temperature": 1,
+  "top_logprobs": 20
+}
