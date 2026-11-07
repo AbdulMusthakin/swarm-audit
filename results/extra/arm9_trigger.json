@@ -1,0 +1,12 @@
+{
+ "rule_fixed_before_result": "results/extra/README.md, commit a2657c5 (about 19:00 UTC 7 Nov)",
+ "reading": "d4.signal_responsiveness_length1_mean, strictly below 0.05 triggers arm 9",
+ "source": "core branch claude/funny-turing-qv2y66, results/serving/signal_responsiveness.json (commit 846ce77, 19:12 UTC); measured by the core's G4, not on this account",
+ "value": 0.055284065452479714,
+ "triggered": false,
+ "reported_not_deciding": {
+  "d4_length5_mean": 0.022457479812774368,
+  "d2_length1_mean": 0.03786814984999434,
+  "d2_length5_mean": 0.03828653627969985
+ }
+}
