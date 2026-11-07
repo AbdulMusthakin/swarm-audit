@@ -1,0 +1,19 @@
+{
+ "gate": "G5",
+ "channel": "cheap_talk",
+ "exception": true,
+ "approved_by": "Abdul Musthakin",
+ "date": "2026-11-07",
+ "decision": "Accept as sampling variation: G5 cheap talk is recorded as 'per-decision PASS; per-run p = 0.0076, attributed to chance after diagnostics'. Every logged probability matched the table exactly, and the sampling, wiring and exact-law checks all passed. Launch the core arms. As a disclosed confirmation, run arm 4b once more with fresh seeds (run indices 50-99, same table) and report the per-run test on the new 50 and on all 100 pooled, keeping the original 50. If the new or pooled test fails, pause the cheap-talk core (not counts) and report.",
+ "evidence": [
+  "results/gates/G5_cheap_talk.json",
+  "results/gates/G5_cheap_talk_investigation.json (scripts/diagnose_g5.py)",
+  "independent check on the independent-check branch: reproduces G5 exactly; no wiring, sampling or draw problem; logged uniforms uniform and independent (KS p = 0.85 and 0.40)"
+ ],
+ "applies_to": {
+  "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc",
+  "run_fingerprint": "38389fb09a937f00cb92b6f03e9df4b2d3e732f256120bdc8f1492212811a88f",
+  "runs": 50
+ },
+ "requires": "a passing confirmation (G5_<channel>_confirmation.json) before the cheap_talk core launches"
+}

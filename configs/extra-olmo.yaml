@@ -97,4 +97,7 @@ arms:
   olmo_calibration_cheap_talk: {arm_id: 9, channel: cheap_talk, graph: cycle, n: [4], runs: 50, last_k: 1}
   # 9b: cheap talk, cycle, n = 10, full history, 50 runs; only if 9a passes G5 and the
   # lock-in stop does not apply (>= 45 of 50 runs with every agent low in rounds 16-20).
-  olmo_core_cheap_talk: {arm_id: 91, channel: cheap_talk, graph: cycle, n: [10], runs: 50, last_k: null}
+  olmo_core_cheap_talk:
+    {arm_id: 91, channel: cheap_talk, graph: cycle, n: [10], runs: 50, last_k: null,
+     after_calibration: {arm: olmo_calibration_cheap_talk, channel: cheap_talk,
+                         lock_in_file: arm9a_lock_in.json}}
