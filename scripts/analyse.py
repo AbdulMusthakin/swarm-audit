@@ -51,12 +51,18 @@ def one(args) -> None:
     cond = Path(args.runs).name
     if args.gate_g5:
         floor = args.floor if args.floor is not None else build.numerical_floor(cfg)
-        res = calibration.check_arm(data, {"actions": tables.actions, "signal": tables.signal},
-                                    g, floor, an["ks_sims"])
+        tabs = {"actions": tables.actions, "signal": tables.signal}
+        res = calibration.check_arm(data, tabs, g, floor, an["ks_sims"])
         path = OUT / arm / f"{cond}_G5.json"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(to_jsonable(res), indent=1) + "\n")
         print(json.dumps(to_jsonable(res), indent=1))
+        rec = calibration.gate_record(to_jsonable(res), data, tabs, floor)
+        gpath = calibration.write_gate(rec)
+        print(f"G5 {data.channel}: {'PASS' if rec['pass'] else 'FAIL'} ({rec['required']}); "
+              f"record {gpath}")
+        if not rec["pass"]:     # review C3: a failed required check is a failed command
+            raise SystemExit(1)
         return
     res = analyse_condition(data, g, tables, an["n_model"], an["seed"], an["bootstrap"],
                             build.ptest(cfg))

@@ -14,6 +14,7 @@ chain's result there is a finding, not a gate.
 from __future__ import annotations
 
 from collections import defaultdict
+from pathlib import Path
 
 import numpy as np
 
@@ -22,6 +23,8 @@ from .audit import AuditTable
 from .prediction import ActionsChain, SignalChain, exact_law
 from .swarm import RunData
 from .topology import Graph
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def per_decision(data: RunData, table: AuditTable, floor: float = 0.0) -> dict:
@@ -60,15 +63,25 @@ def per_decision(data: RunData, table: AuditTable, floor: float = 0.0) -> dict:
             "states_whose_prompt_differs_from_table": table_mismatch}
 
 
-def per_run(data: RunData, chain, g: Graph, sims: int = 20000, q: float = 0.99,
+ALPHA = 0.01
+
+
+def per_run(data: RunData, chain, g: Graph, sims: int = 20000, alpha: float = ALPHA,
             seed: int = 5) -> dict:
+    """The per-run test as a discrete Monte Carlo p-value (review C5): pass if
+    p = (1 + #{simulated gap >= observed gap}) / (1 + sims) > alpha. Fixed before any
+    live calibration data existed (7 Nov 2026)."""
     ex = exact_law(chain, g, data.T)
     y = stats.high_count(data.actions)
     G = stats.cdf_from_law(ex["y"])
     gap = stats.ks_gap(y, G)
-    thr = stats.ks_threshold(ex["y"], data.R, sims, q, np.random.default_rng(seed))
+    null = stats.ks_null_gaps(ex["y"], data.R, sims, np.random.default_rng(seed))
+    pval = stats.mc_pvalue(gap, null)
     K = len(G) - 1
-    return {"pass": bool(gap < thr), "gap": gap, "threshold_q99": thr, "runs": data.R,
+    return {"pass": bool(pval > alpha), "gap": gap, "p_value": pval, "alpha": alpha,
+            "rule": "discrete Monte Carlo p-value (1 + #{null >= gap}) / (1 + sims) > alpha",
+            "threshold_q99": float(np.quantile(null, 1 - alpha)), "sims": sims,
+            "runs": data.R,
             "chain": getattr(chain, "name", type(chain).__name__),
             "exact_mean_y": float((np.arange(K + 1) * ex["y"]).sum()),
             "swarm_mean_y": float(y.mean()), "n_profiles": ex["n_profiles"]}
@@ -87,3 +100,73 @@ def check_arm(data: RunData, tables: dict[str, AuditTable], g: Graph, floor: flo
     res["finding_actions_only_chain"] = per_run(
         data, ActionsChain(tables["actions"].lookup(), d), g, sims)
     return res
+
+
+# ------------------------------------------------------ gate records (review C3)
+
+GATES_DIR = REPO_ROOT / "results" / "gates"
+CHANNELS = ("counts", "cheap_talk")
+
+
+def gate_record(res: dict, data: RunData, tables: dict[str, AuditTable], floor: float) -> dict:
+    """The G5 record of one calibration arm. Required checks: per decision and per run
+    (on cheap talk, the signal-aware chain). The actions-only chain on cheap talk is a
+    finding, not part of the gate."""
+    import datetime as dt
+
+    from .swarm import git_commit
+
+    required = {"per_decision": res["per_decision"]["pass"], "per_run": res["per_run"]["pass"]}
+    return {"gate": "G5", "channel": data.channel, "pass": all(required.values()),
+            "required": required, "floor": floor, "runs": data.R,
+            "kernel_fingerprint": data.meta.get("kernel_fingerprint"),
+            "run_fingerprint": data.meta.get("fingerprint"),
+            "table_fingerprints": {k: t.meta.get("provenance", {}).get("fingerprint")
+                                   for k, t in tables.items() if t is not None},
+            "finding_not_gate": ("actions-only chain on cheap talk"
+                                 if "finding_actions_only_chain" in res else None),
+            "folder": data.meta.get("folder"), "git_commit": git_commit(),
+            "time": dt.datetime.now(dt.timezone.utc).isoformat(), "result": res}
+
+
+def write_gate(rec: dict, folder: Path | None = None) -> Path:
+    """Write results/gates/G5_<channel>.json; every record is also appended to
+    history.jsonl, so a superseded record is never lost."""
+    import json
+
+    folder = Path(folder or GATES_DIR)
+    folder.mkdir(parents=True, exist_ok=True)
+    text = json.dumps(rec, default=_jsonable)
+    with open(folder / "history.jsonl", "a") as fh:
+        fh.write(text + "\n")
+    path = folder / f"G5_{rec['channel']}.json"
+    path.write_text(json.dumps(json.loads(text), indent=1) + "\n")
+    return path
+
+
+def _jsonable(x):
+    if isinstance(x, np.ndarray):
+        return x.tolist()
+    if isinstance(x, (np.floating, np.integer)):
+        return x.item()
+    return str(x)
+
+
+def require_g5(kernel_fingerprint: str, channels=CHANNELS, folder: Path | None = None) -> None:
+    """Block a core launch unless G5 passed on every channel under the same kernel."""
+    import json
+
+    folder = Path(folder or GATES_DIR)
+    problems = []
+    for ch in channels:
+        p = folder / f"G5_{ch}.json"
+        if not p.exists():
+            problems.append(f"{ch}: no G5 record")
+            continue
+        rec = json.loads(p.read_text())
+        if not rec.get("pass"):
+            problems.append(f"{ch}: G5 failed ({rec.get('required')})")
+        elif rec.get("kernel_fingerprint") != kernel_fingerprint:
+            problems.append(f"{ch}: G5 passed under a different kernel (stale)")
+    if problems:
+        raise SystemExit("Stopping before the core launch (gate G5): " + "; ".join(problems))

@@ -158,13 +158,14 @@ def table_md(rows, runs) -> str:
              "Δ is the largest binned TV over rounds; the floor is the 95th percentile of the "
              "same maximum between two model samples of the swarm's size.", "",
              "| condition | expected | ε_test actions | ε_test signal | max Δ actions (floor) | "
-             "max Δ signal (floor) | bound B_T | exact law, n = 4 (gap / q99) | G5 path, n = 4 | result |",
+             "max Δ signal (floor) | bound B_T | exact law, n = 4 (gap / q99, MC p) | G5 path, n = 4 | result |",
              "|---|---|---|---|---|---|---|---|---|---|"]
     for name, e in rows:
         o = e["observed"]
         ex = e.get("exact_law")
         g5 = e.get("calibration_G5")
-        ex_s = f"{f(ex['gap'])} / {f(ex['threshold_q99'])} {'✓' if ex['pass'] else '✗'}" if ex else "–"
+        ex_s = (f"{f(ex['gap'])} / {f(ex['threshold_q99'])} (p = {f(ex['p_value'])}) "
+                f"{'✓' if ex['pass'] else '✗'}") if ex else "–"
         g5_s = ("✓" if g5["per_decision"]["pass"] and g5["per_run"]["pass"] else "✗") if g5 else "–"
         sig = (f"{f(o['max_delta_signal'])} ({f(o['floor_signal'])})"
                if "max_delta_signal" in o else "–")

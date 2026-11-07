@@ -171,14 +171,30 @@ def ks_gap(y_obs: np.ndarray, G: np.ndarray) -> float:
     return float(np.abs(cdf_from_samples(np.asarray(y_obs), len(G) - 1) - G).max())
 
 
-def ks_threshold(p_y: np.ndarray, R: int, sims: int = 20000, q: float = 0.99,
-                 rng: np.random.Generator | None = None) -> float:
-    """q-quantile of ks_gap over `sims` simulated sets of R runs drawn from the law p_y."""
+def ks_null_gaps(p_y: np.ndarray, R: int, sims: int = 20000,
+                 rng: np.random.Generator | None = None) -> np.ndarray:
+    """ks_gap for `sims` simulated sets of R runs drawn from the law p_y."""
     rng = rng or np.random.default_rng(2)
     G = cdf_from_law(p_y)
     counts = rng.multinomial(R, p_y / p_y.sum(), size=sims)            # (sims, K+1)
     emp = np.cumsum(counts, axis=1) / R
-    return float(np.quantile(np.abs(emp - G[None, :]).max(axis=1), q))
+    return np.abs(emp - G[None, :]).max(axis=1)
+
+
+def ks_threshold(p_y: np.ndarray, R: int, sims: int = 20000, q: float = 0.99,
+                 rng: np.random.Generator | None = None) -> float:
+    """q-quantile of ks_gap over `sims` simulated sets of R runs drawn from the law p_y."""
+    return float(np.quantile(ks_null_gaps(p_y, R, sims, rng), q))
+
+
+TIE_EPS = 1e-12
+
+
+def mc_pvalue(observed: float, null: np.ndarray) -> float:
+    """Discrete Monte Carlo p-value: (1 + #{null >= observed}) / (1 + len(null)).
+    Ties count as at least as extreme, so a perfectly matched point mass (observed 0,
+    every null value 0) gives p = 1 (review C5)."""
+    return float((1 + np.sum(null >= observed - TIE_EPS)) / (1 + len(null)))
 
 
 # ------------------------------------------------------------------------- defects
