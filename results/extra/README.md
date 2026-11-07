@@ -7,8 +7,9 @@ Separate arms on a second Modal account. Nothing here feeds the core's primary c
 - **Branch:** `extra-arms`, with the core branch (`claude/funny-turing-qv2y66`) merged in.
 - **Configs:** `configs/extra-scale.yaml` (arm 8). `configs/extra-olmo.yaml` (arm 9) only if
   its trigger is met.
-- **Spend ledger:** `results/extra/spend.json`, cap $25. Spent so far: $0 on GPU. The X1
-  attempt and its diagnostic used only CPU containers, a few minutes each.
+- **Spend ledger:** `results/extra/spend.json`, cap $25. Spent so far: **$2.57** (wall-clock
+  estimates at the L4 list price, idle scaledown included as an upper bound): X1/X2/X3 and the
+  d = 4 audit table $0.95, the 45 remaining arm 8 runs $1.48 plus $0.13 idle.
 
 ## Status
 
@@ -17,7 +18,7 @@ Separate arms on a second Modal account. Nothing here feeds the core's primary c
 | X1, workspace set-up | **PASS** (7 Nov). The secret first stored the token under key `huggingface` (Llama download: 401); after the teammate renamed it to `HF_TOKEN`, the token (HF account `micsenso`, read) has Llama access. Weights cached in this workspace's `swarm-audit-weights` volume (16.1 GB, 56 s, CPU). Every label one token with the configured id: actions 473/445, signals 1579/3428/7000, on 148 action and 250 signal positions (core d = 2 prompts), and on 66 counts prompts at d = 4 (arm 8's degree, longest 782 tokens) | `serving/workspace_setup.json`, `serving/label_check_d4.json` |
 | X2, serving repeatability | **PASS** (7 Nov, 19:11 UTC). Batch invariance on: 48 prompts alone, in a shuffled batch of 448 others, and warm; max difference **0** in P(H) and in every signal probability (floor 0, as in the core's G3). 4.07 prompts/s. Fresh queries (no replay) | `serving/g3_batchinv1.json` |
 | X3, cross-account drift panel | **identical**: all 136 panel prompts byte-identical, max difference **0** in P(H) and every signal probability, against the core's start, end and mixed panels of arms 4 and 4b (6 comparisons); same serving settings and serving-code hash. Informational | `serving/x3_cross_account.json` |
-| Arm 8, 100 agents, random 4-regular | graph saved (simple, connected, 200 edges, measured diameter 6; pair distances 1–6: 200/579/1412/1980/758/21; 1 triangle). Core pilot froze the payoffs unchanged, (12, 10, 4, 0) = this config's (checked by `build.check_core_pilot_payoffs`). Audit table (d = 4, 1,502 histories) running | `results/extra/graph_rr4_n100.json`, `runs/`, `audit/` |
+| Arm 8, 100 agents, random 4-regular | **complete** (7 Nov, 21:31 UTC): 50/50 runs, 100,000 decisions, drift 0, no p_valid flags; analysed. Actions-only audit CRPS 0.0142 [0.0113, 0.0173] vs order-0 0.0170 [0.0140, 0.0204] (paired difference +0.0028 [0.0016, 0.0039]); max Δ_t 0.166 below the simultaneous null 0.180; ε(p_test) 0.061, ε(p_swarm) 0.058; bound vacuous from round 2. One graph realization; counts only. See `arm8_summary.md` | `arm8_summary.md`, `arm8_numbers.json`, `graph_rr4_n100.json`, `runs/extra_rr4/`, `audit/llama-3.1-8b/`, `analysis/extra_rr4/`, `figures/` |
 | Arm 9, OLMo-3-7B | **Trigger not met** (Abdul confirmed, 7 Nov 20:15): 0.0553 on the d = 4 grid fixed in a2657c5, not below 0.05. **Run anyway as an EXPLORATORY arm** by Abdul's decision (7 Nov 20:15), made after seeing Llama's d = 2 responsiveness (0.038) and the core's arm 4b CRPS null; same design, cap and stop rules. Starts after arm 8 | `arm9_trigger.json` |
 
 ## Code added (additive; core behaviour unchanged)
@@ -31,6 +32,8 @@ Separate arms on a second Modal account. Nothing here feeds the core's primary c
 - `check_serving.py --panel`: also saves the drift panel's outputs (X3).
 - `analyse.py --collect` reads and writes under the config's results tree;
   `benchmark.py` (the core's G4) refuses an extra config.
+- `scripts/extra_arm8_report.py`: the numbers in `arm8_summary.md` and its defects figure,
+  from logs only.
 - Tests: `tests/test_extra.py`.
 
 ## Core commits merged
