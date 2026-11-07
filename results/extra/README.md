@@ -41,8 +41,8 @@ Separate arms on a second Modal account. Nothing here feeds the core's primary c
 - `9edb338`: G6 pilot, payoffs frozen at (12, 10, 4, 0).
 - `04cfc68`: review C3 and C5, G5 blocks the core launch; discrete Monte Carlo p-value.
 - `main` up to `1676dcd` (teammates' hosted scoping evidence), so PR #7 has no conflicts.
-- Still to merge when they land: the matched TV null reference and labels for
-  conditional uncertainty (review C6 or later).
+- `846ce77`: review C4 and C6, matched null for Δ_t, labelled outputs (conditional
+  uncertainty); plus the core's arms 4 and 4b and its G5 investigation, up to `f2449ea`.
 
 ## Arm 9 trigger: the reading, fixed before any result (7 Nov, about 19:00 UTC)
 
