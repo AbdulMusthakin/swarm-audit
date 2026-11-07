@@ -9,6 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import matplotlib
+import matplotlib.ticker
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -65,15 +66,20 @@ def figure1(res: dict, path: Path, title: str = "") -> None:
     for name, d in res["defects"].items():
         b = d["bound"]
         c = COLOURS.get(name, INK2)
-        a2.fill_between(t, b["lo"], b["hi"], color=c, alpha=0.15, linewidth=0)
-        a2.plot(t, b["B"], color=c, linewidth=2, label=f"bound, {LABELS.get(name, name)}")
+        a2.fill_between(t, np.minimum(b["lo"], 1), np.minimum(b["hi"], 1), color=c, alpha=0.15,
+                        linewidth=0)
+        a2.plot(t, b["B_capped"], color=c, linewidth=2,
+                label=f"bound, {LABELS.get(name, name)} (uncapped B_T = {b['B'][-1]:.2f})")
     delta = res["scores"]["delta"].get("actions_only")
     if delta is not None:
         a2.plot(t, delta, color=INK, linewidth=2, linestyle="--", label="measured Δ_t (actions-only)")
     a2.axhline(1.0, color=INK2, linewidth=0.8, linestyle=":")
     a2.set_xlabel("round t", color=INK2, fontsize=9)
-    a2.set_ylabel("TV distance (bound uncapped)", color=INK2, fontsize=9)
-    a2.legend(frameon=False, fontsize=7, loc="upper left")
+    a2.set_ylabel("TV distance (bound capped at 1)", color=INK2, fontsize=9)
+    a2.set_ylim(0, 1.05)
+    a2.legend(frameon=False, fontsize=7, loc="center right")
+    for ax in (a1, a2):
+        ax.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(integer=True))
     if title:
         fig.suptitle(title, fontsize=10, color=INK)
     fig.tight_layout()
