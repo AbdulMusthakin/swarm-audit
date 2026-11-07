@@ -13,6 +13,11 @@ dependencies = [
 ]
 # vLLM runs inside the Modal image (Linux), so it is not a local dependency.
 
+[project.optional-dependencies]
+# Tests and the CPU tokenizer screen; torch only for the local smoke test.
+dev = ["pytest", "transformers>=5", "tokenizers", "huggingface_hub"]
+smoke = ["torch"]
+
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"

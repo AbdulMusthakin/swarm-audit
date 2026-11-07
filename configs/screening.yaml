@@ -1,0 +1,135 @@
+# Model screening: choose the ~7B model (docs/handoff-model-screening.md).
+# Read by scripts/screen_tokenizers.py and scripts/screen_models.py.
+
+seed: 20261107
+payoffs: {uLH: 12, uHH: 10, uLL: 4, uHL: 0}
+
+# Candidate label sets. "_" in a name stands for a leading space.
+# The prompts end in "Bid:" (and "Message:" on the cheap-talk step), so the
+# space-prefixed sets are the natural continuation.
+label_sets:
+  actions:
+    "H/L": ["H", "L"]
+    "_H/_L": [" H", " L"]
+    "high/low": ["high", "low"]
+    "_high/_low": [" high", " low"]
+    "A/B": ["A", "B"]
+    "_A/_B": [" A", " B"]
+  signals:            # order: "I'll bid high", "I'll bid low", silence
+    "1/2/3": ["1", "2", "3"]
+    "_1/_2/_3": [" 1", " 2", " 3"]
+    "high/low/none": ["high", "low", "none"]
+    "_high/_low/_none": [" high", " low", " none"]
+
+# A model's labels are the first set in this order that passes the tokenizer screen
+# for that model (unless the model sets `labels` explicitly below).
+label_preference:
+  actions: ["_H/_L", "_high/_low", "_A/_B", "H/L", "high/low", "A/B"]
+  signals: ["_high/_low/_none", "_1/_2/_3", "high/low/none", "1/2/3"]
+
+# The newest instruct model at <= 9B in each family (checked on Hugging Face on
+# 7 Nov 2026), plus the versions on Abdul's original list as fallbacks.
+# `shortlist: true` marks the models that scripts/screen_models.py runs by default.
+models:
+  - name: qwen3.5-9b
+    hf_id: Qwen/Qwen3.5-9B
+    revision: c202236235762e1c871ad0ccb60c8ee5ba337b9a
+    family: Qwen
+    licence: apache-2.0
+    shortlist: true
+    chat_kwargs: {enable_thinking: false}   # renders the empty <think></think> block
+    engine_kwargs: {language_model_only: true}   # skip the vision encoder; text only
+
+  - name: ministral-3-8b
+    hf_id: mistralai/Ministral-3-8B-Instruct-2512-BF16
+    revision: f6fae9795746f63c9be8344932f01275f3c63734
+    family: Mistral
+    licence: apache-2.0
+    shortlist: true
+    # transformers warns that the shipped pre-tokenizer regex is wrong; with or without the
+    # fix, the ids match mistral_common (tekken.json) on all 104 grid prompts (7 Nov 2026).
+    tokenizer_kwargs: {fix_mistral_regex: true}
+    engine_kwargs: {language_model_only: true}
+
+  - name: olmo-3-7b
+    hf_id: allenai/Olmo-3-7B-Instruct
+    revision: 6e5971d9eba42665f5bd5a0fcf047f299ce1dccc
+    family: OLMo
+    licence: apache-2.0
+    shortlist: true
+
+  - name: gemma-4-e4b
+    hf_id: google/gemma-4-E4B-it
+    revision: 4ecc2ba63bcac23ba4a767fc87025b1450f84c9c
+    family: Gemma
+    licence: apache-2.0
+    shortlist: false     # 8.0B stored, but about 4B effective (per-layer embeddings)
+    engine_kwargs: {language_model_only: true}
+
+  - name: llama-3.1-8b
+    hf_id: meta-llama/Llama-3.1-8B-Instruct
+    revision: 0e9e39f249a16976918f6564b8830bc894c89659
+    family: Llama
+    licence: llama3.1 (gated; needs Abdul's HF token and licence acceptance)
+    gated: true
+    shortlist: false
+
+  - name: qwen3-8b
+    hf_id: Qwen/Qwen3-8B
+    revision: b968826d9c46dd6066d109eabc6255188de91218
+    family: Qwen
+    licence: apache-2.0
+    shortlist: false     # fallback if Qwen3.5-9B does not fit on the L4
+    chat_kwargs: {enable_thinking: false}
+
+  - name: mistral-7b-v0.3
+    hf_id: mistralai/Mistral-7B-Instruct-v0.3
+    revision: c170c708c41dac9275d15a8fff4eca08d52bab71
+    family: Mistral
+    licence: apache-2.0
+    shortlist: false
+
+  - name: olmo-2-7b
+    hf_id: allenai/OLMo-2-1124-7B-Instruct
+    revision: 470b1fba1ae01581f270116362ee4aa1b97f4c84
+    family: OLMo
+    licence: apache-2.0
+    shortlist: false
+
+# Screening grid (hand-off section 5.6). Each state is shown at history length 1,
+# and with `fillers` random earlier rounds added in front (length `filler_length`).
+grid:
+  fillers: 3
+  filler_length: 5
+  counts:
+    d: [2, 4, 10]
+    f: [0.0, 0.5, 1.0]
+    own_last: [H, L]
+  cheap_talk:
+    d: 4
+    n_high: 2                   # action counts fixed at 2 high, 2 low
+    own_last: [H, L]
+    own_last_signal: none       # the agent's own message in the state round
+    signal_variants:            # in-neighbour message counts [high, low, none]
+      all_high: [4, 0, 0]
+      all_low: [0, 4, 0]
+      all_silent: [0, 0, 4]
+      two_two: [2, 2, 0]
+
+# Exact-probability check: vLLM against a plain transformers forward pass (bf16).
+validation:
+  n_counts: 8          # prompts per model from the counts step
+  n_cheap_talk: 8      # prompts per model from the cheap-talk step (action and message)
+  tolerance: 0.01      # max |P_vLLM(H) - P_transformers(H)|, renormalised
+
+serving:
+  gpu: L4
+  vllm_version: "0.32.0"
+  dtype: bfloat16
+  max_model_len: 4096
+  gpu_memory_utilization: 0.90
+  enforce_eager: true        # skip compilation and CUDA graphs: faster start, fine at this volume
+  method: logprob_token_ids  # see swarm_audit/serving.py
+  timeout_minutes: 20        # per container; caps the worst-case GPU spend
+  cost_cap_usd: 3.0
+  l4_usd_per_hour: 0.80      # Modal list price for an L4 at the time of writing; check before running

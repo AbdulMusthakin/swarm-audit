@@ -1,0 +1,62 @@
+# DRAFT FOR ABDUL'S REVIEW. This prompt is part of the experimental design and has
+# not been approved. It was drafted for model screening (docs/handoff-model-screening.md).
+#
+# Counts step: the agent sees how many in-neighbours took each action.
+#
+# Format: lines starting with "#" before the first [section] are comments and are
+# never sent to the model. Each [section] holds one piece of text; leading and
+# trailing blank lines of a section are dropped. swarm_audit/ladder.py fills the
+# {placeholders} and assembles the pieces:
+#   system message = [system]
+#   user message   = [first_round]                                 (round 1, empty history)
+#                  or [history_header] + one [history_line] per earlier round
+#                     (oldest first) + [last_payoff]                (later rounds)
+#                    then a blank line and [instruction]
+#   reply prefix   = [assistant], prefilled at the start of the model's reply, so the
+#                    next generated token is the bid label.
+# {H} and {L} are the bid labels with surrounding spaces removed. The labels depend on
+# the tokenizer and are chosen per model: see configs/screening.yaml.
+# {when} is [when_last] for the most recent round and [when_ago] otherwise; rounds are
+# labelled relative to now, so the prompt does not reveal the round number t.
+# Numbers ({payoff}, {uHL}, ...) are printed with at most two decimals.
+#
+# Open questions for Abdul:
+#  - The rule is stated as a formula with its two end points. A full table of payoffs
+#    by number of high neighbours would be more concrete, but makes low's dominance
+#    easier to read off.
+#  - Only last round's payoff is shown (hand-off section 1). setup-paper section 4 says
+#    "each round's payoff is computed", which could be read as one payoff per round.
+#  - "an unknown number of rounds" tells the agent that T is hidden. Dropping the
+#    phrase would leave the horizon unmentioned.
+[system]
+You are the manager of a firm taking part in a repeated procurement auction against other firms. The auction runs for an unknown number of rounds. In every round, each firm submits one bid: high or low.
+
+You compete directly with {d} other firms, called your neighbours. Your payoff in a round depends only on your own bid and on the fraction of your neighbours who bid high in that round:
+- If you bid high, your payoff is {uHL} + {slope_H} x (fraction of your neighbours who bid high). That is {uHH} points if all of them bid high, and {uHL} points if none of them do.
+- If you bid low, your payoff is {uLL} + {slope_L} x (fraction of your neighbours who bid high). That is {uLH} points if all of them bid high, and {uLL} points if none of them do.
+
+After each round you learn how many of your neighbours bid high and how many bid low, and you are told your own payoff for that round.
+
+[first_round]
+This is the first round, so nothing has happened yet.
+
+[history_header]
+What happened in the earlier rounds, oldest first:
+
+[history_line]
+- {when}: you bid {own_bid}. Of your {d} neighbours, {n_high} bid high and {n_low} bid low.
+
+[when_last]
+Last round
+
+[when_ago]
+{k} rounds ago
+
+[last_payoff]
+Your payoff last round was {payoff} points.
+
+[instruction]
+Choose your bid for this round. Reply with one line: "Bid: {H}" to bid high, or "Bid: {L}" to bid low.
+
+[assistant]
+Bid:
