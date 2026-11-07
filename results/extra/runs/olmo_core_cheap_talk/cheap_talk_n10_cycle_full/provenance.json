@@ -1,0 +1,72 @@
+{
+ "fingerprint": "b6fd5f70f0dd3162d86391279297a8bff8cbb23b90237e3504be7adf78f4b87d",
+ "kernel_fingerprint": "95a642bba7f5092e9fb2612d00e6b6f67c99e19c7372a4f83b5e17bbadcee588",
+ "payload": {
+  "kernel": {
+   "templates": {
+    "cheap_talk": "7df81f5308f515f855107eb9a06703e1bbc9d21c23e2e84799554641221c2991",
+    "counts": "2598208c29c8cb6c5ecea266c8c3b2b59b02c32acf3a3362395f4a13519f4357"
+   },
+   "backend": {
+    "backend": "llm",
+    "labels": [
+     " H",
+     " L",
+     " high",
+     " low",
+     " none"
+    ],
+    "action_ids": [
+     473,
+     445
+    ],
+    "signal_ids": [
+     1579,
+     3428,
+     7000
+    ],
+    "chat_kwargs": {},
+    "model": "olmo-3-7b",
+    "hf_id": "allenai/Olmo-3-7B-Instruct",
+    "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+    "serving": {
+     "hf_id": "allenai/Olmo-3-7B-Instruct",
+     "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+     "method": "logprob_token_ids",
+     "dtype": "bfloat16",
+     "engine_kwargs": {
+      "max_model_len": 4096,
+      "gpu_memory_utilization": 0.9,
+      "enforce_eager": true
+     },
+     "vllm_version": "0.32.0",
+     "batch_invariant": true,
+     "gpu": "L4",
+     "serving_code_sha256": "7e5b3b5089c7bcd0807fae2b14f8226fec4c2954f5d15f77afb3371dbe04afd9"
+    }
+   },
+   "payoffs": {
+    "uLH": 12.0,
+    "uHH": 10.0,
+    "uLL": 4.0,
+    "uHL": 0.0
+   }
+  },
+  "design": {
+   "arm": "olmo_core_cheap_talk",
+   "arm_id": 91,
+   "condition_id": 10,
+   "channel": "cheap_talk",
+   "n": 10,
+   "graph": "cycle",
+   "T": 20,
+   "last_k": null,
+   "base_seed": 20261107,
+   "own_signal_in_state": true,
+   "graph_kwargs": []
+  },
+  "sampling": "v1: one numpy PCG64 stream per run, SeedSequence([base_seed, arm_id, condition_id, run]); agents draw in index order; a = H iff u < p_H; on cheap talk each agent then draws its signal from P(m | h, a) for its sampled a; vLLM's own sampling is not used"
+ },
+ "created": "2026-11-07T22:58:28.630592+00:00",
+ "git_commit": "e4fae78038318ccd1f4d625ba44b2b833db0d888"
+}
