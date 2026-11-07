@@ -118,5 +118,21 @@
   "usd": 0.1333,
   "time": "2026-11-07T20:55:13.514093+00:00",
   "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "core_counts/counts_n10_cycle_full",
+  "seconds": 709.2,
+  "containers": 1,
+  "usd": 0.1576,
+  "time": "2026-11-07T21:07:11.591088+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-07T21:07:11.593815+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
  }
 ]
