@@ -1,0 +1,33 @@
+{
+  "independent_precomparison_commit": "1a7fb83dfebc7b991d9eed4faf6260dd97a6594b",
+  "gate_gap_abs_diff": 7.771561172376096e-16,
+  "gate_mean_abs_diff": 0.0,
+  "gate_p_abs_diff": 9.999500024998782e-05,
+  "signal_pmf_max_abs_diff": 0.0,
+  "actions_pmf_max_abs_diff": 0.0,
+  "signal_crps_max_abs_diff": 3.608224830031759e-16,
+  "actions_crps_max_abs_diff": 5.551115123125783e-17,
+  "build_crps": {
+    "signal": 0.05813534883092139,
+    "actions": 0.058152831915988586,
+    "paired": {
+      "mean": 1.7483085067197117e-05,
+      "lo": -8.196470410083148e-05,
+      "hi": 0.00011581516056483975,
+      "n": 50,
+      "B": 2000
+    }
+  },
+  "build_published_crps_output_available": false,
+  "core_runs_available": false,
+  "n10_calibration_table_sampler_checks": {
+    "signal": {
+      "cdf_gap": 0.009799999999999975,
+      "combined_dkw99": 0.024477468306808164
+    },
+    "actions": {
+      "cdf_gap": 0.00799999999999998,
+      "combined_dkw99": 0.024477468306808164
+    }
+  }
+}
