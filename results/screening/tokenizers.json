@@ -1,0 +1,805 @@
+[
+  {
+    "name": "qwen3.5-9b",
+    "hf_id": "Qwen/Qwen3.5-9B",
+    "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "params": {
+      "billion": {
+        "language": 8.954,
+        "mtp": 0.243,
+        "vision": 0.456
+      },
+      "total_billion": 9.653,
+      "bf16_gib_language": 16.7,
+      "bf16_gib_total": 18.0
+    },
+    "actions": {
+      "H/L": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "'H' is not one token here (tail tokens [90941])",
+          "'L' is not one token here (tail tokens [66888])"
+        ]
+      },
+      "_H/_L": {
+        "ok": true,
+        "ids": [
+          462,
+          436
+        ],
+        "problems": []
+      },
+      "high/low": {
+        "ok": true,
+        "ids": [
+          11553,
+          9997
+        ],
+        "problems": []
+      },
+      "_high/_low": {
+        "ok": true,
+        "ids": [
+          1496,
+          3238
+        ],
+        "problems": []
+      },
+      "A/B": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "'A' is not one token here (tail tokens [53779])",
+          "'B' is not one token here (tail tokens [78465])"
+        ]
+      },
+      "_A/_B": {
+        "ok": true,
+        "ids": [
+          357,
+          417
+        ],
+        "problems": []
+      }
+    },
+    "signals": {
+      "1/2/3": {
+        "ok": true,
+        "ids": [
+          16,
+          17,
+          18
+        ],
+        "problems": []
+      },
+      "_1/_2/_3": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "' 1' is not one token here (tail tokens [25, 220, 16])",
+          "' 2' is not one token here (tail tokens [25, 220, 17])",
+          "' 3' is not one token here (tail tokens [25, 220, 18])"
+        ]
+      },
+      "high/low/none": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "'none' is not one token here (tail tokens [21196])"
+        ]
+      },
+      "_high/_low/_none": {
+        "ok": true,
+        "ids": [
+          1496,
+          3238,
+          6643
+        ],
+        "problems": []
+      }
+    },
+    "signals_checked_after": "_H/_L",
+    "chosen": [
+      "_H/_L",
+      "_high/_low/_none"
+    ],
+    "prompt_tokens": {
+      "min": 304,
+      "max": 644
+    },
+    "chat_kwargs": {
+      "enable_thinking": false
+    },
+    "think_block_in_prompt": true,
+    "empty_think_block": true,
+    "template_mentions_thinking": true
+  },
+  {
+    "name": "ministral-3-8b",
+    "hf_id": "mistralai/Ministral-3-8B-Instruct-2512-BF16",
+    "revision": "f6fae9795746f63c9be8344932f01275f3c63734",
+    "params": {
+      "billion": {
+        "language": 8.49,
+        "vision": 0.428
+      },
+      "total_billion": 8.918,
+      "bf16_gib_language": 15.8,
+      "bf16_gib_total": 16.6
+    },
+    "actions": {
+      "H/L": {
+        "ok": true,
+        "ids": [
+          1072,
+          1076
+        ],
+        "problems": []
+      },
+      "_H/_L": {
+        "ok": true,
+        "ids": [
+          1443,
+          1424
+        ],
+        "problems": []
+      },
+      "high/low": {
+        "ok": true,
+        "ids": [
+          24871,
+          14775
+        ],
+        "problems": []
+      },
+      "_high/_low": {
+        "ok": true,
+        "ids": [
+          2738,
+          4253
+        ],
+        "problems": []
+      },
+      "A/B": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "'A' is not one token here (tail tokens [87825])"
+        ]
+      },
+      "_A/_B": {
+        "ok": true,
+        "ids": [
+          1349,
+          1398
+        ],
+        "problems": []
+      }
+    },
+    "signals": {
+      "1/2/3": {
+        "ok": true,
+        "ids": [
+          1049,
+          1050,
+          1051
+        ],
+        "problems": []
+      },
+      "_1/_2/_3": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "' 1' is not one token here (tail tokens [1058, 1032, 1049])",
+          "' 2' is not one token here (tail tokens [1058, 1032, 1050])",
+          "' 3' is not one token here (tail tokens [1058, 1032, 1051])"
+        ]
+      },
+      "high/low/none": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "'none' is not one token here (tail tokens [59317])"
+        ]
+      },
+      "_high/_low/_none": {
+        "ok": true,
+        "ids": [
+          2738,
+          4253,
+          11518
+        ],
+        "problems": []
+      }
+    },
+    "signals_checked_after": "_H/_L",
+    "chosen": [
+      "_H/_L",
+      "_high/_low/_none"
+    ],
+    "prompt_tokens": {
+      "min": 293,
+      "max": 628
+    },
+    "chat_kwargs": {},
+    "think_block_in_prompt": false,
+    "empty_think_block": false,
+    "template_mentions_thinking": false
+  },
+  {
+    "name": "olmo-3-7b",
+    "hf_id": "allenai/Olmo-3-7B-Instruct",
+    "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+    "params": {
+      "billion": {
+        "language": 7.298
+      },
+      "total_billion": 7.298,
+      "bf16_gib_language": 13.6,
+      "bf16_gib_total": 13.6
+    },
+    "actions": {
+      "H/L": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "'H' is not one token here (tail tokens [95292])",
+          "'L' is not one token here (tail tokens [70333])"
+        ]
+      },
+      "_H/_L": {
+        "ok": true,
+        "ids": [
+          473,
+          445
+        ],
+        "problems": []
+      },
+      "high/low": {
+        "ok": true,
+        "ids": [
+          12156,
+          10516
+        ],
+        "problems": []
+      },
+      "_high/_low": {
+        "ok": true,
+        "ids": [
+          1579,
+          3428
+        ],
+        "problems": []
+      },
+      "A/B": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "'A' is not one token here (tail tokens [56748])",
+          "'B' is not one token here (tail tokens [82368])"
+        ]
+      },
+      "_A/_B": {
+        "ok": true,
+        "ids": [
+          362,
+          426
+        ],
+        "problems": []
+      }
+    },
+    "signals": {
+      "1/2/3": {
+        "ok": true,
+        "ids": [
+          16,
+          17,
+          18
+        ],
+        "problems": []
+      },
+      "_1/_2/_3": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "' 1' is not one token here (tail tokens [25, 220, 16])",
+          "' 2' is not one token here (tail tokens [25, 220, 17])",
+          "' 3' is not one token here (tail tokens [25, 220, 18])"
+        ]
+      },
+      "high/low/none": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "'none' is not one token here (tail tokens [22627])"
+        ]
+      },
+      "_high/_low/_none": {
+        "ok": true,
+        "ids": [
+          1579,
+          3428,
+          7000
+        ],
+        "problems": []
+      }
+    },
+    "signals_checked_after": "_H/_L",
+    "chosen": [
+      "_H/_L",
+      "_high/_low/_none"
+    ],
+    "prompt_tokens": {
+      "min": 290,
+      "max": 624
+    },
+    "chat_kwargs": {},
+    "think_block_in_prompt": false,
+    "empty_think_block": false,
+    "template_mentions_thinking": false
+  },
+  {
+    "name": "gemma-4-e4b",
+    "hf_id": "google/gemma-4-E4B-it",
+    "revision": "4ecc2ba63bcac23ba4a767fc87025b1450f84c9c",
+    "params": {
+      "billion": {
+        "audio": 0.309,
+        "language": 4.617,
+        "per_layer_embeddings": 2.901,
+        "vision": 0.169
+      },
+      "total_billion": 7.996,
+      "bf16_gib_language": 14.0,
+      "bf16_gib_total": 14.9
+    },
+    "actions": {
+      "H/L": {
+        "ok": true,
+        "ids": [
+          236814,
+          236798
+        ],
+        "problems": []
+      },
+      "_H/_L": {
+        "ok": true,
+        "ids": [
+          640,
+          639
+        ],
+        "problems": []
+      },
+      "high/low": {
+        "ok": true,
+        "ids": [
+          11480,
+          976
+        ],
+        "problems": []
+      },
+      "_high/_low": {
+        "ok": true,
+        "ids": [
+          1494,
+          2708
+        ],
+        "problems": []
+      },
+      "A/B": {
+        "ok": true,
+        "ids": [
+          236776,
+          236799
+        ],
+        "problems": []
+      },
+      "_A/_B": {
+        "ok": true,
+        "ids": [
+          562,
+          603
+        ],
+        "problems": []
+      }
+    },
+    "signals": {
+      "1/2/3": {
+        "ok": true,
+        "ids": [
+          236770,
+          236778,
+          236800
+        ],
+        "problems": []
+      },
+      "_1/_2/_3": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "' 1' is not one token here (tail tokens [236787, 236743, 236770])",
+          "' 2' is not one token here (tail tokens [236787, 236743, 236778])",
+          "' 3' is not one token here (tail tokens [236787, 236743, 236800])"
+        ]
+      },
+      "high/low/none": {
+        "ok": true,
+        "ids": [
+          11480,
+          976,
+          9745
+        ],
+        "problems": []
+      },
+      "_high/_low/_none": {
+        "ok": true,
+        "ids": [
+          1494,
+          2708,
+          7293
+        ],
+        "problems": []
+      }
+    },
+    "signals_checked_after": "_H/_L",
+    "chosen": [
+      "_H/_L",
+      "_high/_low/_none"
+    ],
+    "prompt_tokens": {
+      "min": 301,
+      "max": 659
+    },
+    "chat_kwargs": {},
+    "think_block_in_prompt": false,
+    "empty_think_block": false,
+    "template_mentions_thinking": true
+  },
+  {
+    "name": "llama-3.1-8b",
+    "hf_id": "meta-llama/Llama-3.1-8B-Instruct",
+    "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+    "error": "OSError: You are trying to access a gated repo."
+  },
+  {
+    "name": "qwen3-8b",
+    "hf_id": "Qwen/Qwen3-8B",
+    "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+    "params": {
+      "billion": {
+        "language": 8.191
+      },
+      "total_billion": 8.191,
+      "bf16_gib_language": 15.3,
+      "bf16_gib_total": 15.3
+    },
+    "actions": {
+      "H/L": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "'H' is not one token here (tail tokens [94192])",
+          "'L' is not one token here (tail tokens [69233])"
+        ]
+      },
+      "_H/_L": {
+        "ok": true,
+        "ids": [
+          472,
+          444
+        ],
+        "problems": []
+      },
+      "high/low": {
+        "ok": true,
+        "ids": [
+          11892,
+          10303
+        ],
+        "problems": []
+      },
+      "_high/_low": {
+        "ok": true,
+        "ids": [
+          1550,
+          3347
+        ],
+        "problems": []
+      },
+      "A/B": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "'A' is not one token here (tail tokens [55648])",
+          "'B' is not one token here (tail tokens [81268])"
+        ]
+      },
+      "_A/_B": {
+        "ok": true,
+        "ids": [
+          362,
+          425
+        ],
+        "problems": []
+      }
+    },
+    "signals": {
+      "1/2/3": {
+        "ok": true,
+        "ids": [
+          16,
+          17,
+          18
+        ],
+        "problems": []
+      },
+      "_1/_2/_3": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "' 1' is not one token here (tail tokens [25, 220, 16])",
+          "' 2' is not one token here (tail tokens [25, 220, 17])",
+          "' 3' is not one token here (tail tokens [25, 220, 18])"
+        ]
+      },
+      "high/low/none": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "'none' is not one token here (tail tokens [21869])"
+        ]
+      },
+      "_high/_low/_none": {
+        "ok": true,
+        "ids": [
+          1550,
+          3347,
+          6857
+        ],
+        "problems": []
+      }
+    },
+    "signals_checked_after": "_H/_L",
+    "chosen": [
+      "_H/_L",
+      "_high/_low/_none"
+    ],
+    "prompt_tokens": {
+      "min": 297,
+      "max": 631
+    },
+    "chat_kwargs": {
+      "enable_thinking": false
+    },
+    "think_block_in_prompt": true,
+    "empty_think_block": true,
+    "template_mentions_thinking": true
+  },
+  {
+    "name": "mistral-7b-v0.3",
+    "hf_id": "mistralai/Mistral-7B-Instruct-v0.3",
+    "revision": "c170c708c41dac9275d15a8fff4eca08d52bab71",
+    "params": {
+      "billion": {
+        "language": 7.248
+      },
+      "total_billion": 7.248,
+      "bf16_gib_language": 13.5,
+      "bf16_gib_total": 13.5
+    },
+    "actions": {
+      "H/L": {
+        "ok": true,
+        "ids": [
+          29537,
+          29526
+        ],
+        "problems": []
+      },
+      "_H/_L": {
+        "ok": true,
+        "ids": [
+          1150,
+          1161
+        ],
+        "problems": []
+      },
+      "high/low": {
+        "ok": true,
+        "ids": [
+          10069,
+          10149
+        ],
+        "problems": []
+      },
+      "_high/_low": {
+        "ok": true,
+        "ids": [
+          2254,
+          3627
+        ],
+        "problems": []
+      },
+      "A/B": {
+        "ok": true,
+        "ids": [
+          29509,
+          29528
+        ],
+        "problems": []
+      },
+      "_A/_B": {
+        "ok": true,
+        "ids": [
+          1098,
+          1133
+        ],
+        "problems": []
+      }
+    },
+    "signals": {
+      "1/2/3": {
+        "ok": true,
+        "ids": [
+          29508,
+          29518,
+          29538
+        ],
+        "problems": []
+      },
+      "_1/_2/_3": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "' 1' is not one token here (tail tokens [29515, 29473, 29508])",
+          "' 2' is not one token here (tail tokens [29515, 29473, 29518])",
+          "' 3' is not one token here (tail tokens [29515, 29473, 29538])"
+        ]
+      },
+      "high/low/none": {
+        "ok": true,
+        "ids": [
+          10069,
+          10149,
+          9375
+        ],
+        "problems": []
+      },
+      "_high/_low/_none": {
+        "ok": true,
+        "ids": [
+          2254,
+          3627,
+          7315
+        ],
+        "problems": []
+      }
+    },
+    "signals_checked_after": "_H/_L",
+    "chosen": [
+      "_H/_L",
+      "_high/_low/_none"
+    ],
+    "prompt_tokens": {
+      "min": 317,
+      "max": 682
+    },
+    "chat_kwargs": {},
+    "think_block_in_prompt": false,
+    "empty_think_block": false,
+    "template_mentions_thinking": false
+  },
+  {
+    "name": "olmo-2-7b",
+    "hf_id": "allenai/OLMo-2-1124-7B-Instruct",
+    "revision": "470b1fba1ae01581f270116362ee4aa1b97f4c84",
+    "params": {
+      "billion": {
+        "language": 7.299
+      },
+      "total_billion": 7.299,
+      "bf16_gib_language": 13.6,
+      "bf16_gib_total": 13.6
+    },
+    "actions": {
+      "H/L": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "'H' is not one token here (tail tokens [95292])",
+          "'L' is not one token here (tail tokens [70333])"
+        ]
+      },
+      "_H/_L": {
+        "ok": true,
+        "ids": [
+          473,
+          445
+        ],
+        "problems": []
+      },
+      "high/low": {
+        "ok": true,
+        "ids": [
+          12156,
+          10516
+        ],
+        "problems": []
+      },
+      "_high/_low": {
+        "ok": true,
+        "ids": [
+          1579,
+          3428
+        ],
+        "problems": []
+      },
+      "A/B": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "'A' is not one token here (tail tokens [56748])",
+          "'B' is not one token here (tail tokens [82368])"
+        ]
+      },
+      "_A/_B": {
+        "ok": true,
+        "ids": [
+          362,
+          426
+        ],
+        "problems": []
+      }
+    },
+    "signals": {
+      "1/2/3": {
+        "ok": true,
+        "ids": [
+          16,
+          17,
+          18
+        ],
+        "problems": []
+      },
+      "_1/_2/_3": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "' 1' is not one token here (tail tokens [25, 220, 16])",
+          "' 2' is not one token here (tail tokens [25, 220, 17])",
+          "' 3' is not one token here (tail tokens [25, 220, 18])"
+        ]
+      },
+      "high/low/none": {
+        "ok": false,
+        "ids": null,
+        "problems": [
+          "'none' is not one token here (tail tokens [22627])"
+        ]
+      },
+      "_high/_low/_none": {
+        "ok": true,
+        "ids": [
+          1579,
+          3428,
+          7000
+        ],
+        "problems": []
+      }
+    },
+    "signals_checked_after": "_H/_L",
+    "chosen": [
+      "_H/_L",
+      "_high/_low/_none"
+    ],
+    "prompt_tokens": {
+      "min": 293,
+      "max": 628
+    },
+    "chat_kwargs": {},
+    "think_block_in_prompt": false,
+    "empty_think_block": false,
+    "template_mentions_thinking": false
+  }
+]
