@@ -106,8 +106,14 @@ def modal_backend(cfg: dict, log_name: str) -> tuple[LLMBackend, Any]:
     eng = {"max_model_len": srv["max_model_len"],
            "gpu_memory_utilization": srv["gpu_memory_utilization"],
            "enforce_eager": srv["enforce_eager"], **m.get("engine_kwargs", {})}
-    server = serving.Server(hf_id=m["hf_id"], revision=m["revision"],
-                            engine_kwargs_json=json.dumps(eng))
+    if srv.get("deployed"):
+        import modal
+
+        server = modal.Cls.from_name(serving.APP_NAME, "Server")(
+            hf_id=m["hf_id"], revision=m["revision"], engine_kwargs_json=json.dumps(eng))
+    else:
+        server = serving.Server(hf_id=m["hf_id"], revision=m["revision"],
+                                engine_kwargs_json=json.dumps(eng))
     meta = {"model": m["name"], "hf_id": m["hf_id"], "revision": m["revision"]}
 
     def call(prompts: list[list[int]], ids: list[int], kind: str) -> list[dict]:
@@ -309,16 +315,71 @@ def gpu_session(cfg: dict, need: tuple[str, ...]):
                          f"SWARM_AUDIT_BATCH_INVARIANT={'1' if env_bi else '0'}: set them alike")
     if int(os.environ.get("SWARM_AUDIT_MAX_CONTAINERS", "1")) != int(srv["max_containers"]):
         raise SystemExit("set SWARM_AUDIT_MAX_CONTAINERS to serving.max_containers")
+    os.environ.setdefault("SWARM_AUDIT_SCALEDOWN_S", str(srv.get("scaledown_window_s", 60)))
     os.environ.setdefault("SWARM_AUDIT_TIMEOUT_MIN", str(srv["timeout_minutes"]))
+
+    if srv.get("deployed"):
+        check_deployed(cfg)
 
     @contextmanager
     def ctx():
         import modal
 
+        if srv.get("deployed"):       # the deployed app outlives this script
+            try:
+                yield
+            finally:                  # its GPU idles up to scaledown_window_s afterwards
+                record_spend("idle after script (upper bound)",
+                             float(srv["scaledown_window_s"]), cfg)
+            return
         from .serving import app
         with modal.enable_output(), app.run():
             yield
     return ctx()
+
+
+# ------------------------------------------------------------ the deployed server
+
+DEPLOY_FILE = RESULTS / "serving" / "deployed.json"
+SERVER_CODE = ("serving.py", "tokens.py", "ladder.py", "game.py", "__init__.py")
+
+
+def server_code_sha() -> str:
+    """sha256 over the package files the server container imports."""
+    import hashlib
+
+    h = hashlib.sha256()
+    for name in SERVER_CODE:
+        h.update(name.encode() + b"\0" + (Path(__file__).parent / name).read_bytes())
+    return h.hexdigest()
+
+
+def deploy_settings(cfg: dict) -> dict:
+    srv = cfg["serving"]
+    return {"batch_invariant": bool(srv["batch_invariant"]),
+            "scaledown_window_s": int(srv["scaledown_window_s"]),
+            "max_containers": int(srv["max_containers"]),
+            "timeout_minutes": int(srv["timeout_minutes"]),
+            "vllm_version": srv["vllm_version"], "gpu": srv["gpu"]}
+
+
+def check_deployed(cfg: dict) -> None:
+    """The deployed server must run this repository's serving code and settings, in the
+    workspace that is signed in; otherwise redeploy (scripts/deploy_server.py)."""
+    if not DEPLOY_FILE.exists():
+        raise SystemExit("serving.deployed is true but nothing is deployed: run "
+                         "scripts/deploy_server.py")
+    d = json.loads(DEPLOY_FILE.read_text())
+    problems = []
+    if d.get("code_sha256") != server_code_sha():
+        problems.append("the serving code changed since the deploy")
+    if d.get("settings") != deploy_settings(cfg):
+        problems.append(f"settings differ: deployed {d.get('settings')}, config {deploy_settings(cfg)}")
+    if d.get("workspace") != current_workspace():
+        problems.append(f"deployed in workspace {d.get('workspace')!r}, signed in elsewhere")
+    if problems:
+        raise SystemExit("The deployed server does not match: " + "; ".join(problems)
+                         + ". Redeploy with scripts/deploy_server.py.")
 
 
 # --------------------------------------------------------- label check, final prompts

@@ -57,6 +57,10 @@ BATCH_INVARIANT = os.environ.get("SWARM_AUDIT_BATCH_INVARIANT", "0") == "1"
 # More than one container only when an arm is split across containers, up to the
 # account's GPU concurrency limit.
 MAX_CONTAINERS = int(os.environ.get("SWARM_AUDIT_MAX_CONTAINERS", "1"))
+# Seconds a GPU container stays up after its last call. Matters for the deployed app
+# (scripts/deploy_server.py), which outlives each script, so consecutive steps reuse a
+# warm GPU instead of queueing for a new one.
+SCALEDOWN_S = int(os.environ.get("SWARM_AUDIT_SCALEDOWN_S", "60"))
 CACHE = "/cache"
 HF_HOME = f"{CACHE}/hf"
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -75,6 +79,8 @@ image = (
     .env({"HF_HOME": HF_HOME, "TOKENIZERS_PARALLELISM": "false",
           "SWARM_AUDIT_HF_SECRET": _hf_secret,
           "SWARM_AUDIT_BATCH_INVARIANT": "1" if BATCH_INVARIANT else "0",
+          "SWARM_AUDIT_SCALEDOWN_S": str(SCALEDOWN_S),
+          "SWARM_AUDIT_MAX_CONTAINERS": str(MAX_CONTAINERS),
           **({"VLLM_BATCH_INVARIANT": "1"} if BATCH_INVARIANT else {})})
     .add_local_python_source("swarm_audit")
 )
@@ -126,7 +132,7 @@ def _result(raw: list[float], sampled: int | None = None) -> dict:
 
 
 @app.cls(image=image, gpu=GPU, volumes={CACHE: weights}, secrets=secrets,
-         timeout=TIMEOUT_S, scaledown_window=60, max_containers=MAX_CONTAINERS)
+         timeout=TIMEOUT_S, scaledown_window=SCALEDOWN_S, max_containers=MAX_CONTAINERS)
 class Server:
     hf_id: str = modal.parameter()
     revision: str = modal.parameter()

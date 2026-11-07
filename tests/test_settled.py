@@ -113,3 +113,23 @@ def test_floor_must_be_set_before_model_runs():
     cfg["serving"]["numerical_floor"] = None
     with pytest.raises(SystemExit):
         build.numerical_floor(cfg)
+
+
+def test_deployed_server_must_match(tmp_path, monkeypatch):
+    import json
+
+    cfg = build.load("core.yaml")
+    assert cfg["serving"]["deployed"] is True and cfg["serving"]["scaledown_window_s"] == 600
+    monkeypatch.setattr(build, "DEPLOY_FILE", tmp_path / "deployed.json")
+    monkeypatch.setattr(build, "current_workspace", lambda: "aliyusufbelal")
+    with pytest.raises(SystemExit):                       # nothing deployed yet
+        build.check_deployed(cfg)
+    rec = {"workspace": "aliyusufbelal", "code_sha256": build.server_code_sha(),
+           "settings": build.deploy_settings(cfg)}
+    (tmp_path / "deployed.json").write_text(json.dumps(rec))
+    build.check_deployed(cfg)                             # matches
+    for k, v in (("code_sha256", "x"), ("workspace", "other"),
+                 ("settings", {**rec["settings"], "batch_invariant": False})):
+        (tmp_path / "deployed.json").write_text(json.dumps({**rec, k: v}))
+        with pytest.raises(SystemExit):
+            build.check_deployed(cfg)
