@@ -52,11 +52,12 @@ def test_cheap_talk_history_and_signal_prefix():
          Record("H", 2, 2, signal="none", sig_high=0, sig_low=0, sig_none=4))
     r = render("cheap_talk", h, d=4, labels=LABELS)
     lines = [l for l in r.user.splitlines() if l.startswith("- ")]
-    assert lines[0] == ('- 2 rounds ago: you bid low and sent "I\'ll bid high". Of your 4 '
-                        'neighbours, 2 bid high and 2 bid low; 3 sent "I\'ll bid high", '
-                        '1 sent "I\'ll bid low", and 0 sent no message.')
+    assert lines[0] == ('- 2 rounds ago: you bid low and sent "Next round I\'ll bid high". Of '
+                        'your 4 neighbours, 2 bid high and 2 bid low; 3 sent "Next round '
+                        'I\'ll bid high", 1 sent "Next round I\'ll bid low", and 0 sent no message.')
     assert lines[1].startswith("- Last round: you bid high and sent no message.")
-    assert 'Message: high for "I\'ll bid high"' in r.user
+    assert 'Message: high for "Next round I\'ll bid high"' in r.user
+    assert "about your bid in the next round" in r.system
     assert r.signal_prefix(" H") == "Bid: H\nMessage:"
     _no_placeholders(r.user)
 

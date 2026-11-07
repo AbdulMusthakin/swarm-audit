@@ -68,7 +68,14 @@ INPUT_TEXT = {
 
 def missing_inputs(cfg: dict, need: tuple[str, ...]) -> list[str]:
     inp = cfg.get("inputs", {})
-    return [INPUT_TEXT[k] for k in need if not inp.get(k)]
+    out = []
+    for k in need:
+        v = inp.get(k)
+        if isinstance(v, dict):   # e.g. prompts_approved: one flag per template
+            out += [f"{INPUT_TEXT[k]}: {name}" for name, ok in v.items() if not ok]
+        elif not v:
+            out.append(INPUT_TEXT[k])
+    return out
 
 
 def require_inputs(cfg: dict, need: tuple[str, ...]) -> None:
@@ -99,23 +106,47 @@ def modal_backend(cfg: dict, log_name: str) -> tuple[LLMBackend, Any]:
     eng = {"max_model_len": srv["max_model_len"],
            "gpu_memory_utilization": srv["gpu_memory_utilization"],
            "enforce_eager": srv["enforce_eager"], **m.get("engine_kwargs", {})}
-    server = serving.Server(hf_id=m["hf_id"], revision=m["revision"],
-                            engine_kwargs_json=json.dumps(eng))
-    meta = {"model": m["name"], "hf_id": m["hf_id"], "revision": m["revision"]}
+    if use_deployed(cfg):
+        import modal
 
-    def call(prompts: list[list[int]], ids: list[int], kind: str) -> list[dict]:
-        return serving.call_logged(server.label_logprobs, prompts, ids, method=srv["method"],
-                                   log_name=log_name, prompts=prompts,
-                                   prompt_ids=[str(i) for i in range(len(prompts))],
-                                   meta={**meta, "call": kind, "allowed_token_ids": ids})
+        server = modal.Cls.from_name(serving.APP_NAME, "Server")(
+            hf_id=m["hf_id"], revision=m["revision"], engine_kwargs_json=json.dumps(eng))
+    else:
+        server = serving.Server(hf_id=m["hf_id"], revision=m["revision"],
+                                engine_kwargs_json=json.dumps(eng))
+    meta = {"model": m["name"], "hf_id": m["hf_id"], "revision": m["revision"]}
+    # Review C1: the call-log (resume) key carries the full serving identity, so a changed
+    # setting can never reuse an incompatible cached answer.
+    identity = serving_identity(cfg, eng)
+
+    def call(prompts: list[list[int]], ids: list[int], kind: str,
+             fresh: bool = False) -> list[dict]:
+        out, replayed = serving.call_logged(
+            server.label_logprobs, prompts, ids, method=srv["method"], log_name=log_name,
+            prompts=prompts, prompt_ids=[str(i) for i in range(len(prompts))],
+            meta={**meta, "call": kind, "allowed_token_ids": ids, "serving": identity},
+            fresh=fresh, return_status=True)
+        return [{**r, "replayed": replayed} for r in out]
 
     tok = load_tokenizer(m)
     be = LLMBackend(tok, labels(cfg), tuple(m["label_ids"]["actions"]),
                     tuple(m["label_ids"]["signals"]), call, params(cfg), m.get("chat_kwargs"),
-                    model_info={**meta, "vllm": srv["vllm_version"],
-                                "batch_invariant": serving.BATCH_INVARIANT,
-                                "engine_kwargs": eng})
+                    model_info={**meta, "serving": identity})
     return be, server
+
+
+def serving_identity(cfg: dict, eng: dict | None = None) -> dict:
+    """Everything about the serving side that can change the kernel: revision, read-out
+    method, precision, engine settings, vLLM version, batch invariance, GPU type and the
+    serving code itself."""
+    m, srv = cfg["model"], cfg["serving"]
+    eng = eng or {"max_model_len": srv["max_model_len"],
+                  "gpu_memory_utilization": srv["gpu_memory_utilization"],
+                  "enforce_eager": srv["enforce_eager"], **m.get("engine_kwargs", {})}
+    return {"hf_id": m["hf_id"], "revision": m["revision"], "method": srv["method"],
+            "dtype": "bfloat16", "engine_kwargs": eng, "vllm_version": srv["vllm_version"],
+            "batch_invariant": bool(srv["batch_invariant"]), "gpu": srv["gpu"],
+            "serving_code_sha256": server_code_sha()}
 
 
 # ------------------------------------------------------------------------ tables
@@ -188,7 +219,10 @@ def drift_panel(cfg: dict, n_core: int = 10, seed: int = 99) -> list[Query]:
 
 
 def panel_outputs(backend: Backend, panel: list[Query]) -> list[dict]:
-    outs = backend.query(panel)
+    """The drift panel, always measured fresh (never replayed from the call log)."""
+    outs = backend.query(panel, fresh=True)
+    if any(o.replayed for o in outs):
+        raise RuntimeError("a drift-panel answer was replayed from the log")
     return [{"p_H": o.p_H, "sig": o.sig, "sha": o.prompt_sha256} for o in outs]
 
 
@@ -212,12 +246,14 @@ class PanelMixer:
         self.rng = np.random.default_rng(seed)
         self.name = inner.name
 
-    def query(self, queries):
+    def query(self, queries, fresh: bool = False):
         if self.mixed is not None or len(queries) < self.min_batch:
-            return self.inner.query(queries)
+            return self.inner.query(queries, fresh=fresh)
         allq = list(queries) + self.panel
         perm = self.rng.permutation(len(allq))
-        outs = self.inner.query([allq[i] for i in perm])
+        outs = self.inner.query([allq[i] for i in perm], fresh=True)   # a measurement
+        if any(o.replayed for o in outs):
+            raise RuntimeError("the mixed drift batch was replayed from the log")
         back = [None] * len(allq)
         for pos, i in enumerate(perm):
             back[i] = outs[pos]
@@ -244,13 +280,17 @@ def spent_usd() -> float:
 def record_spend(what: str, seconds: float, cfg: dict, containers: int = 1) -> float:
     import datetime as dt
 
+    import fcntl
+
     usd = seconds / 3600 * cfg["serving"]["l4_usd_per_hour"] * containers
-    log = json.loads(SPEND_FILE.read_text()) if SPEND_FILE.exists() else []
-    log.append({"what": what, "seconds": round(seconds, 1), "containers": containers,
-                "usd": round(usd, 4), "time": dt.datetime.now(dt.timezone.utc).isoformat(),
-                "note": "wall-clock estimate at the list price; check the Modal dashboard"})
     SPEND_FILE.parent.mkdir(parents=True, exist_ok=True)
-    SPEND_FILE.write_text(json.dumps(log, indent=1) + "\n")
+    with open(SPEND_FILE.with_suffix(".lock"), "w") as lock:   # GPU scripts may run at once
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        log = json.loads(SPEND_FILE.read_text()) if SPEND_FILE.exists() else []
+        log.append({"what": what, "seconds": round(seconds, 1), "containers": containers,
+                    "usd": round(usd, 4), "time": dt.datetime.now(dt.timezone.utc).isoformat(),
+                    "note": "wall-clock estimate at the list price; check the Modal dashboard"})
+        SPEND_FILE.write_text(json.dumps(log, indent=1) + "\n")
     return usd
 
 
@@ -264,13 +304,37 @@ def check_cost(cfg: dict, worst_minutes: float) -> None:
         raise SystemExit("Stopping: the worst-case cost would pass the cap. Ask Abdul.")
 
 
+def current_workspace() -> str:
+    """The Modal workspace of the active credentials (from `modal token info`)."""
+    import re
+    import subprocess
+
+    r = subprocess.run(["modal", "token", "info"], capture_output=True, text=True)
+    m = re.search(r"Workspace:\s*(\S+)", r.stdout)
+    if r.returncode != 0 or not m:
+        raise SystemExit("Modal is not signed in (or `modal token info` failed). A teammate "
+                         "signs in to their own workspace with `python scripts/modal_login.py`.")
+    return m.group(1)
+
+
+def check_workspace(cfg: dict) -> str:
+    ws = current_workspace()
+    if ws in cfg.get("inputs", {}).get("forbidden_workspaces", []):
+        raise SystemExit(f"Stopping: signed in to Modal workspace {ws!r}, which Abdul ruled "
+                         "out for GPU runs. Sign in to a teammate's workspace instead.")
+    print(f"Modal workspace: {ws}")
+    return ws
+
+
 def gpu_session(cfg: dict, need: tuple[str, ...]):
-    """Context for Modal GPU work: checks the inputs and that the batch-invariance flag
-    and container count in the environment match the config, then runs the app."""
+    """Context for Modal GPU work: checks the inputs, the Modal workspace, and that the
+    batch-invariance flag and container count in the environment match the config, then
+    runs the app."""
     import os
     from contextlib import contextmanager
 
     require_inputs(cfg, need)
+    check_workspace(cfg)
     srv = cfg["serving"]
     env_bi = os.environ.get("SWARM_AUDIT_BATCH_INVARIANT", "0") == "1"
     if env_bi != bool(srv["batch_invariant"]):
@@ -278,13 +342,183 @@ def gpu_session(cfg: dict, need: tuple[str, ...]):
                          f"SWARM_AUDIT_BATCH_INVARIANT={'1' if env_bi else '0'}: set them alike")
     if int(os.environ.get("SWARM_AUDIT_MAX_CONTAINERS", "1")) != int(srv["max_containers"]):
         raise SystemExit("set SWARM_AUDIT_MAX_CONTAINERS to serving.max_containers")
+    os.environ.setdefault("SWARM_AUDIT_SCALEDOWN_S", str(srv.get("scaledown_window_s", 60)))
     os.environ.setdefault("SWARM_AUDIT_TIMEOUT_MIN", str(srv["timeout_minutes"]))
+
+    if use_deployed(cfg):
+        check_deployed(cfg)
 
     @contextmanager
     def ctx():
         import modal
 
+        if use_deployed(cfg):       # the deployed app outlives this script
+            try:
+                yield
+            finally:                  # its GPU idles up to scaledown_window_s afterwards
+                record_spend("idle after script (upper bound)",
+                             float(srv["scaledown_window_s"]), cfg)
+            return
         from .serving import app
         with modal.enable_output(), app.run():
             yield
     return ctx()
+
+
+# ------------------------------------------------------------ the deployed server
+
+DEPLOY_FILE = RESULTS / "serving" / "deployed.json"
+SERVER_CODE = ("serving.py", "tokens.py", "ladder.py", "game.py", "__init__.py")
+
+
+def server_code_sha() -> str:
+    """sha256 over the package files the server container imports."""
+    import hashlib
+
+    h = hashlib.sha256()
+    for name in SERVER_CODE:
+        h.update(name.encode() + b"\0" + (Path(__file__).parent / name).read_bytes())
+    return h.hexdigest()
+
+
+def deploy_settings(cfg: dict) -> dict:
+    srv = cfg["serving"]
+    return {"batch_invariant": bool(srv["batch_invariant"]),
+            "scaledown_window_s": int(srv["scaledown_window_s"]),
+            "max_containers": int(srv["max_containers"]),
+            "timeout_minutes": int(srv["timeout_minutes"]),
+            "vllm_version": srv["vllm_version"], "gpu": srv["gpu"]}
+
+
+def check_deployed(cfg: dict) -> None:
+    """The deployed server must run this repository's serving code and settings, in the
+    workspace that is signed in; otherwise redeploy (scripts/deploy_server.py)."""
+    if not DEPLOY_FILE.exists():
+        raise SystemExit("serving.deployed is true but nothing is deployed: run "
+                         "scripts/deploy_server.py")
+    d = json.loads(DEPLOY_FILE.read_text())
+    problems = []
+    if d.get("code_sha256") != server_code_sha():
+        problems.append("the serving code changed since the deploy")
+    if d.get("settings") != deploy_settings(cfg):
+        problems.append(f"settings differ: deployed {d.get('settings')}, config {deploy_settings(cfg)}")
+    if d.get("workspace") != current_workspace():
+        problems.append(f"deployed in workspace {d.get('workspace')!r}, signed in elsewhere")
+    if problems:
+        raise SystemExit("The deployed server does not match: " + "; ".join(problems)
+                         + ". Redeploy with scripts/deploy_server.py.")
+
+
+# --------------------------------------------------------- label check, final prompts
+
+
+def label_check_queries(cfg: dict, seed: int = 11) -> list[Query]:
+    """The drift panel (every calibration state, both channels) plus round-20 p_test
+    histories on both channels: the prompts whose label tokenisation must hold."""
+    from .audit import synthetic_history
+
+    pt = ptest(cfg)
+    rng = np.random.default_rng(seed)
+    long_pt = PTest(**{**pt.__dict__, "L_min": pt.L_max})   # the longest histories
+    out = drift_panel(cfg)
+    for ch in ("counts", "cheap_talk"):
+        for s in all_actions_states(2, start=False):
+            out.append(Query(ch, synthetic_history(rng, ch, 2, s, long_pt), 2))
+    return out
+
+
+def check_final_labels(tok: Any, cfg: dict) -> dict:
+    """Every action label is one token with the configured id after every prompt, and
+    every signal label likewise after each action label; plus prompt lengths."""
+    from .tokens import chat_prefix, check_labels, encode
+
+    lab = labels(cfg)
+    m = cfg["model"]
+    act_texts, sig_texts, n_tok = [], [], {"counts": 0, "cheap_talk": 0}
+    for qy in label_check_queries(cfg):
+        from .ladder import render
+
+        r = render(qy.channel, qy.history, qy.d, lab, params(cfg), qy.last_k)
+        text = chat_prefix(tok, r, m.get("chat_kwargs"))
+        act_texts.append(text)
+        n_tok[qy.channel] = max(n_tok[qy.channel], len(encode(tok, text)))
+        if qy.channel == "cheap_talk":
+            base = text[: -len(r.assistant)]
+            sig_texts += [base + r.signal_prefix(a) for a in lab.actions]
+    a = check_labels(tok, act_texts, lab.actions)
+    s = check_labels(tok, sig_texts, lab.signals)
+    ok = (a.ok and s.ok and list(a.ids) == m["label_ids"]["actions"]
+          and list(s.ids) == m["label_ids"]["signals"])
+    return {"pass": bool(ok), "action_ids": a.ids, "signal_ids": s.ids,
+            "configured": m["label_ids"], "problems": a.problems + s.problems,
+            "prompts_checked": len(act_texts), "signal_positions_checked": len(sig_texts),
+            "max_prompt_tokens": n_tok, "max_model_len": cfg["serving"]["max_model_len"]}
+
+
+# ------------------------------------------------------------- settled decisions
+
+BUILD_CONFIGS = ("core.yaml", "calibration.yaml", "secondary.yaml")
+
+
+def set_config_line(key: str, value: str, folder: Path = REPO_ROOT / "configs",
+                    configs=BUILD_CONFIGS, note: str = "") -> None:
+    """Rewrite the first line `  <key>: ...` (any indentation) in every build config,
+    keeping the rest of the file and its comments. `value` is YAML text."""
+    import re
+
+    for name in configs:
+        p = Path(folder) / name
+        s = p.read_text()
+        pat = re.compile(rf"^(\s*){re.escape(key)}:[^\n]*$", re.M)
+        m = pat.search(s)
+        if not m:
+            raise ValueError(f"no `{key}:` line in {p}")
+        line = f"{m.group(1)}{key}: {value}" + (f"   # {note}" if note else "")
+        p.write_text(s[:m.start()] + line + s[m.end():])
+
+
+def use_deployed(cfg: dict) -> bool:
+    """serving.deployed, unless SWARM_AUDIT_DEPLOYED=0/1 overrides it for one script."""
+    import os
+
+    env = os.environ.get("SWARM_AUDIT_DEPLOYED")
+    return bool(cfg["serving"].get("deployed")) if env is None else env == "1"
+
+
+def numerical_floor(cfg: dict) -> float:
+    f = cfg["serving"].get("numerical_floor")
+    if f is None:
+        raise SystemExit("G3 has not set the numerical floor: run scripts/check_serving.py "
+                         "(and --decide)")
+    return float(f)
+
+
+PLAN_FILE = RESULTS / "serving" / "g4_plan.json"
+
+
+def check_in_plan(arm: str, cond_names: list[str]) -> None:
+    """Core and second-topology arms run only as the G4 plan allows."""
+    if not PLAN_FILE.exists():
+        raise SystemExit("no G4 plan (results/serving/g4_plan.json): run scripts/benchmark.py")
+    plan = json.loads(PLAN_FILE.read_text())
+    allowed = {(p["arm"], p["condition"]) for p in plan["run"]}
+    cut = [c for c in cond_names if (arm, c) not in allowed]
+    if cut:
+        raise SystemExit(f"the G4 plan does not include {arm}: {cut} (cut to fit the budget; "
+                         f"see {PLAN_FILE})")
+
+
+class FreshBackend:
+    """Wraps a backend so that every query is measured fresh (never replayed)."""
+
+    def __init__(self, inner: Backend):
+        self.inner, self.name = inner, inner.name
+
+    def query(self, queries, fresh: bool = True):
+        outs = self.inner.query(queries, fresh=True)
+        if any(o.replayed for o in outs):
+            raise RuntimeError("a measurement was replayed from the log")
+        return outs
+
+    def describe(self):
+        return self.inner.describe()

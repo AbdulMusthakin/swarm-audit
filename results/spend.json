@@ -1,0 +1,26 @@
+[
+ {
+  "what": "G3 batch_invariant=False",
+  "seconds": 1516.4,
+  "containers": 1,
+  "usd": 0.337,
+  "time": "2026-11-07T17:19:39.180470+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "G3 batch_invariant=True",
+  "seconds": 1808.2,
+  "containers": 1,
+  "usd": 0.4018,
+  "time": "2026-11-07T17:50:33.300027+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "G4 first attempt (crashed on the info() call; estimate, about 3 min of L4)",
+  "seconds": 180,
+  "containers": 1,
+  "usd": 0.04,
+  "time": "2026-11-07T18:32:46.233519+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ }
+]

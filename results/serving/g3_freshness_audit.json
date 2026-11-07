@@ -1,0 +1,20 @@
+{
+ "question": "review C1: were the G3 measurements fresh, or replayed from the call log?",
+ "finding": "fresh: every expected server call is in the log, and none was replayed",
+ "evidence": {
+  "call_log": "logs/serving/2026-11-07_g3.jsonl (git-ignored; summarised here)",
+  "entries": 608,
+  "expected": "2 runs x (200 single-prompt action calls + 100 two-prompt signal calls alone, 2 calls in the 1,200-prompt batch, 2 calls warm) = 608",
+  "prompts_per_call": {
+   "1": 400,
+   "2": 200,
+   "200": 4,
+   "1200": 4
+  },
+  "first_call": "2026-11-07T17:13:45.735881+00:00",
+  "last_call": "2026-11-07T17:50:33.278130+00:00",
+  "resume_env": "SWARM_AUDIT_RESUME was not set for either G3 command, and neither output contains 'resumed from log'; call_logged writes an entry only when it calls the server, so 608 entries means 608 server calls"
+ },
+ "action": "none: G3 is not repeated; the old records are kept as they are",
+ "scope": "zero difference on this panel of 200 prompts with batch invariance; this does not establish numerical invariance for every possible prompt or batch"
+}

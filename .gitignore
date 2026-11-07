@@ -23,3 +23,4 @@ logs/*
 *.toc
 setup-paper/*.log
 report/*.log
+results/spend.lock

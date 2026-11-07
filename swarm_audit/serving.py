@@ -57,6 +57,10 @@ BATCH_INVARIANT = os.environ.get("SWARM_AUDIT_BATCH_INVARIANT", "0") == "1"
 # More than one container only when an arm is split across containers, up to the
 # account's GPU concurrency limit.
 MAX_CONTAINERS = int(os.environ.get("SWARM_AUDIT_MAX_CONTAINERS", "1"))
+# Seconds a GPU container stays up after its last call. Matters for the deployed app
+# (scripts/deploy_server.py), which outlives each script, so consecutive steps reuse a
+# warm GPU instead of queueing for a new one.
+SCALEDOWN_S = int(os.environ.get("SWARM_AUDIT_SCALEDOWN_S", "60"))
 CACHE = "/cache"
 HF_HOME = f"{CACHE}/hf"
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -75,6 +79,8 @@ image = (
     .env({"HF_HOME": HF_HOME, "TOKENIZERS_PARALLELISM": "false",
           "SWARM_AUDIT_HF_SECRET": _hf_secret,
           "SWARM_AUDIT_BATCH_INVARIANT": "1" if BATCH_INVARIANT else "0",
+          "SWARM_AUDIT_SCALEDOWN_S": str(SCALEDOWN_S),
+          "SWARM_AUDIT_MAX_CONTAINERS": str(MAX_CONTAINERS),
           **({"VLLM_BATCH_INVARIANT": "1"} if BATCH_INVARIANT else {})})
     .add_local_python_source("swarm_audit")
 )
@@ -126,7 +132,7 @@ def _result(raw: list[float], sampled: int | None = None) -> dict:
 
 
 @app.cls(image=image, gpu=GPU, volumes={CACHE: weights}, secrets=secrets,
-         timeout=TIMEOUT_S, scaledown_window=60, max_containers=MAX_CONTAINERS)
+         timeout=TIMEOUT_S, scaledown_window=SCALEDOWN_S, max_containers=MAX_CONTAINERS)
 class Server:
     hf_id: str = modal.parameter()
     revision: str = modal.parameter()
@@ -158,10 +164,12 @@ class Server:
             kv_tokens = cc.num_gpu_blocks * cc.block_size
         except Exception:
             kv_tokens = None
-        return {"vllm": vllm.__version__, "torch": torch.__version__,
+        # Plain str/float only: torch.__version__ is a TorchVersion, which the client
+        # cannot unpickle without torch installed.
+        return {"vllm": str(vllm.__version__), "torch": str(torch.__version__),
                 "kv_cache_tokens": kv_tokens,
-                "gpu": torch.cuda.get_device_name(0),
-                "gpu_mem_gb": torch.cuda.get_device_properties(0).total_memory / 1e9,
+                "gpu": str(torch.cuda.get_device_name(0)),
+                "gpu_mem_gb": float(torch.cuda.get_device_properties(0).total_memory / 1e9),
                 "load_seconds": self.load_seconds, "engine_kwargs": self.engine_kwargs,
                 "batch_invariant": os.environ.get("VLLM_BATCH_INVARIANT") == "1"}
 
@@ -256,7 +264,7 @@ def hf_label_logprobs(hf_id: str, revision: str,
     load_s = time.time() - t0
     out = [hf_logprobs(model, prompts, ids) for prompts, ids in batches]
     return {"results": out, "transformers": transformers.__version__,
-            "torch": torch.__version__, "load_seconds": load_s}
+            "torch": str(torch.__version__), "load_seconds": load_s}
 
 
 # ------------------------------------------------------------------------- logging
@@ -276,19 +284,24 @@ def _find_logged(log_name: str, function: str, meta: dict, prompts: list[list[in
 
 
 def call_logged(fn: Any, *args: Any, log_name: str, meta: dict, prompt_ids: list[str] | None = None,
-                prompts: list[list[int]] | None = None, **kwargs: Any) -> Any:
+                prompts: list[list[int]] | None = None, fresh: bool = False,
+                return_status: bool = False, **kwargs: Any) -> Any:
     """Call a Modal function (`fn.remote`) or a local callable, and append the call, its
     inputs and its outputs to logs/serving/<date>_<log_name>.jsonl.
 
     With SWARM_AUDIT_RESUME=1, an identical call already in the log (same function,
-    metadata and prompt token ids) is not repeated: its logged output is returned."""
+    metadata and prompt token ids) is not repeated: its logged output is returned. The
+    metadata must carry the full serving identity (callers: build.modal_backend), so a
+    changed setting never matches an old entry. `fresh=True` never replays: every
+    repeatability, drift and timing measurement uses it. With `return_status`, returns
+    (output, replayed)."""
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     fname = getattr(fn, "__name__", str(fn))
-    if os.environ.get("SWARM_AUDIT_RESUME") == "1":
+    if not fresh and os.environ.get("SWARM_AUDIT_RESUME") == "1":
         out = _find_logged(log_name, fname, meta, prompts or [])
         if out is not None:
             print(f"resumed from log: {log_name} {meta.get('call')}", flush=True)
-            return out
+            return (out, True) if return_status else out
     t0 = time.time()
     remote = getattr(fn, "remote", None)
     out = remote(*args, **kwargs) if remote else fn(*args, **kwargs)
@@ -296,6 +309,7 @@ def call_logged(fn: Any, *args: Any, log_name: str, meta: dict, prompt_ids: list
         "time": _dt.datetime.now(_dt.timezone.utc).isoformat(),
         "seconds": round(time.time() - t0, 3),
         "function": fname,
+        "fresh_measurement": bool(fresh),
         **meta,
         "prompts": [
             {"prompt_id": pid, "n_tokens": len(p),
@@ -307,4 +321,4 @@ def call_logged(fn: Any, *args: Any, log_name: str, meta: dict, prompt_ids: list
     path = LOG_DIR / f"{_dt.date.today().isoformat()}_{log_name}.jsonl"
     with open(path, "a") as fh:
         fh.write(json.dumps(entry, default=str) + "\n")
-    return out
+    return (out, False) if return_status else out

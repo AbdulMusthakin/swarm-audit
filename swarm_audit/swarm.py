@@ -129,7 +129,8 @@ def simulate(cond: Condition, backend: Backend, runs: Sequence[int]) -> dict[int
                        "state": key(actions_state(h)),
                        "prompt_sha256": o.prompt_sha256, "n_tokens": o.n_tokens,
                        "p_H": o.p_H, "logprob_H": o.logprob_H, "logprob_L": o.logprob_L,
-                       "p_valid": o.p_valid, "u_action": u_a, "action": a}
+                       "p_valid": o.p_valid, "u_action": u_a, "action": a,
+                       "replayed": o.replayed}
                 if cheap:
                     u_m = float(rngs[r].random())
                     m = sample_signal(u_m, o.sig[a])

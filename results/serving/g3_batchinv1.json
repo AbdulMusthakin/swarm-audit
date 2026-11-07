@@ -1,0 +1,19 @@
+{
+ "batch_invariant": true,
+ "prompts": 200,
+ "others": 1000,
+ "max_abs_diff_p_H": 0.0,
+ "max_abs_diff_signal": 0.0,
+ "by_pair": {
+  "alone_vs_batch": 0.0,
+  "alone_vs_warm": 0.0,
+  "batch_vs_warm": 0.0
+ },
+ "seconds": {
+  "alone": 1476.8602702617645,
+  "batch": 286.3829674720764,
+  "warm": 44.953389406204224,
+  "total": 1808.197943687439
+ },
+ "throughput_prompts_per_s_batch": 4.190193329556183
+}
