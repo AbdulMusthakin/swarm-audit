@@ -13,7 +13,7 @@ preference order of `configs/screening.yaml`; `_` is a leading space):
 - **ministral-3-8b** (`mistralai/Ministral-3-8B-Instruct-2512-BF16`): _H/_L + _high/_low/_none
 - **olmo-3-7b** (`allenai/Olmo-3-7B-Instruct`): _H/_L + _high/_low/_none
 - **gemma-4-e4b** (`google/gemma-4-E4B-it`): _H/_L + _high/_low/_none
-- **llama-3.1-8b** (`meta-llama/Llama-3.1-8B-Instruct`): OSError: You are trying to access a gated repo.
+- **llama-3.1-8b** (`meta-llama/Llama-3.1-8B-Instruct`): _H/_L + _high/_low/_none
 - **qwen3-8b** (`Qwen/Qwen3-8B`): _H/_L + _high/_low/_none
 - **mistral-7b-v0.3** (`mistralai/Mistral-7B-Instruct-v0.3`): _H/_L + _high/_low/_none
 - **olmo-2-7b** (`allenai/OLMo-2-1124-7B-Instruct`): _H/_L + _high/_low/_none
@@ -28,7 +28,7 @@ The newest instruct model at ≤ 9B in each family (Hugging Face, 7 Nov 2026), p
 | ministral-3-8b (`mistralai/Ministral-3-8B-Instruct-2512-BF16`) | Mistral | apache-2.0 | 8.49 / 8.92 | 15.8 | no think block | yes |
 | olmo-3-7b (`allenai/Olmo-3-7B-Instruct`) | OLMo | apache-2.0 | 7.30 / 7.30 | 13.6 | no think block | yes |
 | gemma-4-e4b (`google/gemma-4-E4B-it`) | Gemma | apache-2.0 | 7.52 / 8.00 | 14.0 | no think block | no |
-| llama-3.1-8b (`meta-llama/Llama-3.1-8B-Instruct`) | Llama | llama3.1 (gated; needs Abdul's HF token and licence acceptance) | – | – | – | no |
+| llama-3.1-8b (`meta-llama/Llama-3.1-8B-Instruct`) | Llama | llama3.1 (gated; needs Abdul's HF token and licence acceptance) | 8.03 / 8.03 | 15.0 | no think block | no |
 | qwen3-8b (`Qwen/Qwen3-8B`) | Qwen | apache-2.0 | 8.19 / 8.19 | 15.3 | empty think block | no |
 | mistral-7b-v0.3 (`mistralai/Mistral-7B-Instruct-v0.3`) | Mistral | apache-2.0 | 7.25 / 7.25 | 13.5 | no think block | no |
 | olmo-2-7b (`allenai/OLMo-2-1124-7B-Instruct`) | OLMo | apache-2.0 | 7.30 / 7.30 | 13.6 | no think block | no |

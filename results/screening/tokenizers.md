@@ -10,7 +10,7 @@ position in every screening-grid prompt (`encode(prompt + label) == encode(promp
 | ministral-3-8b | pass | pass | pass | pass | FAIL | pass | pass | FAIL | FAIL | pass | _H/_L + _high/_low/_none | 293–628 | no think block |
 | olmo-3-7b | FAIL | pass | pass | pass | FAIL | pass | pass | FAIL | FAIL | pass | _H/_L + _high/_low/_none | 290–624 | no think block |
 | gemma-4-e4b | pass | pass | pass | pass | pass | pass | pass | FAIL | pass | pass | _H/_L + _high/_low/_none | 301–659 | no think block |
-| llama-3.1-8b | not screened: OSError: You are trying to access a gated repo. |
+| llama-3.1-8b | FAIL | pass | pass | pass | FAIL | pass | pass | FAIL | FAIL | pass | _H/_L + _high/_low/_none | 312–646 | no think block |
 | qwen3-8b | FAIL | pass | pass | pass | FAIL | pass | pass | FAIL | FAIL | pass | _H/_L + _high/_low/_none | 297–631 | empty think block |
 | mistral-7b-v0.3 | pass | pass | pass | pass | pass | pass | pass | FAIL | pass | pass | _H/_L + _high/_low/_none | 317–682 | no think block |
 | olmo-2-7b | FAIL | pass | pass | pass | FAIL | pass | pass | FAIL | FAIL | pass | _H/_L + _high/_low/_none | 293–628 | no think block |
@@ -31,6 +31,10 @@ Signal sets were checked after the action labels in the `signals_checked_after` 
 - olmo-3-7b, signals `_1/_2/_3`: ' 1' is not one token here (tail tokens [25, 220, 16]); ' 2' is not one token here (tail tokens [25, 220, 17]); ' 3' is not one token here (tail tokens [25, 220, 18])
 - olmo-3-7b, signals `high/low/none`: 'none' is not one token here (tail tokens [22627])
 - gemma-4-e4b, signals `_1/_2/_3`: ' 1' is not one token here (tail tokens [236787, 236743, 236770]); ' 2' is not one token here (tail tokens [236787, 236743, 236778]); ' 3' is not one token here (tail tokens [236787, 236743, 236800])
+- llama-3.1-8b, actions `H/L`: 'H' is not one token here (tail tokens [95292]); 'L' is not one token here (tail tokens [70333])
+- llama-3.1-8b, actions `A/B`: 'A' is not one token here (tail tokens [56748]); 'B' is not one token here (tail tokens [82368])
+- llama-3.1-8b, signals `_1/_2/_3`: ' 1' is not one token here (tail tokens [25, 220, 16]); ' 2' is not one token here (tail tokens [25, 220, 17]); ' 3' is not one token here (tail tokens [25, 220, 18])
+- llama-3.1-8b, signals `high/low/none`: 'none' is not one token here (tail tokens [22627])
 - qwen3-8b, actions `H/L`: 'H' is not one token here (tail tokens [94192]); 'L' is not one token here (tail tokens [69233])
 - qwen3-8b, actions `A/B`: 'A' is not one token here (tail tokens [55648]); 'B' is not one token here (tail tokens [81268])
 - qwen3-8b, signals `_1/_2/_3`: ' 1' is not one token here (tail tokens [25, 220, 16]); ' 2' is not one token here (tail tokens [25, 220, 17]); ' 3' is not one token here (tail tokens [25, 220, 18])
