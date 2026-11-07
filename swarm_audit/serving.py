@@ -284,19 +284,24 @@ def _find_logged(log_name: str, function: str, meta: dict, prompts: list[list[in
 
 
 def call_logged(fn: Any, *args: Any, log_name: str, meta: dict, prompt_ids: list[str] | None = None,
-                prompts: list[list[int]] | None = None, **kwargs: Any) -> Any:
+                prompts: list[list[int]] | None = None, fresh: bool = False,
+                return_status: bool = False, **kwargs: Any) -> Any:
     """Call a Modal function (`fn.remote`) or a local callable, and append the call, its
     inputs and its outputs to logs/serving/<date>_<log_name>.jsonl.
 
     With SWARM_AUDIT_RESUME=1, an identical call already in the log (same function,
-    metadata and prompt token ids) is not repeated: its logged output is returned."""
+    metadata and prompt token ids) is not repeated: its logged output is returned. The
+    metadata must carry the full serving identity (callers: build.modal_backend), so a
+    changed setting never matches an old entry. `fresh=True` never replays: every
+    repeatability, drift and timing measurement uses it. With `return_status`, returns
+    (output, replayed)."""
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     fname = getattr(fn, "__name__", str(fn))
-    if os.environ.get("SWARM_AUDIT_RESUME") == "1":
+    if not fresh and os.environ.get("SWARM_AUDIT_RESUME") == "1":
         out = _find_logged(log_name, fname, meta, prompts or [])
         if out is not None:
             print(f"resumed from log: {log_name} {meta.get('call')}", flush=True)
-            return out
+            return (out, True) if return_status else out
     t0 = time.time()
     remote = getattr(fn, "remote", None)
     out = remote(*args, **kwargs) if remote else fn(*args, **kwargs)
@@ -304,6 +309,7 @@ def call_logged(fn: Any, *args: Any, log_name: str, meta: dict, prompt_ids: list
         "time": _dt.datetime.now(_dt.timezone.utc).isoformat(),
         "seconds": round(time.time() - t0, 3),
         "function": fname,
+        "fresh_measurement": bool(fresh),
         **meta,
         "prompts": [
             {"prompt_id": pid, "n_tokens": len(p),
@@ -315,4 +321,4 @@ def call_logged(fn: Any, *args: Any, log_name: str, meta: dict, prompt_ids: list
     path = LOG_DIR / f"{_dt.date.today().isoformat()}_{log_name}.jsonl"
     with open(path, "a") as fh:
         fh.write(json.dumps(entry, default=str) + "\n")
-    return out
+    return (out, False) if return_status else out

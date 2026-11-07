@@ -43,6 +43,7 @@ def main() -> None:
     with build.gpu_session(cfg, ("model_confirmed", "prompts_approved", "modal_account")):
         t_session = time.time()
         be, server = build.modal_backend(cfg, log_name="g4")
+        be = build.FreshBackend(be)          # timings and responsiveness are measurements
         info = server.info.remote()
         # Abdul, 7 Nov 2026: re-measure Llama's signal responsiveness on the final
         # cheap-talk prompt (messages about the next bid). Done before the timed runs.
@@ -75,7 +76,7 @@ def main() -> None:
         for ch in ("counts", "cheap_talk"):
             qs = [Query(ch, synthetic_history(rng, ch, 2, sts[j % 6], pt), 2) for j in range(1000)]
             t0 = time.time()
-            be.query(qs)
+            be.query(qs, fresh=True)
             sec_per_dec[ch] = (time.time() - t0) / len(qs)
         build.record_spend("G4 (whole GPU session)", time.time() - t_session, cfg)
     cfgs = {f: build.load(f) for f in ("core.yaml", "calibration.yaml", "secondary.yaml",

@@ -115,20 +115,38 @@ def modal_backend(cfg: dict, log_name: str) -> tuple[LLMBackend, Any]:
         server = serving.Server(hf_id=m["hf_id"], revision=m["revision"],
                                 engine_kwargs_json=json.dumps(eng))
     meta = {"model": m["name"], "hf_id": m["hf_id"], "revision": m["revision"]}
+    # Review C1: the call-log (resume) key carries the full serving identity, so a changed
+    # setting can never reuse an incompatible cached answer.
+    identity = serving_identity(cfg, eng)
 
-    def call(prompts: list[list[int]], ids: list[int], kind: str) -> list[dict]:
-        return serving.call_logged(server.label_logprobs, prompts, ids, method=srv["method"],
-                                   log_name=log_name, prompts=prompts,
-                                   prompt_ids=[str(i) for i in range(len(prompts))],
-                                   meta={**meta, "call": kind, "allowed_token_ids": ids})
+    def call(prompts: list[list[int]], ids: list[int], kind: str,
+             fresh: bool = False) -> list[dict]:
+        out, replayed = serving.call_logged(
+            server.label_logprobs, prompts, ids, method=srv["method"], log_name=log_name,
+            prompts=prompts, prompt_ids=[str(i) for i in range(len(prompts))],
+            meta={**meta, "call": kind, "allowed_token_ids": ids, "serving": identity},
+            fresh=fresh, return_status=True)
+        return [{**r, "replayed": replayed} for r in out]
 
     tok = load_tokenizer(m)
     be = LLMBackend(tok, labels(cfg), tuple(m["label_ids"]["actions"]),
                     tuple(m["label_ids"]["signals"]), call, params(cfg), m.get("chat_kwargs"),
-                    model_info={**meta, "vllm": srv["vllm_version"],
-                                "batch_invariant": serving.BATCH_INVARIANT,
-                                "engine_kwargs": eng})
+                    model_info={**meta, "serving": identity})
     return be, server
+
+
+def serving_identity(cfg: dict, eng: dict | None = None) -> dict:
+    """Everything about the serving side that can change the kernel: revision, read-out
+    method, precision, engine settings, vLLM version, batch invariance, GPU type and the
+    serving code itself."""
+    m, srv = cfg["model"], cfg["serving"]
+    eng = eng or {"max_model_len": srv["max_model_len"],
+                  "gpu_memory_utilization": srv["gpu_memory_utilization"],
+                  "enforce_eager": srv["enforce_eager"], **m.get("engine_kwargs", {})}
+    return {"hf_id": m["hf_id"], "revision": m["revision"], "method": srv["method"],
+            "dtype": "bfloat16", "engine_kwargs": eng, "vllm_version": srv["vllm_version"],
+            "batch_invariant": bool(srv["batch_invariant"]), "gpu": srv["gpu"],
+            "serving_code_sha256": server_code_sha()}
 
 
 # ------------------------------------------------------------------------ tables
@@ -201,7 +219,10 @@ def drift_panel(cfg: dict, n_core: int = 10, seed: int = 99) -> list[Query]:
 
 
 def panel_outputs(backend: Backend, panel: list[Query]) -> list[dict]:
-    outs = backend.query(panel)
+    """The drift panel, always measured fresh (never replayed from the call log)."""
+    outs = backend.query(panel, fresh=True)
+    if any(o.replayed for o in outs):
+        raise RuntimeError("a drift-panel answer was replayed from the log")
     return [{"p_H": o.p_H, "sig": o.sig, "sha": o.prompt_sha256} for o in outs]
 
 
@@ -225,12 +246,14 @@ class PanelMixer:
         self.rng = np.random.default_rng(seed)
         self.name = inner.name
 
-    def query(self, queries):
+    def query(self, queries, fresh: bool = False):
         if self.mixed is not None or len(queries) < self.min_batch:
-            return self.inner.query(queries)
+            return self.inner.query(queries, fresh=fresh)
         allq = list(queries) + self.panel
         perm = self.rng.permutation(len(allq))
-        outs = self.inner.query([allq[i] for i in perm])
+        outs = self.inner.query([allq[i] for i in perm], fresh=True)   # a measurement
+        if any(o.replayed for o in outs):
+            raise RuntimeError("the mixed drift batch was replayed from the log")
         back = [None] * len(allq)
         for pos, i in enumerate(perm):
             back[i] = outs[pos]
@@ -483,3 +506,19 @@ def check_in_plan(arm: str, cond_names: list[str]) -> None:
     if cut:
         raise SystemExit(f"the G4 plan does not include {arm}: {cut} (cut to fit the budget; "
                          f"see {PLAN_FILE})")
+
+
+class FreshBackend:
+    """Wraps a backend so that every query is measured fresh (never replayed)."""
+
+    def __init__(self, inner: Backend):
+        self.inner, self.name = inner, inner.name
+
+    def query(self, queries, fresh: bool = True):
+        outs = self.inner.query(queries, fresh=True)
+        if any(o.replayed for o in outs):
+            raise RuntimeError("a measurement was replayed from the log")
+        return outs
+
+    def describe(self):
+        return self.inner.describe()

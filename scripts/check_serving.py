@@ -116,18 +116,18 @@ def main() -> None:
     with build.gpu_session(cfg, ("model_confirmed", "modal_account")):
         be, _ = build.modal_backend(cfg, log_name="g3")
         t0 = time.time()
-        alone = [vec(be.query([q])[0]) for q in test]
+        alone = [vec(be.query([q], fresh=True)[0]) for q in test]
         t_alone = time.time() - t0
         rng = np.random.default_rng(0)
         allq = test + others
         perm = rng.permutation(len(allq))
         t1 = time.time()
-        outs = be.query([allq[i] for i in perm])
+        outs = be.query([allq[i] for i in perm], fresh=True)
         t_batch = time.time() - t1
         pos = {int(i): k for k, i in enumerate(perm)}
         batch = [vec(outs[pos[j]]) for j in range(len(test))]
         t2 = time.time()
-        warm = [vec(o) for o in be.query(test)]
+        warm = [vec(o) for o in be.query(test, fresh=True)]
         t_warm = time.time() - t2
         sec = time.time() - t0
         build.record_spend(f"G3 batch_invariant={args.batch_invariant}", sec, cfg)
