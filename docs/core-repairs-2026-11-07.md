@@ -59,6 +59,16 @@ rather than implementing your own versions. The core session owns these shared p
 ## Signal responsiveness (core G4, for your arm 9 trigger)
 
 Measured on the final cheap-talk prompt (`results/serving/signal_responsiveness.json`):
-0.055 at d = 4 (the screening grid, length 1; screening's 0.051 was on the old wording)
-and 0.038 at d = 2 (the cycle's degree). Your trigger says "below the 0.05 screening bar"
-on "the same grid"; the two grids disagree, so this is for Abdul to settle.
+0.0553 at d = 4 (the screening grid, length 1; screening's 0.051 was on the old wording)
+and 0.038 at d = 2 (the cycle's degree).
+
+**Abdul's decisions (7 Nov 2026, 20:15), for the extra-arms session:**
+
+1. **The trigger uses the d = 4 screening grid**, as committed in `a2657c5` before any
+   result. 0.0553 > 0.05, so **the arm 9 trigger is NOT met. Record that** in
+   `results/extra/README.md`.
+2. **Separately, after arm 8 finishes, run arm 9 (9a, then 9b subject to the lock-in stop)
+   as an EXPLORATORY arm**, decided after seeing Llama's d = 2 responsiveness (0.038) and
+   the arm 4b CRPS null. **Label it exploratory** in `results/extra/arm9_summary.md` and in
+   `results/extra/README.md`. Same design, cost cap and stop rules as
+   `docs/handoff-extra-arms.md`.

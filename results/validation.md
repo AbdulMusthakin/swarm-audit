@@ -154,8 +154,14 @@ at fixed action counts.
 | d = 4, the screening grid | 0.055 (screening, old wording: 0.051) | 0.022 |
 | d = 2, the cycle's degree | 0.038 | 0.038 |
 
-By the settled rule the core continues either way. The two grids sit on opposite sides of
-the 0.05 bar, which matters for the extra-arms trigger (arm 9): flagged to Abdul.
+By the settled rule the core continues either way.
+
+**Extra-arms trigger for arm 9 (Abdul, 7 Nov 2026, 20:15):** the trigger uses the d = 4
+screening grid at history length 1, as committed on `extra-arms` in `a2657c5` (18:55 UTC)
+before this measurement existed. Llama's 0.0553 is above 0.05, so **the arm 9 trigger is
+NOT met.** Separately, Abdul decided to run arm 9 after arm 8 as an **exploratory** arm,
+chosen after seeing Llama's d = 2 responsiveness (0.038) and the arm 4b CRPS null; it is
+labelled exploratory and is not a triggered arm (details: `docs/core-repairs-2026-11-07.md`).
 
 A first G4 attempt crashed on its first call (the server's `info()` returned
 `torch.__version__`, which needs torch to unpickle); fixed in `797660f`, and about 3 minutes
