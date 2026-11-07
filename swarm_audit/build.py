@@ -254,6 +254,7 @@ class PanelMixer:
         self.mixed: list[dict] | None = None
         self.rng = np.random.default_rng(seed)
         self.name = inner.name
+        self.params = getattr(inner, "params", None)
 
     def query(self, queries, fresh: bool = False):
         if self.mixed is not None or len(queries) < self.min_batch:
@@ -551,6 +552,7 @@ class FreshBackend:
 
     def __init__(self, inner: Backend):
         self.inner, self.name = inner, inner.name
+        self.params = getattr(inner, "params", None)
 
     def query(self, queries, fresh: bool = True):
         outs = self.inner.query(queries, fresh=True)

@@ -33,6 +33,7 @@ import numpy as np
 from .game import ACTIONS, DEFAULT_PARAMS, SIGNALS, PayoffParams
 from .ladder import History, Record
 from .policies import Backend, KernelOut, Query
+from .provenance import bind_run_provenance
 from .states import actions_state, key, signal_state
 from .topology import Graph, make
 
@@ -178,10 +179,17 @@ def git_commit() -> str | None:
         return None
 
 
-def update_manifest(arm_dir: Path, cond: Condition, entry: dict) -> None:
+def update_manifest(arm_dir: Path, cond: Condition, provenance: dict, session: dict,
+                    summary: dict) -> None:
+    """One entry per condition: its original provenance (never rewritten), every session
+    that added runs (commit, backend, timings), and the current summary."""
     path = arm_dir / "manifest.json"
     man = json.loads(path.read_text()) if path.exists() else {"arm": cond.arm, "conditions": {}}
-    man["conditions"][cond.name] = entry
+    old = man["conditions"].get(cond.name, {})
+    man["conditions"][cond.name] = {
+        "provenance": old.get("provenance", provenance),
+        "sessions": old.get("sessions", []) + [session],
+        "summary": summary}
     man["updated"] = _dt.datetime.now(_dt.timezone.utc).isoformat()
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(man, indent=2, default=str) + "\n")
@@ -193,6 +201,8 @@ def run_condition(cond: Condition, backend: Backend, runs_root: Path, chunk: int
     once by default), writing each run's log as it completes. Returns the folder.
     max_runs: run only the first that many unfinished runs (e.g. a benchmark)."""
     out = runs_root / cond.arm / cond.name
+    # Review C2: bind the configuration before computing; a resume must match it.
+    prov = bind_run_provenance(out, cond, backend, git_commit())
     todo = [r for r in range(cond.runs) if not run_file(out, r).exists()]
     if max_runs is not None:
         todo = todo[:max_runs]
@@ -209,16 +219,12 @@ def run_condition(cond: Condition, backend: Backend, runs_root: Path, chunk: int
             n_dec += len(lines[r])
         log(f"{cond.name}: runs {part[0]}..{part[-1]} done ({time.time() - t0:.1f}s)")
     summary = summarise_condition(out, cond)
-    man_path = runs_root / cond.arm / "manifest.json"
-    prev = json.loads(man_path.read_text())["conditions"].get(cond.name, {}) if man_path.exists() else {}
-    sessions = prev.get("sessions", []) + [{"runs": todo, "seconds": round(time.time() - t0, 2),
-                                            "decisions": n_dec, **(extra_manifest or {}).get("session", {})}]
-    update_manifest(runs_root / cond.arm, cond, {
-        "sessions": sessions,
+    update_manifest(runs_root / cond.arm, cond, prov, {
         "condition": {**asdict(cond), "name": cond.name},
         "backend": backend.describe(), "git_commit": git_commit(),
-        "seconds_this_session": round(time.time() - t0, 2), "decisions_this_session": n_dec,
-        "summary": summary, **(extra_manifest or {})})
+        "time": _dt.datetime.now(_dt.timezone.utc).isoformat(),
+        "runs_added": len(todo), "runs": list(todo), "seconds": round(time.time() - t0, 2), "decisions": n_dec,
+        **(extra_manifest or {})}, summary)
     return out
 
 
@@ -312,9 +318,12 @@ def load_runs(folder: Path) -> RunData:
                 sig[ri, t, i, 0] = ln["sig_after_H"]
                 sig[ri, t, i, 1] = ln["sig_after_L"]
                 st_sig[ri, t, i] = ln["state_sig"]
+    prov_path = Path(folder) / "provenance.json"
+    prov = json.loads(prov_path.read_text()) if prov_path.exists() else {}
     return RunData(first["channel"], n, first["graph"], T, runs, acts, p_h, p_v, st, sha,
                    sigs if cheap else None, sig, st_sig,
-                   meta={"folder": str(folder),
+                   meta={"folder": str(folder), "fingerprint": prov.get("fingerprint"),
+                         "kernel_fingerprint": prov.get("kernel_fingerprint"),
                          **({"graph_kwargs": first["graph_kwargs"]} if "graph_kwargs" in first else {})})
 
 

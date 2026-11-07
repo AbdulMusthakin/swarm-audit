@@ -28,6 +28,7 @@ sys.path.insert(0, str(REPO))
 
 from swarm_audit import build, calibration, plots  # noqa: E402
 from swarm_audit.analysis import analyse_condition, to_jsonable  # noqa: E402
+from swarm_audit.provenance import ProvenanceError, check_tables_match_runs  # noqa: E402
 from swarm_audit.swarm import graph_of, load_runs  # noqa: E402
 
 OUT = REPO / "results" / "analysis"
@@ -41,16 +42,28 @@ def one(args) -> None:
     root = build.results_root(cfg)
     OUT = root / "analysis"
     tables = build.load_tables(Path(args.tables), args.tag)
+    try:   # review C2: tables must come from the runs' kernel (prompts, model, payoffs...)
+        check_tables_match_runs(data.meta.get("kernel_fingerprint"),
+                                {"actions": tables.actions, "signal": tables.signal,
+                                 "actions_equal": tables.actions_equal})
+    except ProvenanceError as e:
+        raise SystemExit(f"Stopping: {e}")
     arm = Path(args.runs).parent.name
     cond = Path(args.runs).name
     if args.gate_g5:
         floor = args.floor if args.floor is not None else build.numerical_floor(cfg)
-        res = calibration.check_arm(data, {"actions": tables.actions, "signal": tables.signal},
-                                    g, floor, an["ks_sims"])
+        tabs = {"actions": tables.actions, "signal": tables.signal}
+        res = calibration.check_arm(data, tabs, g, floor, an["ks_sims"])
         path = OUT / arm / f"{cond}_G5.json"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(to_jsonable(res), indent=1) + "\n")
         print(json.dumps(to_jsonable(res), indent=1))
+        rec = calibration.gate_record(to_jsonable(res), data, tabs, floor)
+        gpath = calibration.write_gate(rec)
+        print(f"G5 {data.channel}: {'PASS' if rec['pass'] else 'FAIL'} ({rec['required']}); "
+              f"record {gpath}")
+        if not rec["pass"]:     # review C3: a failed required check is a failed command
+            raise SystemExit(1)
         return
     res = analyse_condition(data, g, tables, an["n_model"], an["seed"], an["bootstrap"],
                             build.ptest(cfg))

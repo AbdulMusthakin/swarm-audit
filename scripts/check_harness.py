@@ -30,6 +30,7 @@ import numpy as np  # noqa: E402
 from swarm_audit import build, calibration, plots  # noqa: E402
 from swarm_audit.analysis import Tables, analyse_condition, to_jsonable  # noqa: E402
 from swarm_audit.prediction import ActionsChain, SignalChain  # noqa: E402
+from swarm_audit.provenance import check_tables_match_runs  # noqa: E402
 from swarm_audit.swarm import Condition, load_runs, run_condition  # noqa: E402
 from swarm_audit.topology import make  # noqa: E402
 
@@ -112,6 +113,7 @@ def main() -> None:
                                  cfg["seeds"]["base_seed"], build.params(cfg),
                                  cfg["own_signal_in_state"])
                 data = load_runs(run_condition(cond, be, runs_dir, log=lambda *a: None))
+                check_tables_match_runs(data.meta["kernel_fingerprint"], tables)
                 res = analyse_condition(data, g, tb, an["n_model"], an["seed"], an["bootstrap"], pt)
                 ok, obs = judge(policy, res)
                 name = f"{policy}/{ch}/n{n}"
@@ -156,13 +158,14 @@ def table_md(rows, runs) -> str:
              "Δ is the largest binned TV over rounds; the floor is the 95th percentile of the "
              "same maximum between two model samples of the swarm's size.", "",
              "| condition | expected | ε_test actions | ε_test signal | max Δ actions (floor) | "
-             "max Δ signal (floor) | bound B_T | exact law, n = 4 (gap / q99) | G5 path, n = 4 | result |",
+             "max Δ signal (floor) | bound B_T | exact law, n = 4 (gap / q99, MC p) | G5 path, n = 4 | result |",
              "|---|---|---|---|---|---|---|---|---|---|"]
     for name, e in rows:
         o = e["observed"]
         ex = e.get("exact_law")
         g5 = e.get("calibration_G5")
-        ex_s = f"{f(ex['gap'])} / {f(ex['threshold_q99'])} {'✓' if ex['pass'] else '✗'}" if ex else "–"
+        ex_s = (f"{f(ex['gap'])} / {f(ex['threshold_q99'])} (p = {f(ex['p_value'])}) "
+                f"{'✓' if ex['pass'] else '✗'}") if ex else "–"
         g5_s = ("✓" if g5["per_decision"]["pass"] and g5["per_run"]["pass"] else "✗") if g5 else "–"
         sig = (f"{f(o['max_delta_signal'])} ({f(o['floor_signal'])})"
                if "max_delta_signal" in o else "–")
