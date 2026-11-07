@@ -161,9 +161,43 @@ A first G4 attempt crashed on its first call (the server's `info()` returned
 `torch.__version__`, which needs torch to unpickle); fixed in `797660f`, and about 3 minutes
 of L4 time is recorded for it.
 
-## G5, calibration (arms 4 and 4b): not run
+## G5, calibration (arms 4 and 4b): counts PASS; cheap talk FAIL on the per-run test — stopped for Abdul
 
-Script: `scripts/analyse.py --gate-g5` (code path exercised on scripted policies in G2).
+Cycle, n = 4, last round only, 50 runs each, under the frozen payoffs (pilot: no change),
+batch invariance on, numerical floor 0. Enumerated tables: 7 states (counts) and 108 + START
+(cheap talk). Gate records: `results/gates/G5_{counts,cheap_talk}.json`.
+
+| check | counts (arm 4) | cheap talk (arm 4b) |
+|---|---|---|
+| per decision: logged vs table, max difference | P(H) 0.0 (4000 decisions) ✓ | P(H) 0.0, signals 0.0 (4000 decisions) ✓ |
+| prompts: one per state, equal to the table's | 7 states ✓ | 108 states ✓ |
+| drift panel (start, end, mixed) | 0 ✓ | 0 ✓ |
+| per run: law of y, gap / MC p (pass if p > 0.01) | 0.093 / 0.393 ✓ | 0.203 / **0.0076 ✗** |
+| mean y, swarm vs exact | 12.62 vs 12.06 | 5.82 vs 5.47 |
+| finding (not a gate): actions-only chain on cheap talk | – | gap 0.203, p 0.0072, exact mean y 5.46 |
+
+**Investigation of the cheap-talk miss** (`scripts/diagnose_g5.py`,
+`results/gates/G5_cheap_talk_investigation.json`), in the hand-off's order:
+
+- prompt bytes and a leaked round number: ruled out by the per-decision check (one prompt
+  per state, identical to the enumerated table's, and every probability exact);
+- drift: 0 at the start, the end, and mixed into a swarm batch;
+- sampling: all 4000 logged actions and signals follow from their logged draws
+  and probabilities (0 mismatches); the draws are uniform (KS p = 0.85
+  for actions, 0.40 for signals);
+- wiring: every logged state equals the state rebuilt from the agent's and its neighbours'
+  previous-round outputs (0 mismatches);
+- end to end: the swarm code with the enumerated table as its kernel, 20,000 runs on
+  CPU, reproduces the exact law of y (gap 0.007, p = 0.10; mean y
+  5.44 vs 5.47).
+
+So the 50 logged runs are draws from the exact chain, and the miss is attributed to
+sampling variation: mean y 5.82 against 5.47 (about 1.2 standard errors);
+largest CDF gap at y ≤ 5 (0.32 observed vs 0.52 exact).
+Under the null, P(p < 0.01) = 1%, and about 2% for at least one of the two G5 per-run tests.
+
+**Status:** by the hand-off and review C3, a failed G5 stops the core launch; nothing has
+been rerun or loosened. Abdul decides how to proceed.
 
 ## Drift panel: not run
 
