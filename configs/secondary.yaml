@@ -1,0 +1,57 @@
+# Second topology, arm 7 (docs/handoff-build.md, run manifest row 7): K_10, both
+# channels, actions-only audit (20 states plus START, fitted directly on p_test).
+# ONLY IF ABDUL APPROVES after the G4 benchmark. Shared sections: see core.yaml.
+
+# Hand-off section 1. GPU scripts refuse to start until every item is set.
+inputs:
+  model_confirmed: false    # Abdul confirms the main model (screening recommends llama-3.1-8b)
+  prompts_approved: false   # Abdul approves swarm_audit/prompts/{counts,cheap_talk}.txt
+  pilot_rule: null          # "none", or the payoff-adjustment rule fixed before the pilot (G6)
+  modal_account: null       # whose Modal workspace to use
+
+model:
+  name: llama-3.1-8b        # PROVISIONAL until inputs.model_confirmed
+  hf_id: meta-llama/Llama-3.1-8B-Instruct
+  revision: 0e9e39f249a16976918f6564b8830bc894c89659
+  gated: true
+  chat_kwargs: {}           # the template's date_string defaults to "26 Jul 2024": prompts are date-independent
+  engine_kwargs: {}
+  labels: {H: " H", L: " L", sig_high: " high", sig_low: " low", sig_none: " none"}
+  label_ids: {actions: [473, 445], signals: [1579, 3428, 7000]}   # results/screening/tokenizers.json
+
+payoffs: {uLH: 12, uHH: 10, uLL: 4, uHL: 0}
+T: 20
+
+# p_test (hand-off section 5; described in results/audit/README.md). FLAGGED for Abdul.
+p_test: {L_min: 1, L_max: 19, p_own_H: 0.5, p_neighbour_H: 0.5, seed: 20261108}
+
+# The current cheap-talk draft shows agents their own past messages, so the signal-aware
+# state includes the own last signal (108 states on the cycle; 36 without).
+own_signal_in_state: true
+
+audit:
+  actions: {n_fit: 100, n_score: 50}   # actions-only tables, fitted directly
+  signal: {n_fit: 50, n_score: 25}     # signal-aware tables (cheap talk)
+
+seeds: {base_seed: 20261107}
+
+analysis: {n_model: 20000, bootstrap: 2000, noise_floor_draws: 1000, ks_sims: 20000, seed: 7}
+
+serving:
+  gpu: L4
+  vllm_version: "0.32.0"
+  method: logprob_token_ids
+  max_model_len: 4096
+  gpu_memory_utilization: 0.90
+  enforce_eager: true
+  batch_invariant: false     # VLLM_BATCH_INVARIANT=1; decided by G3
+  max_containers: 1
+  timeout_minutes: 30
+  cost_cap_usd: 20.0         # for everything in the build hand-off
+  l4_usd_per_hour: 0.80      # Modal list price; check before running
+
+approved: false   # arm 7 needs Abdul's approval after G4
+
+arms:
+  second_topology_counts:     {arm_id: 7,  channel: counts,     graph: complete, n: [10], runs: 50, last_k: null}
+  second_topology_cheap_talk: {arm_id: 71, channel: cheap_talk, graph: complete, n: [10], runs: 50, last_k: null}

@@ -6,33 +6,14 @@ from swarm_audit.ladder import Labels, render
 from swarm_audit.tokens import check_labels, chat_prefix, entropy_bits, renormalise, single_token_id
 
 
-@pytest.fixture(scope="module")
-def toy_tokenizer():
-    """A small byte-level BPE tokenizer trained here, so the test needs no download."""
-    tokenizers = pytest.importorskip("tokenizers")
-    transformers = pytest.importorskip("transformers")
-    from tokenizers import decoders, models, pre_tokenizers, trainers
-
-    tok = tokenizers.Tokenizer(models.BPE())
-    tok.pre_tokenizer = pre_tokenizers.ByteLevel(add_prefix_space=False)
-    tok.decoder = decoders.ByteLevel()
-    trainer = trainers.BpeTrainer(vocab_size=300, special_tokens=["<s>"],
-                                  initial_alphabet=pre_tokenizers.ByteLevel.alphabet())
-    tok.train_from_iterator(["Bid: H", "Bid: L"] * 50 + ["the history of it"] * 5, trainer)
-    fast = transformers.PreTrainedTokenizerFast(tokenizer_object=tok)
-    fast.chat_template = ("{% for m in messages %}<|{{ m.role }}|>{{ m.content }}\n{% endfor %}"
-                          "{% if add_generation_prompt %}<|assistant|>{% endif %}")
-    return fast
-
-
 def test_single_token_check_on_toy_tokenizer(toy_tokenizer):
     t = toy_tokenizer
     assert single_token_id(t, "Bid:", " H") is not None
-    assert single_token_id(t, "Bid:", " high") is None          # several tokens
+    assert single_token_id(t, "Bid:", " zebra") is None         # several tokens
     assert single_token_id(t, "Bid: ", "H") is None             # " H" re-splits the prompt's space
     res = check_labels(t, ["Bid:", "x\nBid:"], [" H", " L"])
     assert res.ok and len(set(res.ids)) == 2
-    assert not check_labels(t, ["Bid:"], [" H", " high"]).ok
+    assert not check_labels(t, ["Bid:"], [" H", " zebra"]).ok
 
 
 def test_chat_prefix_ends_with_reply_prefix(toy_tokenizer):

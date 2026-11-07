@@ -1,5 +1,139 @@
-"""Statistics, gap and bounds, figures."""
+#!/usr/bin/env python3
+"""Analysis of logged swarm runs against the audit tables (docs/handoff-build.md section 7).
+
+One condition:
+    python scripts/analyse.py --runs results/runs/core_cheap_talk/cheap_talk_n10_cycle_full \
+        --tables results/audit/llama-3.1-8b --tag cheap_talk_d2
+
+Gate G5 on a calibration arm (enumerated tables; floor from G3):
+    python scripts/analyse.py --runs results/runs/calibration_counts/counts_n4_cycle_last1 \
+        --tables results/audit/llama-3.1-8b --tag counts_d2_enumerated --gate-g5 --floor 0
+
+Figure 2 and the summary tables over every analysed condition:
+    python scripts/analyse.py --collect
+
+Outputs: results/analysis/<arm>/<condition>.json, results/figures/fig1_<arm>_<condition>.png,
+results/figures/fig2.png, results/tables/*.md.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO))
+
+from swarm_audit import build, calibration, plots  # noqa: E402
+from swarm_audit.analysis import analyse_condition, to_jsonable  # noqa: E402
+from swarm_audit.swarm import load_runs  # noqa: E402
+from swarm_audit.topology import make  # noqa: E402
+
+OUT = REPO / "results" / "analysis"
+
+
+def one(args) -> None:
+    cfg = build.load(args.config)
+    an = cfg["analysis"]
+    data = load_runs(Path(args.runs))
+    g = make(data.graph, data.n)
+    tables = build.load_tables(Path(args.tables), args.tag)
+    arm = Path(args.runs).parent.name
+    cond = Path(args.runs).name
+    if args.gate_g5:
+        if args.floor is None:
+            raise SystemExit("--gate-g5 needs --floor (the G3 numerical floor)")
+        res = calibration.check_arm(data, {"actions": tables.actions, "signal": tables.signal},
+                                    g, args.floor, an["ks_sims"])
+        path = OUT / arm / f"{cond}_G5.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(to_jsonable(res), indent=1) + "\n")
+        print(json.dumps(to_jsonable(res), indent=1))
+        return
+    res = analyse_condition(data, g, tables, an["n_model"], an["seed"], an["bootstrap"],
+                            build.ptest(cfg))
+    res["inputs"] = {"runs": args.runs, "tables": args.tables, "tag": args.tag,
+                     "probabilities": "logged (never re-queried)"}
+    path = OUT / arm / f"{cond}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(to_jsonable(res)) + "\n")
+    plots.figure1(res, REPO / "results" / "figures" / f"fig1_{arm}_{cond}.png", f"{arm}: {cond}")
+    print(f"wrote {path}")
+    sc = res["scores"]
+    for k, v in sc["crps"].items():
+        print(f"  CRPS {k}: {v['mean']:.4f} [{v['lo']:.4f}, {v['hi']:.4f}]")
+    if "paired_D" in sc:
+        D = sc["paired_D"]
+        print(f"  paired D: {D['mean']:.4f} [{D['lo']:.4f}, {D['hi']:.4f}]")
+
+
+def collect() -> None:
+    import numpy as np
+
+    rows = []
+    for p in sorted(OUT.glob("*/*.json")):
+        if p.name.endswith("_G5.json"):
+            continue
+        res = json.loads(p.read_text())
+        c = res["condition"]
+        rows.append({"name": f"{p.parent.name}/{p.stem}", "channel": c["channel"], "n": c["n"],
+                     "res": _arrays(res)})
+    if not rows:
+        raise SystemExit(f"no analysed conditions in {OUT}")
+    plots.figure2(rows, REPO / "results" / "figures" / "fig2.png")
+    tdir = REPO / "results" / "tables"
+    tdir.mkdir(parents=True, exist_ok=True)
+    lines = ["| condition | predictor | CRPS (95% CI) | E_swarm F − E_model F (95% CI) | max Δ_t | floor |",
+             "|---|---|---|---|---|---|"]
+    for r in rows:
+        sc = r["res"]["scores"]
+        for k, v in sc["crps"].items():
+            e = sc["F_error"][k]
+            lines.append(f"| {r['name']} | {k} | {v['mean']:.4f} [{v['lo']:.4f}, {v['hi']:.4f}] | "
+                         f"{e['mean']:+.4f} [{e['lo']:+.4f}, {e['hi']:+.4f}] | "
+                         f"{np.max(sc['delta'][k]):.3f} | {sc['floor'][k]['max_over_rounds']:.3f} |")
+    (tdir / "scores.md").write_text("\n".join(lines) + "\n")
+    lines = ["| condition | table | ε(p_test) | ε(p_swarm) | B_T | first saturation |",
+             "|---|---|---|---|---|---|"]
+    for r in rows:
+        for k, d in r["res"]["defects"].items():
+            lines.append(f"| {r['name']} | {k} | {d['eps_test_pooled']:.4f} | {d['eps_swarm']:.4f} | "
+                         f"{d['bound']['B'][-1]:.2f} | {d['bound']['first_saturation_round']} |")
+    (tdir / "defects.md").write_text("\n".join(lines) + "\n")
+    print(f"wrote results/figures/fig2.png and {tdir}/scores.md, defects.md")
+
+
+def _arrays(x):
+    import numpy as np
+
+    if isinstance(x, dict):
+        return {k: _arrays(v) for k, v in x.items()}
+    if isinstance(x, list) and x and all(isinstance(v, (int, float)) or v is None for v in x):
+        return np.array([np.nan if v is None else v for v in x], float)
+    if isinstance(x, list):
+        return [_arrays(v) for v in x]
+    return x
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--config", default="core.yaml")
+    ap.add_argument("--runs")
+    ap.add_argument("--tables")
+    ap.add_argument("--tag")
+    ap.add_argument("--gate-g5", action="store_true")
+    ap.add_argument("--floor", type=float)
+    ap.add_argument("--collect", action="store_true")
+    args = ap.parse_args()
+    if args.collect:
+        collect()
+    elif args.runs and args.tables and args.tag:
+        one(args)
+    else:
+        ap.error("give --runs, --tables and --tag, or --collect")
 
 
 if __name__ == "__main__":
-    pass
+    main()
