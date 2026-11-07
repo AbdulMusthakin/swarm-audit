@@ -1,0 +1,9 @@
+{
+  "covered_states": 116,
+  "minimum_valid_mass": 0.27644770889172093,
+  "repeats_per_state": 32,
+  "split_half_max_tv": 0.29129702178171085,
+  "split_half_median_tv": 0.014151836337455466,
+  "split_half_sentinel_max_tv": 0.10615990379704557,
+  "stable": true
+}

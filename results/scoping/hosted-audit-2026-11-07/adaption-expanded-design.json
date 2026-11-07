@@ -1,0 +1,61 @@
+{
+  "agents": 4,
+  "alternate_blind_weights": "uniform over 27 ordered signal profiles",
+  "arms": [
+    "counts",
+    "recent",
+    "full",
+    "seeded"
+  ],
+  "audit_draws_per_history": 64,
+  "audit_estimator": "empirical joint frequencies with Jeffreys 0.5 per output category",
+  "forecast_draws": 100000,
+  "games_per_arm": 96,
+  "holdout_order": "interleaved arms by game index, all after the audit",
+  "model": "gemma-4-26b-a4b-it",
+  "output_limit": 256,
+  "payoffs_by_neighbour_high_count": {
+    "H": [
+      0,
+      5,
+      10
+    ],
+    "L": [
+      4,
+      8,
+      12
+    ]
+  },
+  "primary_arm": "recent",
+  "primary_blind_weights": "uniform over 18 observable signal configurations",
+  "primary_score": "paired CRPS for final-three-round high-bid share",
+  "prompt_fingerprints": {
+    "counts": "024d8aba63b31ad0d2cd04c6c8a1fa12b7e2933ac0c5891fb16e644b47cb6d58",
+    "full": "d03d4f76e9b683fd8f137b6c660be2a26b8ca0099ef10e3c8f1232563b5f7e91",
+    "recent": "d03d4f76e9b683fd8f137b6c660be2a26b8ca0099ef10e3c8f1232563b5f7e91",
+    "seeded": "d03d4f76e9b683fd8f137b6c660be2a26b8ca0099ef10e3c8f1232563b5f7e91"
+  },
+  "rounds": 8,
+  "secondary_event": "at least 3 high bids in each final round",
+  "seeded_previous_outputs": [
+    [
+      "H",
+      "H"
+    ],
+    [
+      "H",
+      "H"
+    ],
+    [
+      "H",
+      "H"
+    ],
+    [
+      "H",
+      "H"
+    ]
+  ],
+  "temperature": 1.0,
+  "topology": "bidirectional cycle",
+  "uncertainty": "paired game bootstrap and separate audit-draw sensitivity"
+}
