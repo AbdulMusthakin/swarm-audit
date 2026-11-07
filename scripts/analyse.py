@@ -7,7 +7,7 @@ One condition:
 
 Gate G5 on a calibration arm (enumerated tables; floor from G3):
     python scripts/analyse.py --runs results/runs/calibration_counts/counts_n4_cycle_last1 \
-        --tables results/audit/llama-3.1-8b --tag counts_d2_enumerated --gate-g5 --floor 0
+        --tables results/audit/llama-3.1-8b --tag counts_d2_enumerated --gate-g5        # floor from G3 (configs)
 
 Figure 2 and the summary tables over every analysed condition:
     python scripts/analyse.py --collect
@@ -43,10 +43,9 @@ def one(args) -> None:
     arm = Path(args.runs).parent.name
     cond = Path(args.runs).name
     if args.gate_g5:
-        if args.floor is None:
-            raise SystemExit("--gate-g5 needs --floor (the G3 numerical floor)")
+        floor = args.floor if args.floor is not None else build.numerical_floor(cfg)
         res = calibration.check_arm(data, {"actions": tables.actions, "signal": tables.signal},
-                                    g, args.floor, an["ks_sims"])
+                                    g, floor, an["ks_sims"])
         path = OUT / arm / f"{cond}_G5.json"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(to_jsonable(res), indent=1) + "\n")
@@ -124,7 +123,7 @@ def main() -> None:
     ap.add_argument("--tables")
     ap.add_argument("--tag")
     ap.add_argument("--gate-g5", action="store_true")
-    ap.add_argument("--floor", type=float)
+    ap.add_argument("--floor", type=float, help="override the G3 floor in the config")
     ap.add_argument("--collect", action="store_true")
     args = ap.parse_args()
     if args.collect:

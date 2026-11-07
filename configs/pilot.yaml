@@ -10,8 +10,9 @@
 # "All-low consensus by round 5" uses the paper's consensus time: tau is the first round
 # t with X_t = X_{t+1} = X_{t+2} = 0, and a run counts if tau <= 5. The script also
 # evaluates two other readings (everyone low in some round <= 5; the three all-low
-# rounds completed by round 5, i.e. tau <= 3) and stops to ask Abdul if they would
-# lead to a different decision.
+# rounds completed by round 5, i.e. tau <= 3). If they would lead to a different
+# decision, the primary reading governs (settled 7 Nov 2026) and the disagreement is
+# reported to Abdul.
 rule:
   name: all_low_fallback
   consensus_side: L

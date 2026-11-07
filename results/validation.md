@@ -69,6 +69,26 @@ the mass not on "high" is split evenly between "low" and silence (0.15/0.15 afte
 they are reproduced exactly from the seeds by rerunning the script.
 <!-- G2 end -->
 
+## Decisions settled in advance (7 Nov 2026)
+
+Abdul asked for every open point that could be settled before the GPU gates to be
+settled; they are recorded under `decisions:` in the build configs and applied by the
+scripts. The teammate's Modal account (workspace `aliyusufbelal`) has $80 of credit; the
+build's own cap stays at $20 unless Abdul raises it.
+
+| point | settled rule | applied by |
+|---|---|---|
+| G3 setting and floor | Default settings if exactly repeatable (floor 0). Otherwise batch invariance if its maximum difference is smaller and it keeps ≥ 50% of the throughput; the chosen setting's maximum is the floor. A floor above 0.07 (about two bf16 steps in P(H)) stops. | `check_serving.py --decide` |
+| G4 budget | Projected cost × 1.25 must fit what is left of the $20 cap, and projected GPU time × 1.25 must fit 12 hours. If not: reduce the signal-aware audit to 25 fit / 15 score histories per state, then cut n = 20 in both channels. Arms 1–4b and n = 10 are never cut; if they do not fit, stop. Planned on batched throughput (1,000-prompt batches), not on one run's small batches. | `benchmark.py` → `results/serving/g4_plan.json` |
+| Arm 7 | Runs last, only if everything else fits at full size (nothing reduced or cut). | G4 plan, `run_swarm.py` |
+| Signal responsiveness below 0.05 | Continue and report: changing the model or prompt would be tuning toward a result. | report only |
+| Drift beyond the floor | Up to 0.035 above the floor (about one bf16 step): recorded, reported, runs continue. More: the run pauses. | `run_swarm.py` |
+| Pilot readings disagree | The primary reading (τ ≤ 5) governs; the disagreement is reported. | `run_pilot.py` |
+| Weightings disagree | p_test's own weights give the headline; equal weights are the sensitivity check. | analysis write-up |
+
+Still a stop for Abdul: a failed G5 (investigated and reported, never worked around), a
+G3 floor above 0.07, a plan that cannot fit arms 1–4b plus n = 10, and raising the cap.
+
 ## G3, serving repeatability: not run
 
 Model confirmed (Llama 3.1 8B Instruct). Needs a teammate's Modal workspace, set up with

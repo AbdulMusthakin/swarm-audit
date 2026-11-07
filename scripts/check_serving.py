@@ -11,9 +11,10 @@ the throughput.
     SWARM_AUDIT_BATCH_INVARIANT=1 python scripts/check_serving.py --config core.yaml \
         --batch-invariant      # only if the first run's maximum is not 0
 
-If the maximum is 0, keep the default settings. If not, rerun with batch invariance
-and report both maxima and throughputs to Abdul, who picks one; the chosen setting's
-maximum is the numerical floor recorded in results/validation.md.
+If the maximum is 0, keep the default settings. If not, rerun with batch invariance.
+`--decide` then applies the rule settled on 7 Nov 2026 (decisions.g3 in the configs):
+batch invariance if its maximum is smaller and it keeps at least half the throughput;
+the chosen setting's maximum is the numerical floor, and a floor above 0.07 stops.
 """
 
 from __future__ import annotations
@@ -68,6 +69,32 @@ def vec(o) -> np.ndarray:
     return np.array(v)
 
 
+def decide(cfg: dict) -> None:
+    """Apply the settled G3 rule (decisions.g3 in the configs) to the measured results."""
+    from swarm_audit import decisions
+
+    sdir = REPO / "results" / "serving"
+    r0 = json.loads((sdir / "g3_batchinv0.json").read_text())
+    p1 = sdir / "g3_batchinv1.json"
+    r1 = json.loads(p1.read_text()) if p1.exists() else None
+    d = decisions.decide_g3(r0, r1, cfg["decisions"]["g3"])
+    (sdir / "g3_decision.json").write_text(json.dumps(d, indent=1) + "\n")
+    print(json.dumps(d, indent=1))
+    if d["status"] == "need_batch_invariant_run":
+        raise SystemExit("Default settings are not exactly repeatable: run\n  "
+                         "SWARM_AUDIT_BATCH_INVARIANT=1 python scripts/check_serving.py "
+                         "--batch-invariant\nthen --decide again.")
+    if d["status"] == "stop":
+        raise SystemExit(f"The G3 floor {d['numerical_floor']:.3g} is above "
+                         f"{d['max_floor']}: stop and report to Abdul.")
+    build.set_config_line("batch_invariant", "true" if d["batch_invariant"] else "false",
+                          note="set by check_serving.py --decide (G3)")
+    build.set_config_line("numerical_floor", repr(float(d["numerical_floor"])),
+                          note="the G3 floor; set by check_serving.py --decide")
+    print("Recorded in configs/{core,calibration,secondary}.yaml. Later GPU runs need "
+          f"SWARM_AUDIT_BATCH_INVARIANT={'1' if d['batch_invariant'] else '0'}.")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--config", default="core.yaml")
@@ -75,8 +102,13 @@ def main() -> None:
                     help="record that this run uses VLLM_BATCH_INVARIANT=1 (set the env var too)")
     ap.add_argument("--n", type=int, default=200)
     ap.add_argument("--others", type=int, default=1000)
+    ap.add_argument("--decide", action="store_true",
+                    help="apply the settled G3 rule to the measured results (no GPU)")
     args = ap.parse_args()
     cfg = build.load(args.config)
+    if args.decide:
+        decide(cfg)
+        return
     cfg["serving"]["batch_invariant"] = args.batch_invariant
     test = prompt_set(cfg, args.n // 2, args.n // 2, seed=31)
     others = prompt_set(cfg, args.others // 2, args.others // 2, seed=32)
@@ -115,7 +147,8 @@ def main() -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(res, indent=1) + "\n")
     print(json.dumps(res, indent=1))
-    print("Report both maxima and throughputs to Abdul; he picks the setting and its floor.")
+    print("Next: python scripts/check_serving.py --decide (the settled G3 rule picks the "
+          "setting and the floor; both maxima and throughputs are reported to Abdul).")
 
 
 if __name__ == "__main__":

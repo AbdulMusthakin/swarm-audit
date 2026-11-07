@@ -50,11 +50,34 @@ serving:
   max_model_len: 4096
   gpu_memory_utilization: 0.90
   enforce_eager: true
-  batch_invariant: false     # VLLM_BATCH_INVARIANT=1; decided by G3
+  batch_invariant: false     # VLLM_BATCH_INVARIANT=1; set by check_serving.py --decide (G3)
+  numerical_floor: null      # the G3 floor; set by check_serving.py --decide
   max_containers: 1
   timeout_minutes: 30
   cost_cap_usd: 20.0         # for everything in the build hand-off
   l4_usd_per_hour: 0.80      # Modal list price; check before running
+
+# Decisions settled in advance on 7 Nov 2026 (Abdul asked Claude to settle every open
+# point that could be settled before the GPU gates). The scripts named apply them
+# mechanically. Still a stop for Abdul: a failed G5, a G3 floor above max_floor, a plan
+# that cannot fit arms 1-4b plus n = 10 in both channels, and raising the cost cap.
+decisions:
+  g3:                          # scripts/check_serving.py --decide
+    # Floor 0 with default settings: keep them. Otherwise use batch invariance if its
+    # maximum difference is smaller and it keeps at least half the default throughput;
+    # the chosen setting's maximum is the numerical floor.
+    min_throughput_ratio: 0.5
+    max_floor: 0.07            # about two bf16 steps in P(H) near 0.5; above this, stop
+  g4:                          # scripts/benchmark.py
+    cost_margin: 1.25          # projected cost x 1.25 (cold starts, queueing) must fit what is left of the cap
+    max_gpu_hours: 12          # projected GPU time must also fit this (the sprint ends 8 Nov)
+    reduced_signal_audit: {n_fit: 25, n_score: 15}   # first cut if over budget (Abdul: histories, never the prompt)
+    cut_order: [n20]           # then the hand-off's cut order; arms 1-4b and n = 10 are never cut
+  arm7: if_budget              # second topology runs last, only if the G4 plan still fits it with the margin
+  signal_responsiveness_below_bar: continue   # report it; changing the model or prompt would be tuning
+  drift_pause_above_floor_by: 0.035           # about one bf16 step; a smaller excess is recorded and reported, runs go on
+  pilot_readings_disagree: primary            # tau <= 5 governs
+  weighting_disagreement: primary             # p_test's weights give the headline; equal weights are the sensitivity check
 
 arms:
   core_counts:     {arm_id: 5, channel: counts,     graph: cycle, n: [10, 20], runs: 50, last_k: null}

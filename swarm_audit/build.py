@@ -365,3 +365,48 @@ def check_final_labels(tok: Any, cfg: dict) -> dict:
             "configured": m["label_ids"], "problems": a.problems + s.problems,
             "prompts_checked": len(act_texts), "signal_positions_checked": len(sig_texts),
             "max_prompt_tokens": n_tok, "max_model_len": cfg["serving"]["max_model_len"]}
+
+
+# ------------------------------------------------------------- settled decisions
+
+BUILD_CONFIGS = ("core.yaml", "calibration.yaml", "secondary.yaml")
+
+
+def set_config_line(key: str, value: str, folder: Path = REPO_ROOT / "configs",
+                    configs=BUILD_CONFIGS, note: str = "") -> None:
+    """Rewrite the first line `  <key>: ...` (any indentation) in every build config,
+    keeping the rest of the file and its comments. `value` is YAML text."""
+    import re
+
+    for name in configs:
+        p = Path(folder) / name
+        s = p.read_text()
+        pat = re.compile(rf"^(\s*){re.escape(key)}:[^\n]*$", re.M)
+        m = pat.search(s)
+        if not m:
+            raise ValueError(f"no `{key}:` line in {p}")
+        line = f"{m.group(1)}{key}: {value}" + (f"   # {note}" if note else "")
+        p.write_text(s[:m.start()] + line + s[m.end():])
+
+
+def numerical_floor(cfg: dict) -> float:
+    f = cfg["serving"].get("numerical_floor")
+    if f is None:
+        raise SystemExit("G3 has not set the numerical floor: run scripts/check_serving.py "
+                         "(and --decide)")
+    return float(f)
+
+
+PLAN_FILE = RESULTS / "serving" / "g4_plan.json"
+
+
+def check_in_plan(arm: str, cond_names: list[str]) -> None:
+    """Core and second-topology arms run only as the G4 plan allows."""
+    if not PLAN_FILE.exists():
+        raise SystemExit("no G4 plan (results/serving/g4_plan.json): run scripts/benchmark.py")
+    plan = json.loads(PLAN_FILE.read_text())
+    allowed = {(p["arm"], p["condition"]) for p in plan["run"]}
+    cut = [c for c in cond_names if (arm, c) not in allowed]
+    if cut:
+        raise SystemExit(f"the G4 plan does not include {arm}: {cut} (cut to fit the budget; "
+                         f"see {PLAN_FILE})")

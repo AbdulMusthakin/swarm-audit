@@ -21,8 +21,12 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from swarm_audit import build, responsiveness  # noqa: E402
-from swarm_audit.audit import table_states  # noqa: E402
+import numpy as np  # noqa: E402
+
+from swarm_audit import build, decisions, responsiveness  # noqa: E402
+from swarm_audit.audit import synthetic_history  # noqa: E402
+from swarm_audit.policies import Query  # noqa: E402
+from swarm_audit.states import all_actions_states  # noqa: E402
 from swarm_audit.swarm import Condition, read_run, run_condition, run_file  # noqa: E402
 
 
@@ -37,6 +41,7 @@ def main() -> None:
     build.check_cost(cfg, cfg["serving"]["timeout_minutes"])
     res = {}
     with build.gpu_session(cfg, ("model_confirmed", "prompts_approved", "modal_account")):
+        t_session = time.time()
         be, server = build.modal_backend(cfg, log_name="g4")
         info = server.info.remote()
         # Abdul, 7 Nov 2026: re-measure Llama's signal responsiveness on the final
@@ -53,49 +58,50 @@ def main() -> None:
             t0 = time.time()
             out = run_condition(c, be, root)
             sec = time.time() - t0
-            usd = build.record_spend(f"G4 {c.name}", sec, cfg)
+            usd = sec / 3600 * cfg["serving"]["l4_usd_per_hour"]
             lines = read_run(run_file(out, 0))
             tok20 = [ln["n_tokens"] for ln in lines if ln["round"] == c.T]
             res[c.name] = {"decisions": len(lines), "seconds": sec,
                            "decisions_per_s": len(lines) / sec, "usd_per_run": usd,
                            "prompt_tokens_round_T": {"min": min(tok20), "max": max(tok20)},
                            "fits_max_model_len": max(tok20) < cfg["serving"]["max_model_len"] - 8}
-    # Extrapolation (decision-weighted; cheap talk costs three label read-outs per decision).
-    per_dec = {"counts": res[conds[0].name]["seconds"] / res[conds[0].name]["decisions"],
-               "cheap_talk": res[conds[1].name]["seconds"] / res[conds[1].name]["decisions"]}
-    plan = []
-    for cfile in ("calibration.yaml", "core.yaml", "secondary.yaml"):
-        c2 = build.load(cfile)
-        for arm in c2["arms"]:
-            for c in build.conditions(c2, arm):
-                dec = c.runs * c.n * c.T
-                plan.append({"arm": arm, "condition": c.name, "decisions": dec,
-                             "seconds": dec * per_dec[c.channel]})
-    a, s = cfg["audit"]["actions"], cfg["audit"]["signal"]
-    own = cfg["own_signal_in_state"]
-    n_sig = len(table_states("cheap_talk", 2, "signal", own)) - 1
-    audit_q = {"counts_d2": 6 * (a["n_fit"] + a["n_score"]) + 2,
-               "cheap_talk_d2_signal": n_sig * (s["n_fit"] + s["n_score"]) + 2}
-    plan.append({"arm": "audit", "condition": "counts_d2", "decisions": audit_q["counts_d2"],
-                 "seconds": audit_q["counts_d2"] * per_dec["counts"]})
-    plan.append({"arm": "audit", "condition": "cheap_talk_d2_signal",
-                 "decisions": audit_q["cheap_talk_d2_signal"],
-                 "seconds": audit_q["cheap_talk_d2_signal"] * per_dec["cheap_talk"]})
-    price = cfg["serving"]["l4_usd_per_hour"]
-    total_s = sum(p["seconds"] for p in plan)
-    summary = {"server": info, "benchmark": res, "plan": plan,
+        # Batched throughput: real runs send 50 x n prompts per round, so one run's tiny
+        # batches overstate the cost. Time 1,000-prompt batches of p_test histories
+        # (lengths uniform on 1..19, as in the swarm on average) per channel.
+        rng = np.random.default_rng(4)
+        pt = build.ptest(cfg)
+        sts = all_actions_states(2, start=False)
+        sec_per_dec = {}
+        for ch in ("counts", "cheap_talk"):
+            qs = [Query(ch, synthetic_history(rng, ch, 2, sts[j % 6], pt), 2) for j in range(1000)]
+            t0 = time.time()
+            be.query(qs)
+            sec_per_dec[ch] = (time.time() - t0) / len(qs)
+        build.record_spend("G4 (whole GPU session)", time.time() - t_session, cfg)
+    cfgs = {f: build.load(f) for f in ("core.yaml", "calibration.yaml", "secondary.yaml",
+                                       "pilot.yaml")}
+    plan = decisions.plan_g4(cfgs, sec_per_dec, build.spent_usd())
+    if plan["status"] == "go" and plan["signal_audit"] != cfg["audit"]["signal"]:
+        a_ = plan["signal_audit"]
+        build.set_config_line("signal", f"{{n_fit: {a_['n_fit']}, n_score: {a_['n_score']}}}",
+                              note="reduced by the settled G4 rule (Abdul: histories, never the prompt)")
+    build.PLAN_FILE.parent.mkdir(parents=True, exist_ok=True)
+    build.PLAN_FILE.write_text(json.dumps(plan, indent=1) + "\n")
+    summary = {"server": info, "benchmark_single_runs": res,
+               "batched_seconds_per_decision": sec_per_dec,
                "signal_responsiveness": {d: {k: v for k, v in resp[d].items()
                                              if k not in ("groups", "prompts")}
                                          for d in ("d4", "d2")},
-               "total_hours": total_s / 3600, "total_usd": total_s / 3600 * price,
-               "note": "single container, lockstep batches as in the benchmark; arm 7 included "
-                       "but runs only if approved; startup and queueing time excluded",
+               "plan": {k: v for k, v in plan.items() if k not in ("run", "cut")},
                "spent_so_far_usd": build.spent_usd(), "cap_usd": cfg["serving"]["cost_cap_usd"]}
     out = REPO / "results" / "serving" / "g4_benchmark.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(summary, indent=1, default=str) + "\n")
     print(json.dumps({k: v for k, v in summary.items() if k != "server"}, indent=1, default=str))
-    print("Report to Abdul before launching anything larger.")
+    if plan["status"] != "go":
+        raise SystemExit("The G4 plan cannot fit arms 1-4b plus n = 10: stop and ask Abdul.")
+    print(f"G4 plan: {plan['steps'] or 'everything fits'}; projected {plan['projected_hours']:.1f} "
+          f"GPU-hours, ${plan['projected_usd']:.2f} (x{plan['margin']} margin applied in the check).")
 
 
 if __name__ == "__main__":

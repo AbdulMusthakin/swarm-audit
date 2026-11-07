@@ -23,7 +23,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from swarm_audit import build  # noqa: E402
+from swarm_audit import build, decisions  # noqa: E402
 from swarm_audit.swarm import run_condition  # noqa: E402
 
 
@@ -34,7 +34,7 @@ def check_pilot_frozen(cfg: dict) -> None:
         raise SystemExit("Gate G6 has not run (no results/pilot/summary.json): run scripts/run_pilot.py")
     summ = json.loads(path.read_text())
     frozen = summ.get("frozen_payoffs")
-    if summ.get("ambiguous") or frozen is None:
+    if frozen is None:
         raise SystemExit("The pilot did not freeze the payoffs (see results/pilot/summary.json): ask Abdul")
     if {k: float(v) for k, v in frozen.items()} != {k: float(v) for k, v in cfg["payoffs"].items()}:
         raise SystemExit(f"config payoffs {cfg['payoffs']} differ from the frozen {frozen}")
@@ -52,6 +52,7 @@ def main() -> None:
     cfg = build.load(args.config)
     if cfg.get("approved") is False:
         raise SystemExit("this arm needs Abdul's approval (approved: false in the config)")
+    # approved: if_budget (arm 7) is enforced through the G4 plan below.
     conds = build.conditions(cfg, args.arm, args.n)
     root = Path(args.runs_root)
 
@@ -62,9 +63,12 @@ def main() -> None:
         return
 
     need = ("model_confirmed", "prompts_approved", "modal_account")
+    floor = build.numerical_floor(cfg)              # G3 must have run
+    pause_by = cfg["decisions"]["drift_pause_above_floor_by"]
     if args.arm.startswith(("core", "second")):
         need += ("pilot_rule",)
         check_pilot_frozen(cfg)
+        build.check_in_plan(args.arm, [c.name for c in conds])
     build.check_cost(cfg, cfg["serving"]["timeout_minutes"] * len(conds))
     with build.gpu_session(cfg, need):
         be, _ = build.modal_backend(cfg, log_name=f"swarm_{args.arm}")
@@ -82,11 +86,19 @@ def main() -> None:
             sec = time.time() - t0
             usd = build.record_spend(f"{args.arm}/{c.name}", sec, cfg)
             path = root / args.arm / c.name / "drift.json"
+            worst = max(v for v in (drift["start_vs_end"], drift["start_vs_mixed"]) if v is not None)
+            action = decisions.drift_action(worst, floor, pause_by)
+            drift.update(floor=floor, action=action)
             path.write_text(json.dumps({**drift, "start": start, "end": end,
                                         "mixed": mixer.mixed}) + "\n")
-            print(f"{c.name}: drift {drift}; {sec:.0f}s, about ${usd:.2f}", flush=True)
-            print("Report any drift above the G3 floor to Abdul at once "
-                  "(results/validation.md).", flush=True)
+            print(f"{c.name}: drift {worst:.3g} (floor {floor:.3g}) -> {action}; {sec:.0f}s, "
+                  f"about ${usd:.2f}", flush=True)
+            if action == "report":
+                print("DRIFT above the G3 floor: recorded; report it to Abdul at once "
+                      "(runs continue, by the settled rule).", flush=True)
+            if action == "pause":
+                raise SystemExit(f"DRIFT {worst:.3g} is more than {pause_by} above the floor: "
+                                 "paused by the settled rule; report to Abdul.")
 
 
 if __name__ == "__main__":

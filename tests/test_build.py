@@ -269,7 +269,7 @@ def test_hidden_signal_policy_is_as_specified():
 
 # ------------------------------------------------------------------------- configs
 
-SHARED = ("inputs", "model", "payoffs", "T", "p_test", "own_signal_in_state", "audit", "seeds",
+SHARED = ("inputs", "model", "payoffs", "T", "p_test", "own_signal_in_state", "audit", "seeds", "decisions",
           "analysis", "serving")
 
 

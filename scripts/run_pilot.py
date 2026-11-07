@@ -4,8 +4,9 @@
 5 counts runs at n = 10 on the cycle with the current payoffs, logged to results/pilot/
 (never analysed). Then Abdul's pre-registered rule is applied mechanically: if 3 or more
 runs reach all-low consensus by round 5, uLH becomes 11 in every config (both channels)
-and is frozen; otherwise nothing changes. If the alternative readings of the rule
-disagree, nothing is changed and the script stops for Abdul.
+and is frozen; otherwise nothing changes. If the alternative readings of "by round 5"
+disagree, the primary reading (tau <= 5) governs (settled 7 Nov 2026) and the
+disagreement is reported.
 
     python scripts/run_pilot.py
 """
@@ -42,7 +43,7 @@ def main() -> None:
     dec = pilot.decide(data.actions, pil["rule"])
     summ = {"rule": pil["rule"], "payoffs_in_pilot": cfg["payoffs"], **dec,
             "note": "pilot runs never enter the analysis"}
-    if dec["ambiguous"]:
+    if dec["ambiguous"] and cfg["decisions"]["pilot_readings_disagree"] != "primary":
         summ["action"] = "none: the readings of the rule disagree; Abdul decides"
     elif dec["apply_change"]:
         newp = pilot.new_payoffs(cfg["payoffs"], pil["rule"]["change"])
@@ -56,7 +57,13 @@ def main() -> None:
     (OUT / "summary.json").write_text(json.dumps(summ, indent=1) + "\n")
     print(json.dumps(summ, indent=1))
     if dec["ambiguous"]:
-        raise SystemExit("The readings of the pilot rule disagree for these runs: ask Abdul.")
+        if cfg["decisions"]["pilot_readings_disagree"] == "primary":
+            summ["ambiguous_resolved_by"] = "settled rule: the primary reading (tau <= 5) governs"
+            (OUT / "summary.json").write_text(json.dumps(summ, indent=1) + "\n")
+            print("Readings of 'by round 5' disagreed; the primary reading governed (settled "
+                  "rule). Report this to Abdul.")
+        else:
+            raise SystemExit("The readings of the pilot rule disagree for these runs: ask Abdul.")
 
 
 if __name__ == "__main__":
