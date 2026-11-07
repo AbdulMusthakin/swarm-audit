@@ -15,9 +15,9 @@ Separate arms on a second Modal account. Nothing here feeds the core's primary c
 | step | status | file |
 |---|---|---|
 | X1, workspace set-up | **PASS** (7 Nov). The secret first stored the token under key `huggingface` (Llama download: 401); after the teammate renamed it to `HF_TOKEN`, the token (HF account `micsenso`, read) has Llama access. Weights cached in this workspace's `swarm-audit-weights` volume (16.1 GB, 56 s, CPU). Every label one token with the configured id: actions 473/445, signals 1579/3428/7000, on 148 action and 250 signal positions (core d = 2 prompts), and on 66 counts prompts at d = 4 (arm 8's degree, longest 782 tokens) | `serving/workspace_setup.json`, `serving/label_check_d4.json` |
-| X2, serving repeatability | not run | `results/extra/serving/` |
-| X3, cross-account drift panel | not run | `results/extra/serving/drift_panel.json` |
-| Arm 8, 100 agents, random 4-regular | graph saved (simple, connected, 200 edges, measured diameter 6; pair distances 1–6: 200/579/1412/1980/758/21; 1 triangle). Not run; also needs the core pilot's frozen payoffs (G6 has not run on the core branch) | `results/extra/graph_rr4_n100.json`, `runs/`, `audit/` |
+| X2, serving repeatability | **PASS** (7 Nov, 19:11 UTC). Batch invariance on: 48 prompts alone, in a shuffled batch of 448 others, and warm; max difference **0** in P(H) and in every signal probability (floor 0, as in the core's G3). 4.07 prompts/s. Fresh queries (no replay) | `serving/g3_batchinv1.json` |
+| X3, cross-account drift panel | this account's panel saved (136 prompts, fresh, 19:11 UTC); the core has no logged panel outputs yet, comparison pending | `serving/drift_panel.json` |
+| Arm 8, 100 agents, random 4-regular | graph saved (simple, connected, 200 edges, measured diameter 6; pair distances 1–6: 200/579/1412/1980/758/21; 1 triangle). Core pilot froze the payoffs unchanged, (12, 10, 4, 0) = this config's (checked by `build.check_core_pilot_payoffs`). Audit table (d = 4, 1,502 histories) running | `results/extra/graph_rr4_n100.json`, `runs/`, `audit/` |
 | Arm 9, OLMo-3-7B (conditional second-model extension) | trigger not checked yet; reading fixed in advance (below) | – |
 
 ## Code added (additive; core behaviour unchanged)
@@ -35,10 +35,14 @@ Separate arms on a second Modal account. Nothing here feeds the core's primary c
 
 ## Core commits merged
 
-- Up to `61de1cb` (spend-ledger lock, G4 info() fix, core cap $40). The review's correctness
-  repairs (fresh repeatability bypassing replay, cache identity, config fingerprints,
-  final payoff freeze, G5 discrete-threshold fix, matched TV null) were not on the core
-  branch at this merge; they will be merged, not re-implemented, when they land.
+- `61de1cb`: spend-ledger lock, G4 info() fix, core cap $40.
+- `a83410a`: review C1, fresh repeatability/drift measurements, serving identity in the cache key.
+- `470c271`: review C2, immutable provenance for runs and tables, checked on resume and load.
+- `9edb338`: G6 pilot, payoffs frozen at (12, 10, 4, 0).
+- `04cfc68`: review C3 and C5, G5 blocks the core launch; discrete Monte Carlo p-value.
+- `main` up to `1676dcd` (teammates' hosted scoping evidence), so PR #7 has no conflicts.
+- Still to merge when they land: the matched TV null reference and labels for
+  conditional uncertainty (review C6 or later).
 
 ## Arm 9 trigger: the reading, fixed before any result (7 Nov, about 19:00 UTC)
 
