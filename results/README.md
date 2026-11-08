@@ -26,6 +26,11 @@ cloud session's disk is temporary). Every number comes from logged data.
 | `tables/scores.md`, `tables/defects.md` | CRPS, mean errors, Δ against the floor; defects and bounds. | `scripts/analyse.py --collect` |
 | `screening/` | Model screening (6–7 Nov): see `screening/summary.md`. | screening scripts |
 
-As of this commit only G1 and G2 have run (CPU). No GPU run of the build has happened:
-`audit/<model>/`, `runs/`, `serving/`, `pilot/`, `analysis/` and Figures 1–2 for the
-LLM do not exist yet.
+| `gates/` | G5 gate records (`G5_<channel>.json`, the exception, the confirmation and `history.jsonl`). | `scripts/analyse.py --gate-g5`, `scripts/confirm_g5.py` |
+| `followup/core/` | Exploratory follow-up of 8 Nov (temporal scores, uncertainty, clock-indexed audit, claims map, figures, report insert): start at `followup/core/summary.md`. | `scripts/followup_core_*.py` |
+| `extra/` | The extra arms (8 and 9), owned by the extra-arms session. | `extra-arms` branch |
+
+## Status
+
+The status as of 8 Nov 2026 is in the completion note at the end of this file. The
+manifests and gate records are authoritative.
