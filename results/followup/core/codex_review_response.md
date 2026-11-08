@@ -31,3 +31,16 @@ Independent agreement worth recording (no action needed):
   early gain of +0.005976 [+0.003327, +0.008544] against our +0.005962, and an endpoint gain
   of −0.003581 against our −0.003587. The rounds 8–13 point estimates differ by 2.3 combined
   MC SE, so the agreement is distributional, not bitwise. The signed errors match exactly.
+
+## Continuation review (Codex, 05:30 UK; read at 05:52 UTC, commits `1ef630b`–`751ddc8`)
+
+The review checked core `f8ad9bb` and found no critical numerical invalidation. It
+confirmed the earlier corrections: the MC docstring, the primary classification, the status
+text and the causal wording.
+
+| finding | owner | verified? | action |
+|---|---|---|---|
+| **m4** Resume provenance does not bind the observation intervention: a condition logged under `unmodified` accepted a resume under `both_null` with the same fingerprint | shared core code (`swarm.run_condition`) | **yes**: Codex's probe (`review-codex/independent/continuation_provenance_probe.py`) accepted the change before the fix | **Fixed.** `swarm.bind_observation` writes `observation.json` (name and spec version) before the first run and rejects any changed name on resume. Conditions logged before the guard are checked against the names in their manifest sessions. Unnamed interventions are refused. `provenance.json` is never rewritten, so every existing fingerprint is unchanged. Two tests are added, and Codex's probe now reports `changed_observation_on_resume_accepted: false` (ProvenanceError). The completed E2 cells each carry a single treatment (Codex checked all 16,000 records), so nothing needs rerunning. |
+| Multiplicity sensitivity for the E3 size contrasts (full-memory nominal interval [−0.214, −0.009]; Bonferroni over 2: [−0.234, +0.010]) | extra session / report authors | n/a (extra's analysis) | Recorded in `extra_import.md`. Report the size contrasts as nominal and exploratory. |
+| Do not promote n = 20 to the primary result; its endpoint sign rests on conditional precision | core | agrees with our wording | Already worded so in `summary.md`, `report_insert.md` and the README. Codex's independent 500k reference gives D = −0.000265 [−0.000387, −0.000139] against our 2M value of −0.000311, so the two agree within MC. |
+| K_10 paired order-0 − actions-only CRPS | core | **reproduced here** | Cheap talk +0.0168 [+0.0121, +0.0211]; counts −0.0006 [−0.0024, +0.0012] (this repo's bootstrap). Codex: +0.0168 [+0.0121, +0.0212] and −0.0006 [−0.0025, +0.0012]. These are added to the completion note. |

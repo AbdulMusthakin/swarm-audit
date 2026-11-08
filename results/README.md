@@ -90,7 +90,9 @@ labels, payoffs, serving). Run fingerprints are in each condition's `provenance.
 - **Arm 7, K_10 (secondary).** Actions-only audit against order-0:
   - Cheap talk: CRPS 0.0596 against 0.0764; max Δ_t 0.228 against a null of 0.239.
   - Counts: CRPS 0.0405 against 0.0399; max Δ_t 0.216 against a null of 0.237.
-  - On the complete graph the local audit helps on cheap talk but not on counts.
+  - On the complete graph the local audit helps on cheap talk but not on counts. Paired
+    order-0 − actions-only CRPS: cheap talk +0.0168 [+0.0121, +0.0211]; counts −0.0006
+    [−0.0024, +0.0012]. Codex reproduced both independently.
 - **All conditions:** `tables/scores.md`, `tables/defects.md`, `figures/fig2.png`. Figure
   2's middle-panel labels overlap (cosmetic); the tables carry the same numbers.
 - **Exploratory follow-up** (`followup/core/summary.md`):

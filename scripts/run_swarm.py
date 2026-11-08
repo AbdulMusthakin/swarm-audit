@@ -80,7 +80,8 @@ def main() -> None:
     if args.backend.startswith("scripted:"):
         be = build.scripted(args.backend.split(":", 1)[1], cfg)
         for c in conds:
-            run_condition(c, be, root, args.chunk, max_runs=args.max_runs, observe=observe)
+            run_condition(c, be, root, args.chunk, max_runs=args.max_runs, observe=observe,
+                          observe_name=obs_name)
         return
 
     need = ("model_confirmed", "prompts_approved", "modal_account")
@@ -127,7 +128,7 @@ def main() -> None:
                 extra.update(workspace=build.current_workspace(), model=cfg["model"],
                              started=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(t0)))
             run_condition(c, mixer, root, args.chunk, extra_manifest=extra, max_runs=args.max_runs,
-                          observe=observe)
+                          observe=observe, observe_name=obs_name)
             end = build.panel_outputs(be, panel)
             drift = {"start_vs_end": build.panel_max_change(start, end),
                      "start_vs_mixed": (build.panel_max_change(start, mixer.mixed)

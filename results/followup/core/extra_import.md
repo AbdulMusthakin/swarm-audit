@@ -48,3 +48,8 @@ before computing).
    `is_primary_contrast: true` from the old classifier (Codex review M2). The core
    classifier is fixed (`analysis.is_primary`). Treat that flag as **false**: the primary
    contrast is core arm 6 only.
+4. **Multiplicity (Codex review, 05:30).** The full-memory size contrast's nominal 95%
+   interval [−0.21, −0.01] becomes [−0.234, +0.010] with a two-comparison Bonferroni
+   correction, and [−0.254, +0.029] over all four E3 contrasts. The last-1 contrast stays
+   negative. Report the size contrasts as nominal and exploratory; no memory effect or phase
+   transition is established.
