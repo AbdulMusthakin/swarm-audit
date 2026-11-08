@@ -254,5 +254,21 @@
   "usd": 0.1333,
   "time": "2026-11-08T02:20:15.275004+00:00",
   "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "second_topology_counts/counts_n10_complete_full",
+  "seconds": 718.6,
+  "containers": 1,
+  "usd": 0.1597,
+  "time": "2026-11-08T02:32:19.197077+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-08T02:32:19.199894+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
  }
 ]
