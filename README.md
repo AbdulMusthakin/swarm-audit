@@ -67,7 +67,7 @@ GPU steps run with `SWARM_AUDIT_HF_SECRET=huggingface SWARM_AUDIT_BATCH_INVARIAN
 
 The final report is `report/main.tex` (built PDF: `report/main.pdf`; build with
 `cd report && latexmk -pdf main.tex`). The report and its scripts are at commit
-[`42c52a0`](https://github.com/AbdulMusthakin/swarm-audit/tree/42c52a0d1db9ee681396bba011cc38bb2dee2578); its evidence is pinned at commit
+[`e75e800`](https://github.com/AbdulMusthakin/swarm-audit/tree/e75e8003cd56553756ec3f804df09a09a93c32ac); its evidence is pinned at commit
 [`b524342`](https://github.com/AbdulMusthakin/swarm-audit/tree/b52434290039a1bc775137271a38ee35c06d432c).
 Everything it reports can be recomputed on CPU from committed tables and logs, with no
 model queries:
