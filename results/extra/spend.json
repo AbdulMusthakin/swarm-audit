@@ -174,5 +174,21 @@
   "usd": 0.1333,
   "time": "2026-11-08T01:01:41.514264+00:00",
   "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "followup_olmo_n4_full/cheap_talk_n4_cycle_full",
+  "seconds": 1156.0,
+  "containers": 1,
+  "usd": 0.2569,
+  "time": "2026-11-08T01:21:00.387161+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-08T01:21:00.390830+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
  }
 ]
