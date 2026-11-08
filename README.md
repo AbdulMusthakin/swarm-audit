@@ -76,7 +76,10 @@ model queries:
   [`results/extra/followup/REPRODUCE.md`](results/extra/followup/REPRODUCE.md).
 - Fresh four-agent OLMo cohort (the original roundwise check reapplied to the 50 fresh
   runs): `python scripts/report_fresh_cohort.py`.
-- Report figures: `python scripts/report_figures.py` (after the line above).
+- Diagnostic sensitivity within the four-agent setting (Appendix F; pre-registered in
+  [`results/extra/followup/sensitivity/plan.md`](results/extra/followup/sensitivity/plan.md)):
+  `python scripts/report_sensitivity.py`.
+- Report figures: `python scripts/report_figures.py` (after the fresh-cohort line above).
 
 ## Results
 

@@ -69,81 +69,92 @@ def pct(p: float) -> str:
 
 
 def lead_figure() -> None:
+    """Figure 1: one takeaway per panel, text at about 9 pt at print size."""
     ten = json.loads(OLMO10.read_text())
     four = json.loads(FRESH.read_text())
-    fig, (a, b) = plt.subplots(1, 2, figsize=(WIDTH, 2.9), facecolor=SURFACE,
-                               gridspec_kw={"width_ratios": [1.0, 1.08]})
+    fig, (a, b) = plt.subplots(1, 2, figsize=(WIDTH, 3.35), facecolor=SURFACE,
+                               gridspec_kw={"width_ratios": [1.0, 1.0]})
     for ax in (a, b):
         style(ax)
+        ax.tick_params(labelsize=9)
+    blue, orange = COLOURS["actions_only"], COLOURS["signal_aware"]
+    percent = matplotlib.ticker.PercentFormatter(1.0, decimals=0)
 
-    # (A) timing, 10 agents.
+    # (A) timing, 10 agents: the round-3 gap is the first thing the eye sees.
     X = ten["X"]
     t = np.arange(1, len(X["swarm"]["mean"]) + 1)
+    live, ao, sa = (np.asarray(X[k]["mean"]) for k in ("swarm", "actions_only", "signal_aware"))
     a.fill_between(t, X["swarm"]["lo"], X["swarm"]["hi"], color=INK, alpha=0.12, linewidth=0)
-    a.plot(t, X["actions_only"]["mean"], color=COLOURS["actions_only"], linewidth=2,
-           label="actions-only audit")
-    a.plot(t, X["signal_aware"]["mean"], color=COLOURS["signal_aware"], linewidth=2,
-           label="signal-aware audit")
-    a.plot(t, X["swarm"]["mean"], color=INK, linewidth=2, marker="o", markersize=3.5,
-           label="live runs (95% interval)")
-    a.axvline(3, color=INK2, linewidth=0.8, linestyle=":")
-    sc, fl = ten["scores"], ten["scores"]["floor"]
-    da, ds = max(sc["delta"]["actions_only"]), max(sc["delta"]["signal_aware"])
-    a.annotate(f"round 3: live {pct(X['swarm']['mean'][2])}, audits "
-               f"{pct(X['actions_only']['mean'][2])} and {pct(X['signal_aware']['mean'][2])}\n"
-               f"max roundwise TV {da:.3f} and {ds:.3f}\n"
-               f"(cutoffs {fl['actions_only']['max_over_rounds']:.3f} and "
-               f"{fl['signal_aware']['max_over_rounds']:.3f}): flagged",
-               xy=(3, X["actions_only"]["mean"][2]), xytext=(5.2, 0.43), fontsize=7.5,
-               color=INK, va="center",
+    a.plot(t, ao, color=blue, linewidth=2.2, label="actions-only audit")
+    a.plot(t, sa, color=orange, linewidth=2.2, linestyle=(0, (4, 2)), label="signal-aware audit")
+    a.plot(t, live, color=INK, linewidth=2, marker="o", markersize=3.5, label="live games")
+    a.annotate("", xy=(3, live[2] + 0.012), xytext=(3, ao[2] - 0.012),
+               arrowprops={"arrowstyle": "<->", "color": INK, "linewidth": 1.3,
+                           "shrinkA": 0, "shrinkB": 0})
+    a.annotate(f"round 3: {100 * live[2]:.0f}% live\nvs {100 * ao[2]:.0f}–{100 * sa[2]:.0f}% forecast",
+               xy=(3.15, (live[2] + ao[2]) / 2), xytext=(6.2, 0.37), fontsize=9, color=INK,
+               va="center", ha="left",
                arrowprops={"arrowstyle": "-", "color": INK2, "linewidth": 0.8})
-    a.text(20, 0.13, f"all low in rounds 16–20:\nlive 50 of 50; audits "
-           f"{100 * sc['G']['actions_only'][0]:.1f}% and {100 * sc['G']['signal_aware'][0]:.1f}%",
-           fontsize=7.5, color=INK, ha="right", va="bottom")
     a.set_xlim(1, 20)
     a.set_ylim(0, 0.7)
-    a.set_xticks([1, 5, 10, 15, 20])
-    a.set_xlabel("round", color=INK2)
-    a.set_ylabel("fraction bidding high", color=INK2)
-    a.legend(frameon=False, loc="upper right", bbox_to_anchor=(1.0, 1.02), handlelength=1.6)
-    a.set_title("A  OLMo, 10 agents, full history", loc="left", color=INK, fontweight="bold")
+    a.set_xticks([1, 3, 5, 10, 15, 20])
+    a.yaxis.set_major_formatter(percent)
+    a.set_xlabel("round", color=INK2, fontsize=9)
+    a.set_ylabel("agents bidding high", color=INK2, fontsize=9)
+    a.legend(frameon=False, loc="upper right", fontsize=9, handlelength=2.2)
+    a.set_title("A  10 agents, full history\nexpected ending, reached faster than forecast",
+                loc="left", color=INK, fontsize=9.5, fontweight="bold", linespacing=1.3)
 
-    # (B) the persistent all-high event, 4 agents.
+    # (B) the final-five-round all-high event, 4 agents.
     ex = four["exact_P_F1"]
     co = four["cohorts"]
-    rows = [("actions-only audit", ex["actions_only"], None, COLOURS["actions_only"]),
-            ("signal-aware audit", ex["signal_aware"], None, COLOURS["signal_aware"]),
-            ("live, original 50 runs", co["original"]["live_F1"] / co["original"]["runs"],
-             co["original"]["live_F1_ci_clopper_pearson"], INK),
-            ("live, fresh 50 runs", co["fresh"]["live_F1"] / co["fresh"]["runs"],
-             co["fresh"]["live_F1_ci_clopper_pearson"], INK)]
-    for i, (lab, p, ci, col) in enumerate(rows):
-        if ci is None:   # exact probabilities on the cached tables: bars, no interval
-            b.barh(i, p, height=0.42, color=col, edgecolor=SURFACE, linewidth=1)
-            txt = f"{100 * p:.4f}%".rstrip("0") if p < 0.001 else f"{100 * p:.2f}%"
-            b.text(max(p, 0) + 0.008, i, txt, va="center", fontsize=8, color=INK)
+    rows = [("actions-only audit", ex["actions_only"], None, blue),
+            ("signal-aware audit", ex["signal_aware"], None, orange),
+            ("live, original games", co["original"], co["original"]["live_F1_ci_clopper_pearson"], INK),
+            ("live, fresh games", co["fresh"], co["fresh"]["live_F1_ci_clopper_pearson"], INK)]
+    for i, (lab, v, ci, col) in enumerate(rows):
+        if ci is None:   # exact audit forecasts on the cached tables: bars, no interval
+            b.barh(i, v, height=0.46, color=col, edgecolor=SURFACE, linewidth=1)
+            txt = "0.0076%" if v < 0.001 else f"{100 * v:.1f}%"
+            b.text(v + 0.01, i, txt, va="center", fontsize=9, color=INK,
+                   fontweight="bold" if v < 0.001 else "normal")
         else:            # live rates: point and 95% Clopper-Pearson interval
+            k, n = v["live_F1"], v["runs"]
             b.plot(ci, [i, i], color=col, linewidth=2)
-            b.plot(p, i, marker="o", markersize=6, color=col, markeredgecolor=SURFACE,
+            b.plot(k / n, i, marker="o", markersize=7, color=col, markeredgecolor=SURFACE,
                    markeredgewidth=1)
-            k = co["original" if "original" in lab else "fresh"]["live_F1"]
-            b.text(ci[1] + 0.008, i, f"{k}/50", va="center", fontsize=8, color=INK)
-    b.set_yticks(range(len(rows)), [r[0] for r in rows])
+            b.text(ci[1] + 0.01, i, f"{100 * k / n:.0f}% ({k}/{n})", va="center", fontsize=9,
+                   color=INK)
+    b.set_yticks(range(len(rows)), [r[0] for r in rows], fontsize=9)
     b.invert_yaxis()
-    b.set_xlim(0, 0.42)
-    b.xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
-    b.set_xlabel("probability all agents bid high in every round 16–20", color=INK2)
-    ro, rf = (co[c]["roundwise"]["actions_only"] for c in ("original", "fresh"))
-    b.text(0.415, 0.0, f"actions-only roundwise check:\nmax TV {ro['max_delta']:.3f} (original), "
-           f"{rf['max_delta']:.3f} (fresh),\nboth at round {ro['round_of_max']}, below the "
-           f"cutoff {ro['original_cutoff']:.3f}: not flagged", fontsize=7.5, color=INK,
-           ha="right", va="center")
-    b.set_title("B  OLMo, 4 agents, last-round history", loc="left", color=INK,
-                fontweight="bold")
-    fig.tight_layout(w_pad=1.5)
+    b.set_xlim(0, 0.45)
+    b.xaxis.set_major_formatter(percent)
+    b.set_xlabel("chance of the final-five-round all-high event", color=INK2, fontsize=9)
+    b.text(0.44, 0.5, "roundwise check: not flagged\nin either live cohort", fontsize=9,
+           color=INK, ha="right", va="center")
+    b.set_title("B  4 agents, last round only\na persistent outcome the audit called rare",
+                loc="left", color=INK, fontsize=9.5, fontweight="bold", linespacing=1.3)
+    fig.tight_layout(w_pad=1.2)
     fig.savefig(OUT / "fig1_olmo_lead.pdf", facecolor=SURFACE, bbox_inches="tight",
                 pad_inches=0.02)
     plt.close(fig)
+
+
+def _pp(v, _pos=None) -> str:
+    """Tick label for a probability difference, in percentage points."""
+    return f"{100 * v:.0f}"
+
+
+def _relabel(fig, mapping: dict[str, str]) -> None:
+    """Replace whole text strings (titles, tick labels, legend entries) in a figure."""
+    for txt in fig.findobj(matplotlib.text.Text):
+        new = mapping.get(txt.get_text())
+        if new is not None:
+            txt.set_text(new)
+    for ax in fig.axes:
+        labels = [t.get_text() for t in ax.get_yticklabels()]
+        if any(lab in mapping for lab in labels):
+            ax.set_yticks(ax.get_yticks(), [mapping.get(lab, lab) for lab in labels])
 
 
 def llama_figures() -> None:
@@ -161,15 +172,22 @@ def llama_figures() -> None:
         return fig, axes
 
     def save(fig, name):
-        for txt in fig.findobj(matplotlib.text.Text):
-            if txt.get_text() == "rounds 2-7 (primary)":
-                txt.set_text("rounds 2-7 (early)")
+        _relabel(fig, {"rounds 2-7 (primary)": "rounds 2-7 (early)",
+                       "endpoint y\n(rounds 16-20)": "endpoint F\n(rounds 16-20)",
+                       "endpoint y": "endpoint F", "swarm (50 runs)": "live games",
+                       "pooled audit (L = 1-19)": "pooled tables (lengths 1-19)",
+                       "clock-indexed audit": "history-length tables",
+                       "pooled table": "pooled tables", "clock-indexed table": "history-length tables",
+                       "CRPS(pooled) - CRPS(clock)  [x 1e-3]\n> 0: clock-indexed audit better":
+                       "CRPS(pooled) - CRPS(history-length)  [x 1e-3]\n> 0: history-length tables better"})
         for ax in fig.axes:
-            for lab in ax.get_yticklabels():
-                if lab.get_text() == "rounds 2-7 (primary)":
-                    ax.set_yticks(ax.get_yticks(), [t.get_text().replace("(primary)", "(early)")
-                                                    for t in ax.get_yticklabels()])
-                    break
+            ylab = ax.get_ylabel()
+            if "fraction bidding high" in ylab:
+                ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
+                ax.set_ylabel("agents bidding high", color=INK2, fontsize=9)
+            elif "kappa" in ylab:
+                ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(_pp))
+                ax.set_ylabel("one-step error (percentage points)", color=INK2, fontsize=9)
         fig.savefig(OUT / f"{names[name]}.pdf", facecolor=SURFACE, bbox_inches="tight",
                     pad_inches=0.02)
         plt.close(fig)
@@ -192,12 +210,44 @@ def olmo_mechanism_figure() -> None:
     plt.rcParams["font.family"] = "Carlito"   # the module sets its own font on import
 
     def save(fig, name):
+        def as_pct(text):
+            try:
+                v = float(text)
+            except ValueError:
+                return None
+            return f"{100 * v:.4f}%".rstrip("0") if v < 0.001 else f"{100 * v:.1f}%"
+        mapping = {"full table": "signal-aware", "own msg only": "own message only",
+                   "nbr msgs only": "neighbours only", "actions only": "actions-only",
+                   "nbr msgs only (on top of\nactions only)": "neighbours only\n(on top of actions-only)",
+                   "live 8/50 (95% CI shaded)": "live 16% (8/50), 95% interval shaded",
+                   "P(all high in rounds 16–20)": "final-five-round all-high event",
+                   "P(still all-high)": "still all-high",
+                   "A  Audit keeps which messages? (exact)": "A  Audit keeps which messages?",
+                   "B  Agents shown which? (exact)": "B  Agents shown which messages?",
+                   "C  Staying all-high": "C  Staying all-high"}
+        for txt in fig.findobj(matplotlib.text.Text):
+            t = txt.get_text()
+            if t in mapping:
+                txt.set_text(mapping[t])
+            elif as_pct(t) is not None and not isinstance(txt, matplotlib.text.Annotation) \
+                    and txt.axes is not None and txt not in txt.axes.get_xticklabels() \
+                    and txt not in txt.axes.get_yticklabels():
+                txt.set_text(as_pct(t))
+        for ax in fig.axes:
+            labels = [x.get_text() for x in ax.get_yticklabels()]
+            if any(lab in mapping for lab in labels):
+                ax.set_yticks(ax.get_yticks(), [mapping.get(lab, lab) for lab in labels])
+            if ax.get_xlabel() == "final-five-round all-high event":
+                ax.set_xticks([0, 0.1, 0.2])
+                ax.xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
+            if ax.get_ylabel() == "still all-high":
+                ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
         for txt in fig.findobj(matplotlib.text.Text):
             if txt.get_text():
-                txt.set_fontsize(min(9.0, max(7.0, round(txt.get_fontsize() * 1.2, 1))))
+                txt.set_fontsize(min(9.0, max(7.5, round(txt.get_fontsize() * 1.2, 1))))
         for ax in fig.axes:
             ax.tick_params(labelsize=7.5)
-        fig.set_size_inches(WIDTH, 2.8)
+        fig.set_size_inches(WIDTH, 3.0)
         fig.tight_layout(w_pad=0.6)
         fig.savefig(OUT / "figA_olmo_mechanism.pdf", facecolor=SURFACE, bbox_inches="tight",
                     pad_inches=0.02)
@@ -225,7 +275,7 @@ def contraction_figure() -> None:
     cut = r["observed_tv_null"]["max_over_rounds"]
     blue = COLOURS["actions_only"]   # every curve concerns the actions-only audit
 
-    fig, ax = plt.subplots(figsize=(WIDTH, 3.1), facecolor=SURFACE)
+    fig, ax = plt.subplots(figsize=(WIDTH, 3.3), facecolor=SURFACE)
     style(ax)
     ax.plot(t, th1, color=INK2, linewidth=1.6, linestyle=(0, (5, 3)),
             label="Theorem 1, full trajectory (capped at 1)")
@@ -235,19 +285,19 @@ def contraction_figure() -> None:
     ax.plot(t, joint, color=blue, linewidth=2.2,
             label="contraction, joint one-step defects (95% band)")
     ax.axhline(cut, color=INK2, linewidth=0.9, linestyle=":",
-               label=f"sampling cutoff for the observed maximum ({cut:.3f})")
+               label=f"simultaneous cutoff under the audit model ({cut:.3f})")
     ax.plot(t, obs, color=INK, linewidth=1.4, marker="o", markersize=3.5,
-            label="observed roundwise TV, 50 live runs")
+            label="observed roundwise TV, 50 live games")
     for y, txt in ((th1[-1], f"{th1[-1]:.0f}"), (same[-1], f"{same[-1]:.3f}"),
                    (joint[-1], f"{joint[-1]:.3f}")):
-        ax.text(t[-1] + 0.3, y, txt, va="center", ha="left", fontsize=8, color=INK)
+        ax.text(t[-1] + 0.3, y, txt, va="center", ha="left", fontsize=9, color=INK)
     ax.set_xlim(1, t[-1])
     ax.set_ylim(0, 1.05)
     ax.set_xticks([1, 3, 5, 10, 15, 20])
-    ax.set_xlabel("round", color=INK2, fontsize=8.5)
-    ax.set_ylabel("TV distance (estimate)", color=INK2, fontsize=8.5)
-    ax.tick_params(labelsize=8)
-    ax.legend(frameon=False, fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.2),
+    ax.set_xlabel("round", color=INK2, fontsize=9)
+    ax.set_ylabel("TV distance (0–1)", color=INK2, fontsize=9)
+    ax.tick_params(labelsize=9)
+    ax.legend(frameon=False, fontsize=9, loc="upper center", bbox_to_anchor=(0.5, -0.2),
               ncol=2, handlelength=2.4, columnspacing=1.5)
     fig.tight_layout()
     fig.savefig(OUT / "figA_contraction.pdf", facecolor=SURFACE, bbox_inches="tight",

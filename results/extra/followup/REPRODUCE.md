@@ -47,6 +47,14 @@ recomputes the original cohort and stops unless that reproduces the committed an
 python scripts/report_fresh_cohort.py
 ```
 
+Diagnostic sensitivity within the four-agent setting, pre-registered in
+`sensitivity/plan.md` (writes `sensitivity/results.json` and `sensitivity/summary.md`,
+about 20 s):
+
+```bash
+python scripts/report_sensitivity.py
+```
+
 Figure 2 candidate and the appendix figures (writes `figures/`):
 
 ```bash

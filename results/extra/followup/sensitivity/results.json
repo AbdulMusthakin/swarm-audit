@@ -1,0 +1,172 @@
+{
+ "plan": "results/extra/followup/sensitivity/plan.md",
+ "status": "exploratory, model-based; conditional on the cached OLMo kernels",
+ "setting": "OLMo-3-7B, n = 4 cycle, cheap talk, last-round history, T = 20",
+ "null": "exact actions-only cached chain",
+ "alternative": "exact signal-aware cached chain",
+ "batch_runs": 50,
+ "sizes": {
+  "A": 20000,
+  "B": 20000,
+  "null": 20000,
+  "alternative": 20000
+ },
+ "seed": 20261108,
+ "alpha": 0.05,
+ "pi0_P_F1_actions_only": 7.635603166733566e-05,
+ "pi1_P_F1_signal_aware": 0.14239254032335946,
+ "cutoffs": {
+  "S1a_original_simultaneous": 0.19064822871734904,
+  "S1b_recalibrated": 0.191770942181,
+  "S2_min_tail_p": 0.00519974001299935,
+  "S3_k_star": 1
+ },
+ "tests": {
+  "S1a_shared_max_TV_original_cutoff": {
+   "null": {
+    "rate": 0.0547,
+    "ci95": [
+     0.05158845628714745,
+     0.05794176874229122
+    ],
+    "rejections": 1094,
+    "batches": 20000
+   },
+   "alternative": {
+    "rate": 0.3267,
+    "ci95": [
+     0.32020059407104184,
+     0.3332498161482563
+    ],
+    "rejections": 6534,
+    "batches": 20000
+   }
+  },
+  "S1b_shared_max_TV_recalibrated": {
+   "null": {
+    "rate": 0.05345,
+    "ci95": [
+     0.050372795386308566,
+     0.05665780997015163
+    ],
+    "rejections": 1069,
+    "batches": 20000
+   },
+   "alternative": {
+    "rate": 0.326,
+    "ci95": [
+     0.3195042884009191,
+     0.33254632557882663
+    ],
+    "rejections": 6520,
+    "batches": 20000
+   }
+  },
+  "S2_per_round_tail_joint": {
+   "null": {
+    "rate": 0.05345,
+    "ci95": [
+     0.050372795386308566,
+     0.05665780997015163
+    ],
+    "rejections": 1069,
+    "batches": 20000
+   },
+   "alternative": {
+    "rate": 0.99695,
+    "ci95": [
+     0.9960838482195395,
+     0.997666212836476
+    ],
+    "rejections": 19939,
+    "batches": 20000
+   }
+  },
+  "S3_persistence_event": {
+   "null": {
+    "rate": 0.0039,
+    "ci95": [
+     0.003083972229121625,
+     0.004865020749427314
+    ],
+    "rejections": 78,
+    "batches": 20000
+   },
+   "alternative": {
+    "rate": 0.9997,
+    "ci95": [
+     0.9993471415344145,
+     0.999889897584954
+    ],
+    "rejections": 19994,
+    "batches": 20000
+   },
+   "exact_null_level": 0.0038106682525838533,
+   "exact_alternative_power": 0.9995382281034979
+  }
+ },
+ "live_cohorts_illustration": {
+  "original": {
+   "max_TV": 0.159923593251,
+   "round_of_max": 20,
+   "min_tail_p": 4.999750012499375e-05,
+   "round_of_min_p": 7,
+   "rounds_flagged_by_S2": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+   ],
+   "persistent_runs": 8,
+   "flagged": {
+    "S1a_shared_max_TV_original_cutoff": false,
+    "S1b_shared_max_TV_recalibrated": false,
+    "S2_per_round_tail_joint": true,
+    "S3_persistence_event": true
+   }
+  },
+  "fresh": {
+   "max_TV": 0.179923593251,
+   "round_of_max": 20,
+   "min_tail_p": 4.999750012499375e-05,
+   "round_of_min_p": 6,
+   "rounds_flagged_by_S2": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+   ],
+   "persistent_runs": 9,
+   "flagged": {
+    "S1a_shared_max_TV_original_cutoff": false,
+    "S1b_shared_max_TV_recalibrated": false,
+    "S2_per_round_tail_joint": true,
+    "S3_persistence_event": true
+   }
+  }
+ }
+}
