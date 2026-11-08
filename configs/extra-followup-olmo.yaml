@@ -101,5 +101,10 @@ arms:
   # E3: complete the size-by-memory two-by-two (existing cells: 9a n = 4 last-1, 9b n = 10 full).
   followup_olmo_n10_last1: {arm_id: 92, channel: cheap_talk, graph: cycle, n: [10], runs: 50, last_k: 1}
   followup_olmo_n4_full: {arm_id: 93, channel: cheap_talk, graph: cycle, n: [4], runs: 50, last_k: null}
-  # E2 live cells (arm_ids 94-97, results/extra/followup/plan.json) are NOT here: they need the
-  # observation hook, so they get their own runner and config if they run.
+  # E2 live validation (results/extra/followup/plan.json): n = 4, last-1, each with the
+  # observation intervention named in `observe` (swarm_audit/followup.record_observer;
+  # scripts/run_swarm.py passes it to swarm.simulate). Run only after E3, if it fits.
+  followup_obs_unmodified: {arm_id: 94, channel: cheap_talk, graph: cycle, n: [4], runs: 50, last_k: 1, observe: unmodified}
+  followup_obs_own_null: {arm_id: 95, channel: cheap_talk, graph: cycle, n: [4], runs: 50, last_k: 1, observe: own_null}
+  followup_obs_neighbour_null: {arm_id: 96, channel: cheap_talk, graph: cycle, n: [4], runs: 50, last_k: 1, observe: neighbour_null}
+  followup_obs_both_null: {arm_id: 97, channel: cheap_talk, graph: cycle, n: [4], runs: 50, last_k: 1, observe: both_null}

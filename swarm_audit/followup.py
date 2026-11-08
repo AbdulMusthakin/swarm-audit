@@ -196,3 +196,28 @@ def expected_excess_crps(Q: np.ndarray, G: np.ndarray) -> float:
 
 def all_high(n: int) -> np.ndarray:
     return (profiles(n) // 3 == 0).all(1)
+
+
+# ------------------------------------------------------- live E2: record observers
+
+
+def record_observer(name: str):
+    """The live counterpart of `observation(name)`: a map from an agent's actual record to
+    the record shown in its next prompt (messages only; actions, counts and payoff kept).
+    "unmodified" is the identity, so the control logs an observed record too."""
+    from dataclasses import replace
+
+    from .ladder import Record
+
+    def own(r: Record) -> Record:
+        return replace(r, signal="none")
+
+    def nbr(r: Record) -> Record:
+        d = r.n_high + r.n_low
+        return replace(r, sig_high=0, sig_low=0, sig_none=d)
+
+    fns = {"unmodified": lambda r: r, "own_null": own, "neighbour_null": nbr,
+           "both_null": lambda r: nbr(own(r))}
+    if name not in fns:
+        raise ValueError(f"unknown observation intervention {name!r}")
+    return fns[name]

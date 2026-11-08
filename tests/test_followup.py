@@ -19,7 +19,13 @@ def test_followup_config_differs_from_olmo_config_only_in_arms():
     assert (c4.arm_id, c4.n, c4.last_k, c4.runs) == (93, 4, None, 50)
     used = {int(v["arm_id"]) for cfg in (a, build.load("extra-scale.yaml"), build.load("core.yaml"),
                                          build.load("calibration.yaml")) for v in cfg["arms"].values()}
-    assert not {92, 93} & used                               # disjoint seed namespaces
+    assert not {92, 93, 94, 95, 96, 97} & used               # disjoint seed namespaces
+    obs = {k: v["observe"] for k, v in b["arms"].items() if "observe" in v}
+    assert obs == {"followup_obs_unmodified": "unmodified", "followup_obs_own_null": "own_null",
+                   "followup_obs_neighbour_null": "neighbour_null", "followup_obs_both_null": "both_null"}
+    for k in obs:
+        (c,) = build.conditions(b, k)
+        assert (c.n, c.last_k, c.runs) == (4, 1, 50)
 
 
 # ------------------------------------------------- exact ablations and interventions
@@ -108,3 +114,58 @@ def test_propagate_matches_prediction_exact_law_and_crps_identity():
     Q = np.cumsum(np.full(21, 1 / 21))
     lhs = float((L["y"] * (stats.crps(Q, np.arange(21)) - stats.crps(G, np.arange(21)))).sum())
     assert abs(lhs - fu.expected_excess_crps(Q, G)) < 1e-12
+
+
+# ------------------------------------------------------------ live observation hook
+
+
+def _cond(arm="t"):
+    from swarm_audit.swarm import Condition
+
+    return Condition(arm=arm, arm_id=99, condition_id=4, channel="cheap_talk", n=4, last_k=1,
+                     runs=3, T=6)
+
+
+def test_simulate_without_observer_is_unchanged_and_identity_only_adds_a_field():
+    from swarm_audit.policies import ScriptedBackend
+    from swarm_audit.swarm import simulate
+
+    be = ScriptedBackend("hidden_signal")
+    a = simulate(_cond(), be, [0, 1, 2])
+    b = simulate(_cond(), be, [0, 1, 2], fu.record_observer("unmodified"))
+    for r in a:
+        for x, y in zip(a[r], b[r]):
+            assert y.pop("observed_record") == x["record"]
+            assert x == y
+
+
+def test_live_neighbour_null_changes_what_is_shown_not_what_is_sent():
+    from swarm_audit.policies import ScriptedBackend
+    from swarm_audit.swarm import simulate
+
+    be = ScriptedBackend("hidden_signal")       # P(H) = 0.8 iff a neighbour said "high"
+    lines = simulate(_cond(), be, [0, 1, 2], fu.record_observer("neighbour_null"))
+    for r, rows in lines.items():
+        for row in rows:
+            if row["round"] > 1:
+                assert row["p_H"] == 0.2                       # never shown a "high"
+                assert row["state_sig"].split("-")[2:5] == ["0", "0", "2"]
+            o, a = row["observed_record"], row["record"]
+            assert (o["sig_high"], o["sig_low"], o["sig_none"]) == (0, 0, 2)
+            assert {k: a[k] for k in ("action", "n_high", "n_low", "signal")} == \
+                   {k: o[k] for k in ("action", "n_high", "n_low", "signal")}
+    sent = [row["record"]["sig_high"] for rows in lines.values() for row in rows]
+    assert max(sent) > 0                                       # actual messages still logged
+
+
+def test_live_own_null_routes_only_the_own_message():
+    from swarm_audit.policies import ScriptedBackend
+    from swarm_audit.swarm import simulate
+
+    lines = simulate(_cond(), ScriptedBackend("hidden_signal"), [0], fu.record_observer("own_null"))
+    for row in lines[0]:
+        assert row["observed_record"]["signal"] == "none"
+        assert {k: v for k, v in row["observed_record"].items() if k != "signal"} == \
+               {k: v for k, v in row["record"].items() if k != "signal"}
+        if row["round"] > 1:
+            assert row["state_sig"].endswith("-none")

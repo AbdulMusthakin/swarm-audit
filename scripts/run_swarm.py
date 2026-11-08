@@ -68,11 +68,19 @@ def main() -> None:
 
         conds = [replace(c, runs=args.runs) for c in conds]
     root = Path(args.runs_root)
+    # Overnight follow-up E2 (docs/overnight-extra-plan.md): an arm may name an
+    # observation intervention; arms without `observe` run exactly as before.
+    obs_name = cfg["arms"][args.arm].get("observe")
+    observe = None
+    if obs_name:
+        from swarm_audit.followup import record_observer
+
+        observe = record_observer(obs_name)
 
     if args.backend.startswith("scripted:"):
         be = build.scripted(args.backend.split(":", 1)[1], cfg)
         for c in conds:
-            run_condition(c, be, root, args.chunk, max_runs=args.max_runs)
+            run_condition(c, be, root, args.chunk, max_runs=args.max_runs, observe=observe)
         return
 
     need = ("model_confirmed", "prompts_approved", "modal_account")
@@ -113,10 +121,13 @@ def main() -> None:
             mixer = build.PanelMixer(be, panel,
                                      min_batch=c.n * max(1, min(todo, args.chunk or todo)))
             extra = {"drift_panel_start": start}
+            if obs_name:
+                extra["observe"] = obs_name
             if cfg.get("results_dir"):   # extra arms: record the workspace and the model
                 extra.update(workspace=build.current_workspace(), model=cfg["model"],
                              started=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(t0)))
-            run_condition(c, mixer, root, args.chunk, extra_manifest=extra, max_runs=args.max_runs)
+            run_condition(c, mixer, root, args.chunk, extra_manifest=extra, max_runs=args.max_runs,
+                          observe=observe)
             end = build.panel_outputs(be, panel)
             drift = {"start_vs_end": build.panel_max_change(start, end),
                      "start_vs_mixed": (build.panel_max_change(start, mixer.mixed)
