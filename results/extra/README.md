@@ -7,9 +7,11 @@ Separate arms on a second Modal account. Nothing here feeds the core's primary c
 - **Branch:** `extra-arms`, with the core branch (`claude/funny-turing-qv2y66`) merged in.
 - **Configs:** `configs/extra-scale.yaml` (arm 8). `configs/extra-olmo.yaml` (arm 9) only if
   its trigger is met.
-- **Spend ledger:** `results/extra/spend.json`, cap $25. Spent so far: **$2.57** (wall-clock
-  estimates at the L4 list price, idle scaledown included as an upper bound): X1/X2/X3 and the
-  d = 4 audit table $0.95, the 45 remaining arm 8 runs $1.48 plus $0.13 idle.
+- **Spend ledger:** `results/extra/spend.json`, cap $25. Spent: **$5.16** (wall-clock
+  estimates at the L4 list price; each session's 10-minute idle scaledown counted as an
+  upper bound). Arm 8 and its checks $2.57; arm 9 (OLMo X2, tables, runs) $2.59.
+
+Completion note: `completion_note.md`.
 
 ## Status
 
@@ -19,7 +21,7 @@ Separate arms on a second Modal account. Nothing here feeds the core's primary c
 | X2, serving repeatability | **PASS** (7 Nov, 19:11 UTC). Batch invariance on: 48 prompts alone, in a shuffled batch of 448 others, and warm; max difference **0** in P(H) and in every signal probability (floor 0, as in the core's G3). 4.07 prompts/s. Fresh queries (no replay) | `serving/g3_batchinv1.json` |
 | X3, cross-account drift panel | **identical**: all 136 panel prompts byte-identical, max difference **0** in P(H) and every signal probability, against the core's start, end and mixed panels of arms 4 and 4b (6 comparisons); same serving settings and serving-code hash. Informational | `serving/x3_cross_account.json` |
 | Arm 8, 100 agents, random 4-regular | **complete** (7 Nov, 21:31 UTC): 50/50 runs, 100,000 decisions, drift 0, no p_valid flags; analysed. Actions-only audit CRPS 0.0142 [0.0113, 0.0173] vs order-0 0.0170 [0.0140, 0.0204] (paired difference +0.0028 [0.0016, 0.0039]); max Δ_t 0.166 below the simultaneous null 0.180; ε(p_test) 0.061, ε(p_swarm) 0.058; bound vacuous from round 2. One graph realization; counts only. See `arm8_summary.md` | `arm8_summary.md`, `arm8_numbers.json`, `graph_rr4_n100.json`, `runs/extra_rr4/`, `audit/llama-3.1-8b/`, `analysis/extra_rr4/`, `figures/` |
-| Arm 9, OLMo-3-7B (**EXPLORATORY**) | **Trigger not met** (Abdul confirmed, 7 Nov 20:15): 0.0553 on the d = 4 grid fixed in a2657c5, not below 0.05. **Run anyway as an EXPLORATORY arm** by Abdul's decision (7 Nov 20:15), made after seeing Llama's d = 2 responsiveness (0.038) and the core's arm 4b CRPS null; same design, cap and stop rules. OLMo X1 and X2 pass (floor 0). **9a done**: 50 runs; G5 PASS (per decision 0, per run p = 0.84); lock-in 42/50 all-low, below 45, so 9b allowed; paired D +0.025 [−0.003, +0.054]. **9b**: audit table running | `arm9_summary.md`, `arm9_trigger.json`, `arm9a_lock_in.json`, `arm9b_projection.json`, `gates/olmo-3-7b/` |
+| Arm 9, OLMo-3-7B (**EXPLORATORY**) | **complete**. **Trigger not met** (Abdul confirmed, 7 Nov 20:15): 0.0553 on the d = 4 grid fixed in a2657c5, not below 0.05. **Run anyway as an EXPLORATORY arm** by Abdul's decision (7 Nov 20:15), made after seeing Llama's d = 2 responsiveness (0.038) and the core's arm 4b CRPS null; same design, cap and stop rules. OLMo X1 and X2 pass (floor 0). **9a**: 50 runs; G5 PASS (per decision 0, per run p = 0.84); lock-in 42/50 all-low (8 all-high), below 45, so 9b allowed; paired D +0.025 [−0.003, +0.054]. **9b**: 50 runs, every run locked into all-low (y = 0); both audits forecast the end state (CRPS ≤ 0.0001) but lock-in is about two rounds faster than either chain (max Δ_t 0.47–0.48 vs null 0.21); paired D −0.0001 (degenerate). See `arm9_summary.md` | `arm9_summary.md`, `arm9_trigger.json`, `arm9a_lock_in.json`, `arm9b_projection.json`, `gates/olmo-3-7b/`, `audit/olmo-3-7b/`, `runs/olmo_*`, `analysis/olmo_*` |
 
 ## Code added (additive; core behaviour unchanged)
 

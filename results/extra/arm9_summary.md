@@ -5,6 +5,13 @@ decided on 7 Nov at 20:15 to run it after seeing results. It is a second-model e
 under one prompt, one payoff set and one topology. It is **not a replication** of the core
 and not a confirmatory test.
 
+**Status: complete.** 9a and 9b are each 50 of 50 runs, analysed. 9a's G5 passed and the
+lock-in stop did not apply (42 of 50 runs all-low).
+- **9a:** paired D +0.025 [−0.003, +0.054].
+- **9b:** every run locked into all-low. Both audits forecast that end state but not its
+  speed. Paired D is −0.0001, and its interval is degenerate.
+- **Spend for arm 9:** about $2.60, including the OLMo serving checks.
+
 ## Trigger and decision
 
 - **Rule.** The rule was fixed in commit `a2657c5` (about 19:00 UTC on 7 Nov), before any
@@ -100,9 +107,72 @@ signal-aware chain from the actions-only one.
 
 ## 9b: core extension, n = 10 cycle, cheap talk, full history, 50 runs
 
-*Pending: the sampled audit (50 fit and 25 score histories per state, 8,102 histories) is
-running. The cost projection is in `arm9b_projection.json` ($2.49 with the ×1.25 margin;
-$21.80 left when it started).*
+Arm_id 91. The tables are sampled from p_test histories at the full sizes: 50 fit and 25
+score histories per state, 8,102 histories, 66 minutes, about $0.88.
+`arm9b_projection.json` projected the cost before the run; the reduced 25/15 sizes were
+not needed. 9b ran only after its launch checked two records in code: 9a's G5 record
+(PASS) and `arm9a_lock_in.json` (stop: false).
+
+### What OLMo did
+
+- **Every one of the 50 runs locked into all-low.**
+  - X_t falls from 0.632 in round 1 to 0.136 in round 3 and 0.032 in round 5. It
+    reaches 0 by round 12 in every run.
+  - y = 0 in all 50 runs: no high bid in rounds 16–20.
+- **Neighbouring agents almost always agree:** edge disagreement is 0.031 over rounds
+  2–20.
+
+### Forecasts (y = high bids in rounds 16–20 / 5n)
+
+| predictor | CRPS | E_swarm F − E_model F | max Δ_t, round (null, max over rounds) |
+|---|---|---|---|
+| order-0 audit | 0.324 | −0.362 | 0.926, round 10 (0.233) |
+| actions-only audit | **0.0000** | −0.002 | 0.474, round 3 (0.209) |
+| signal-aware audit | 0.0001 | −0.008 | 0.482, round 3 (0.208) |
+| fitted from swarm (runs 26–50 only) | 0.0000 | −0.007 | n/a |
+
+- **Paired D** (actions-only minus signal-aware) is −0.0001. Both audits forecast the
+  outcome, so there is no measurable incremental value of the signals in y. The tiny
+  difference slightly favours the actions-only audit.
+- **The bootstrap intervals collapse to points** because y is 0 in every run. They do not
+  measure forecast uncertainty here, and this is not evidence of high precision.
+- **The two audits differ in timing, not in outcome.** Both predict the end state well:
+  - all-low consensus probability: signal-aware 0.981, actions-only 0.988;
+  - late-round high-bid fraction: under 0.01.
+- **Both audits are too slow, though.** In round 3 the swarm is at 0.136, the
+  actions-only chain at 0.340 and the signal-aware chain at 0.353.
+  - Δ_t peaks at 0.47–0.48 in round 3. That is far above the null for the maximum over
+    rounds (about 0.21).
+  - It is above the pointwise null in rounds 2–7 for both audits.
+  - So the audits forecast the outcome but not the path: the swarm locks in about two
+    rounds faster than the audited chains.
+- **The order-0 audit** has no state dependence, so it forecasts a stationary 0.36 and
+  fails badly.
+
+### Local defects
+
+| table | ε(p_test) | ε(p_swarm) | shift, pooled (rounds 2–7 / 8–13 / 14–20) | bound saturates |
+|---|---|---|---|---|
+| actions-only (binary TV) | 0.099 | 0.015 | −0.084 (−0.056 / −0.104 / −0.104) | round 2 (B_20 = 2.96) |
+| signal-aware (six-outcome joint TV) | 0.247 | 0.202 | −0.044 (−0.004 / −0.066 / −0.067) | round 2 (B_20 = 40.4) |
+
+- **Like-for-like one-step comparison** (P(H) only):
+  - signal-aware: |p_H − κ′| = 0.0149;
+  - actions-only: |p_H − κ| = 0.0148.
+- **The swarm's defects are far smaller than the audit's test defects.** That is because
+  the swarm spends most decisions in the all-low states, where OLMo is nearly
+  deterministic. The two measures are not comparable across tables: one is a binary TV,
+  the other a six-outcome joint TV.
+
+### Reading 9b
+
+- **It is a degenerate, predictable outcome.** "Lock-in" here does not mean "nothing left
+  to predict": both audits forecast the end state correctly, and both get its timing
+  wrong.
+- **It is uninformative about the incremental value of signals.** When every run ends
+  all-low, y cannot separate a signal-aware forecast from an actions-only one.
+- **Low screening responsiveness did not make this outcome inevitable.** 9a, with the
+  same model, ended all-high in 8 of 50 runs.
 
 ## Limitations
 
@@ -111,8 +181,10 @@ $21.80 left when it started).*
 - **One second model**, with one prompt, payoff set and cycle topology. Low screening
   responsiveness does not make a signal effect impossible: accumulation over rounds and
   untested histories can still matter.
-- **Small samples.** There are 50 runs per condition, and 9a's outcome is nearly binary,
-  so the CRPS intervals are wide.
+- **Small samples.** There are 50 runs per condition. 9a's outcome is nearly binary,
+  so its CRPS intervals are wide. 9b's outcome is constant (y = 0 in every run), so its
+  intervals are degenerate.
+- **One draw of each audit table.** The sampled 9b table is a single draw from p_test.
 - **The intervals are conditional on the fitted tables.** They leave out audit-estimation
   uncertainty.
 
@@ -125,3 +197,4 @@ $21.80 left when it started).*
 - **Runs:** `runs/olmo_calibration_cheap_talk/` and `runs/olmo_core_cheap_talk/`.
 - **G5 record:** `gates/olmo-3-7b/G5_cheap_talk.json`.
 - **Analyses:** `analysis/olmo_calibration_cheap_talk/` and `analysis/olmo_core_cheap_talk/`.
+- **Figures:** `figures/fig1_olmo_calibration_cheap_talk_…png` and `figures/fig1_olmo_core_cheap_talk_…png` (X_t, the bound and Δ_t).
