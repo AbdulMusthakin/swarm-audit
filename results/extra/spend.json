@@ -190,5 +190,69 @@
   "usd": 0.1333,
   "time": "2026-11-08T01:21:00.390830+00:00",
   "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "followup_obs_unmodified/cheap_talk_n4_cycle_last1",
+  "seconds": 143.8,
+  "containers": 1,
+  "usd": 0.032,
+  "time": "2026-11-08T01:23:38.242549+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-08T01:23:38.244857+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "followup_obs_own_null/cheap_talk_n4_cycle_last1",
+  "seconds": 149.2,
+  "containers": 1,
+  "usd": 0.0331,
+  "time": "2026-11-08T01:26:10.249876+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-08T01:26:10.252296+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "followup_obs_neighbour_null/cheap_talk_n4_cycle_last1",
+  "seconds": 143.2,
+  "containers": 1,
+  "usd": 0.0318,
+  "time": "2026-11-08T01:28:36.125867+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-08T01:28:36.127985+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "followup_obs_both_null/cheap_talk_n4_cycle_last1",
+  "seconds": 147.0,
+  "containers": 1,
+  "usd": 0.0327,
+  "time": "2026-11-08T01:31:05.546895+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-08T01:31:05.549672+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
  }
 ]
