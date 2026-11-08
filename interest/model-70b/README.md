@@ -1,9 +1,10 @@
 # Llama 3.1 70B: the core matrix, for interest only
 
-**Not part of the report or the submission.** Abdul asked, on 8 November 2026, for runs with a
-70B model in the Modal workspace used for the core (`aliyusufbelal`), "for interest". Nothing in
-`report/`, `setup-paper/` or `results/` uses these results, and no claim of the submission rests on
-them. The main README does not link here.
+**Used in the report as an exploratory, post hoc rerun.** Abdul asked, on 8 November 2026, after
+the 8B results were seen, for runs with a 70B model in the Modal workspace used for the core
+(`aliyusufbelal`). The report's §4.5 and Appendix B use these results; only the 8B endpoint
+comparison was prespecified. The report's numbers for this rerun are recomputed by
+`scripts/report_70b.py` (`results/followup/report_70b.json`).
 
 ## What ran
 
@@ -70,8 +71,8 @@ For the 8B, conditioning the audit on messages adds nothing. For the 70B it help
 replicates at n = 20. The 70B's messages carry information about its next bid that its action
 history does not.
 
-**But the 70B cheap-talk audits are biased.** On the cycle, both tables under-predict high bids
-late in the game: the forecast mean minus the swarm is −0.05 to −0.08. The order-0 baseline (every
+**But the 70B cheap-talk audits are biased.** On the cycle, both tables over-predict high bids
+late in the game: the swarm minus the forecast mean is −0.05 to −0.08. The order-0 baseline (every
 agent independent at the audit's average rate) scores better than either table:
 
 | CRPS, cheap talk, cycle | order-0 | actions-only | signal-aware |
@@ -89,7 +90,7 @@ are about twice the 8B's on the actions-only tables (0.11–0.13 against about 0
 At n = 20: 0.032 and 0.035. No forecast bias in either.
 
 **K_10, the second topology.** On counts the 70B audit fails clearly. The d = 9 actions-only table
-over-predicts high bids by about 9 points (F_error +0.093 [+0.056, +0.132]), and its CRPS is 0.10
+under-predicts high bids by about 9 points (F_error +0.093 [+0.056, +0.132]), and its CRPS is 0.10
 against 0.04 for the 8B. On cheap talk the two models are similar (actions-only CRPS 0.057 against
 0.060), and the 70B's bias is smaller than the 8B's.
 

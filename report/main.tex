@@ -31,6 +31,7 @@
 \definecolor{stepfill}{HTML}{F4F4F2}
 
 \usepackage{graphicx}
+\usepackage{booktabs}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning}
 \usepackage{needspace}
@@ -133,15 +134,14 @@ Apart Research\par\vspace{3pt}
 {\fontsize{14}{17}\selectfont\bfseries Abstract\par}\vspace{8pt}
 \begin{minipage}{355pt}
 \centering\itshape
-How far can tests of individual AI agents predict the behaviour of a group?
-We tested Llama 3.1 8B and OLMo-3-7B agents in a 20-round repeated bidding game, built group forecasts (audits) from each agent's responses to scripted histories, and compared them with 50 live games per setting.
-Two exploratory OLMo settings illustrate different forecasting failures.
-In ten-agent games where agents saw their full history, both audits gave at least 96.8\% probability to every agent bidding low throughout the final five rounds, which happened in every game; yet for round 3 they forecast 34--35\% high bids, against 14\% in live play.
-In four-agent games where agents saw only the last round, the audit that averaged over messages gave a 0.0076\% chance to every agent bidding high throughout the final five rounds.
-That persistent outcome occurred in 8 of 50 original and 9 of 50 fresh games, and the roundwise check did not flag either cohort.
-The audit gave too much weight to a message state agents almost never occupied, which nearly erased the outcome from its forecast.
-The prespecified Llama comparison found no clear improvement in endpoint forecasts from retaining messages.
-These results motivate checking both timing and specified high-consequence events before relying on group forecasts built from isolated agent tests.
+Group forecasts built from tests of individual AI agents can look right on one summary and fail on another.
+We tested Llama 3.1 8B and OLMo-3-7B agents in a 20-round repeated bidding game, composed each agent's responses to scripted histories into group forecasts (audits), and compared them with 50 live games per setting.
+Two exploratory OLMo settings show different failures.
+With ten agents remembering the full game, both audits forecast the all-low ending but not how quickly groups reached it.
+With four agents shown only the last round, the audit that averaged over messages gave 0.0076\% to every agent bidding high throughout the final five rounds, an outcome seen in 17 of 100 games: small per-step errors compounded over the game, and the roundwise check did not flag it.
+In a pre-registered simulation, a roundwise check calibrated round by round, or a direct persistence test, flagged such an audit in over 99.7\% of batches, against 33\% for the original check.
+The prespecified Llama comparison found no clear benefit from retaining messages; in an exploratory 70B rerun, messages improved the audit, yet both audits forecast worse than a memoryless baseline.
+Before relying on such forecasts, check timing and specified high-consequence events against a small batch of live group runs.
 \end{minipage}\par
 \endgroup
 \vspace{8pt}
@@ -162,8 +162,9 @@ We ask:
 
 Contributions
 \begin{itemize}
-  \item \textbf{Empirical finding.} In a controlled bidding game, isolated-agent audits forecast a ten-agent group's ending but not how quickly it got there, and all but excluded a persistent four-agent outcome that a roundwise check did not flag.
-  \item \textbf{Practical diagnostic.} Before relying on such an audit, specify a consequential event and timing summaries, compare both with a small batch of live group runs, and inspect the histories and omitted states the audit weights heavily when a check disagrees.
+  \item \textbf{Empirical findings.} In a controlled bidding game, isolated-agent audits forecast a ten-agent OLMo group's ending but not its timing, and all but excluded a persistent four-agent outcome that the roundwise check did not flag. In an exploratory rerun with Llama 3.1 70B, which reacts to messages, retaining messages helped but both audits forecast worse than a memoryless baseline: the failure is not specific to small models.
+  \item \textbf{Mechanism.} Small per-step errors compound over persistence: averaging away an agent's own message lowers its chance of staying in the all-high state from about 0.999 to 0.905 per round, which becomes a factor of about 1,900 over a game.
+  \item \textbf{Diagnostic.} Calibrate the roundwise check round by round and test a named high-consequence event directly; a pre-registered simulation shows both catch the four-agent miss at a 5\% false-positive rate.
 \end{itemize}
 
 % ================================================================ 2
@@ -211,10 +212,32 @@ In cheap-talk games it also sees its own message and how many neighbours sent ea
 Agents are not told the number of rounds and see no running score.
 
 \textbf{Settings.}
-Each setting has 50 live games of 20 rounds, with agents on a ring of two neighbours each unless stated (one 10-agent complete-graph variant).
-The prespecified primary setting is Llama 3.1 8B with 10 agents, cheap talk and full history.
-The OLMo-3-7B settings are exploratory: 10 agents with full history, and 4 agents shown only the last round.
-Appendix~C lists the secondary settings and controls.
+Table~\ref{tab:settings} lists every setting.
+Each has 50 live games of 20 rounds, with agents on a ring of two neighbours each unless stated; only the Llama 3.1 8B endpoint comparison was prespecified.
+
+\begin{table}[H]
+  \centering\small
+  \caption{Settings. Cheap talk: agents also send messages; counts: bids only. Full history: agents see every past round; last round: only the previous one.}
+  \label{tab:settings}
+  \begin{tabular}{@{}lllll@{}}
+    \toprule
+    Model & Agents & Memory & Channel & Status (games) \\
+    \midrule
+    Llama 3.1 8B & 10 & full history & cheap talk & \textbf{prespecified} (50) \\
+    Llama 3.1 8B & 20 & full history & cheap talk & secondary (50) \\
+    Llama 3.1 8B & 10, 20 & full history & counts & secondary (50 each) \\
+    Llama 3.1 8B & 10, complete graph & full history & both & secondary (50 each) \\
+    Llama 3.1 8B & 4 & last round & both & calibration (50 each; 50 more on cheap talk) \\
+    OLMo-3-7B & 10 & full history & cheap talk & exploratory (50) \\
+    OLMo-3-7B & 4 & last round & cheap talk & exploratory (50, and 50 fresh) \\
+    OLMo-3-7B & 4 & full history & cheap talk & exploratory memory control (50) \\
+    OLMo-3-7B & 10 & last round & cheap talk & exploratory memory control (50) \\
+    Llama 3.1 70B & 10, 20 & full history & both & exploratory, post hoc (50 each) \\
+    Llama 3.1 70B & 10, complete graph & full history & both & exploratory, post hoc (50 each) \\
+    Llama 3.1 70B & 4 & last round & both & calibration (50 each) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \textbf{1 Test.}
 \emph{We record how a single agent responds to every situation the audit distinguishes.}
@@ -247,13 +270,13 @@ If the first is zero and the group stays within tested situations, the audit is 
 Both rest on live histories, so we use them to explain a gap after the fact.
 
 % ================================================================ 4
-\clearpage
+\needspace{0.5\textheight}
 \section{4. Results}
 
 \textbf{Headline finding.}
 An isolated-agent audit can forecast a group's ending but not its timing, or all but exclude a persistent outcome, and the check that catches one miss need not catch the other.
 Figure~\ref{fig:lead} shows both failures in two exploratory OLMo settings.
-We report the prespecified Llama comparison first, then the two OLMo settings, then a Llama history-length trade-off.
+We report the prespecified Llama comparison first, then the two OLMo settings, a Llama history-length trade-off and an exploratory 70B rerun.
 
 \reportfigure{fig1_olmo_lead}{Two forecasting failures (OLMo-3-7B, cheap talk, exploratory).
 (A) Ten agents, full history: share of agents bidding high in each round, in 50 live games (black; the band is the 95\% interval for the live mean) and in the two audits' forecasts.
@@ -267,6 +290,7 @@ The roundwise check did not flag the actions-only audit in either cohort.}{fig:l
 In the primary setting (Llama 3.1 8B, 10 agents, cheap talk, full history), $D$ was $-0.000086$ with conditional 95\% interval $[-0.000221, +0.000035]$; rechecks at higher simulation precision and with nested resampling also included zero (Appendix~B).
 An order-zero audit that ignores the previous round scored close to both audits (CRPS 0.041, against 0.040 for each).
 The test had little to detect: in a pre-run screen, changing neighbours' messages moved Llama's probability of bidding high by 3.8 percentage points on average.
+§4.5 applies the same comparison, unchanged, to a model that reacts to messages more than twice as strongly.
 
 \subsection{4.2 Ten agents reached the expected ending faster than forecast}
 
@@ -293,6 +317,18 @@ In all-high situations the actions-only audit gives the agent's own ``low'' mess
 After its own ``low'', an agent's chance of bidding high again falls from above 99.8\% to 68--73\%, so the averaged audit predicts exits from all-high that real agents do not make.
 Keeping only the agent's own message restores the forecast to 13.73\% (Figure~\ref{fig:olmo-mechanism}).
 
+\textbf{How a small error became a large one.}
+Both audits start all four agents high in round 1 with probability 15\%.
+In the all-high state, the actions-only audit then keeps each agent high with probability 0.905 per round, and the signal-aware audit with an effective 0.999.
+Over the 76 agent-rounds from round 2 to round 20, these compound to survival of 0.05\% against 95\%, a factor of about 1,900; start times survival reproduces the audits' 0.0076\% and 14.2\%, apart from re-entry.
+A gap of 0.09 per agent-round is barely visible in any one round's share, which is why a check that looks at one round at a time with a shared cutoff missed it.
+
+\textbf{Why average over messages at all?}
+Compression is forced at scale: the signal-aware audit has 108 situations per agent with two neighbours and 3,300 with nine, and our 10-agent complete-graph audits already use directly fitted actions-only tables.
+Any compression needs weights, and the default is the test design's.
+The fix is available from isolated tests: keeping the agent's own message, which isolated tests supply, restores the forecast.
+When an audit summarises away part of the state, it should weight it by the agents' own on-path behaviour, not by the test design.
+
 \subsection{4.4 Refitting by history length traded early accuracy for endpoint accuracy}
 
 Both Llama audits overpredicted early high bidding: in rounds 2--7 about 32\% of live bids were high, against 38\% forecast, and the roundwise check flagged the gap (Appendix~B).
@@ -301,16 +337,38 @@ Refitting the audit from the same test histories as separate tables for history-
 The CRPS gain was $+0.0060$ $[+0.0033, +0.0086]$ in rounds 2--7 but $-0.0036$ $[-0.0070, -0.0002]$ at the endpoint, and the pattern recurred in fresh 20-agent games.
 A shift in history content (half high bids in tests, about 35\% in live histories) may explain the late error but is untested.
 
-\subsection{4.5 How robust are these results?}
+\subsection{4.5 A larger model: messages matter, but the audit forecasts worse (exploratory)}
 
-\begin{itemize}
-  \item \textbf{Prespecified (§4.1):} inconclusive under conditional, high-precision and nested intervals; with 20 agents (secondary, fresh games), the nested interval $[-0.00081, +0.00008]$ also includes zero.
-  \item \textbf{OLMo (§§4.2--4.3):} exploratory, with different group sizes (10 and 4) and memory (full history and last round).
-    The ten-agent ending is degenerate; the four-agent event rests on 17 of 100 games in two cohorts, and did not occur in 50 games in either tested 10-agent OLMo memory setting.
-  \item \textbf{Llama trade-off (§4.4):} chosen after seeing the data and scored on the primary games; it recurred in fresh 20-agent games.
-  \item \textbf{Checks:} the original Llama cheap-talk calibration failed its per-run test ($p = 0.0076$); the diagnostics found no implementation discrepancy, the team recorded the failure and proceeded, and a disclosed fresh calibration passed ($p = 0.744$; pooled, $p = 0.084$).
-    No runs were dropped, and a separately written script re-derived the headline numbers from the same inputs.
-\end{itemize}
+We reran the Llama settings with Llama 3.1 70B, changing only the model and serving hardware; prompts, random draws, test design and analysis were unchanged.
+The decision to run it came after the 8B results, so this is exploratory.
+The 70B reacts to its neighbours' messages more than twice as strongly (9.6 against 3.8 percentage points in the same screen), and the prespecified contrast, applied unchanged, favours the signal-aware audit: $D = +0.0061$ $[+0.0045, +0.0077]$ with 10 agents and $+0.0063$ $[+0.0044, +0.0079]$ with 20 (Table~\ref{tab:70b}).
+Yet both audits forecast the endpoint worse than an order-zero audit built from the same tests (CRPS 0.063 and 0.069 against 0.049; for the signal-aware audit the paired difference is $+0.0136$ $[+0.0082, +0.0185]$).
+They overpredict late high bidding (30--31\% against 23\% live), and the roundwise check flags both: the live share jumps to 34\% in round 2 and falls to 15\% in round 3, while the audits level off near 30\%, a timing miss like the ten-agent OLMo one in a second model family.
+The four-agent last-round calibration, where the audit is exact by construction (Proposition~2), passed on both channels: the audit is exact when it remembers what the agents remember, and wrong when they remember more.
+
+\begin{table}[H]
+  \centering\small
+  \caption{Llama 3.1 8B and 70B, 10 agents, cheap talk, full history, 50 live games each. TV is on a 0--1 scale; shares are of all bids in rounds 16--20.}
+  \label{tab:70b}
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    & Llama 3.1 8B & Llama 3.1 70B (exploratory) \\
+    \midrule
+    Message responsiveness (percentage points) & 3.8 & 9.6 \\
+    $D$, prespecified contrast & $-0.000086$ $[-0.000221, +0.000035]$ & $+0.0061$ $[+0.0045, +0.0077]$ \\
+    CRPS: order-zero / actions-only / signal-aware & 0.041 / 0.040 / 0.040 & 0.049 / 0.069 / 0.063 \\
+    Late high bids: live / actions-only / signal-aware & 36.5\% / 37.7\% / 37.8\% & 23.2\% / 31.0\% / 30.0\% \\
+    Largest roundwise TV (cutoff), actions-only & 0.261 (0.238), round 2 & 0.400 (0.229), round 3 \\
+    Largest roundwise TV (cutoff), signal-aware & 0.289 (0.235), round 2 & 0.382 (0.227), round 3 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{4.6 How robust are these results?}
+
+Only §4.1 was prespecified, and it was inconclusive under every interval we computed.
+The OLMo results come from different group sizes and memory settings, the four-agent event rests on 17 of 100 games, and the Llama trade-off and the 70B rerun were chosen after seeing the data.
+Appendix~B gives the robustness checks, including a calibration failure and its fresh confirmation.
 
 % ================================================================ 5
 \section{5. Discussion and Limitations}
@@ -320,9 +378,11 @@ A forecast can match one summary for the wrong reasons \citep{kirchner2006,hourd
 The four-agent miss is explained within the cached audit by message weighting.
 In Llama, refitting by history length improved early forecasts and worsened endpoint scores.
 The cause of the ten-agent OLMo timing error remains unresolved.
+In the 70B rerun, retaining messages helped, but both audits forecast worse than a memoryless baseline, so the failure is not specific to small models or to message averaging.
+Dangerous swarm behaviour, as in the incident that motivates this work, is coordinated and sustained, and that is where small per-step errors compound.
 Detection is a separate matter: a full trajectory law determines every endpoint statistic, but round-by-round distributions lose dependence across rounds, and a single cutoff shared across rounds is set by the noisiest rounds.
 Within the four-agent setting, a pre-registered simulation with the cached chains (Appendix~F) found that, at a nominal 5\% false-positive rate, the shared-cutoff check flagged the signal-aware chain in 33\% of 50-game batches, whereas a roundwise check calibrated round by round and a direct persistence test flagged over 99.7\%, with achieved false-positive rates of 5.3\% and 0.4\%.
-In the primary Llama setting, a single-round contraction bound remains informative (0.205 at round 20), while the full-trajectory bound becomes vacuous by round 3 (Appendix~A, Figure~\ref{fig:contraction}).
+In the primary Llama setting, a single-round contraction bound remains informative (0.205 at round 20), while the full-trajectory bound becomes vacuous by round 3; for the 70B, every full-history bound is vacuous by round 4 (Appendix~A, Figure~\ref{fig:contraction}).
 
 \textbf{What a practitioner would do.}
 \begin{enumerate}
@@ -333,7 +393,7 @@ In the primary Llama setting, a single-round contraction bound remains informati
 
 \parahead{Limitations}
 \begin{itemize}
-  \item \textbf{Scope.} One stylised game and prompt, two small models, mainly ring topologies, 50 games per setting; Llama barely reacts to other agents' messages, so the prespecified test was weak.
+  \item \textbf{Scope.} One stylised game and prompt, two small models plus an exploratory 70B rerun of the Llama ring settings, mainly ring topologies, 50 games per setting; the 8B barely reacts to other agents' messages, so the prespecified test was weak.
   \item \textbf{How sure we are.} Only the Llama endpoint comparison was planned; the other analyses were chosen after seeing the data.
   \item \textbf{Bounds need live histories.} They explain a gap after the fact rather than certify an audit in advance.
     Appendix~E gives the full limitations and dual-use considerations.
@@ -345,14 +405,15 @@ High bidding measures coordination in this game, not intent.
 Summarising an agent's situation by the last round is an audit approximation, which our comparisons test.
 
 \textbf{Future work.}
-Find the cause of the ten-agent timing error, test the history-content explanation, repeat with models that react more to each other and with mixed or learning agents, and develop informative whole-trajectory bounds.
+Find the cause of the ten-agent timing error, test the history-content explanation, repeat with mixed or learning agents and with larger and frontier models, and develop informative whole-trajectory bounds.
 
 % ================================================================ 6
 \section{6. Conclusion}
 
 A group forecast built from isolated agent tests can look right on one summary and be wrong on another.
 Before relying on one in a new deployment, specify the timing summaries and a high-consequence event in advance, compare both with a small batch of live group runs, and investigate the histories and omitted situations the audit weights heavily when either check disagrees.
-Our evidence for this rule comes from one bidding game, two small open-weights models and groups of up to 20 agents, and the OLMo results are exploratory; it should be tested on larger models and richer tasks.
+Our evidence for this rule comes from one bidding game and groups of up to 20 agents, and the OLMo results are exploratory.
+In an exploratory 70B rerun, retaining messages helped, yet the audits again missed the timing and forecast worse than a memoryless baseline, so the problem is not specific to small models; larger and frontier models and richer tasks remain untested.
 
 % ================================================================ back matter
 \section{Author Contributions}
@@ -486,6 +547,7 @@ The interval is a pointwise 95\% whole-run bootstrap interval, conditional on th
 With the original per-agent defects in place of the joint ones, the estimate is 0.623; Theorem~1's estimate for the full trajectory is capped at 1.
 A separate round-20 bound on the absolute error in the expected high-bid share is 0.064, and averaging the bounds for rounds 16--20 gives about 0.067 for the error in $\mathbb{E}[F]$.
 These estimates use live histories and do not bound the law of the full path or of $F$.
+For the 70B the route closes: its audit chain barely contracts (coefficient 0.90--1.00, against 0.10--0.87 for the 8B), and every full-history TV bound, joint defects included, is vacuous by round 4.
 The derivation, proofs and numerical checks are in \href{https://github.com/AbdulMusthakin/swarm-audit/blob/b52434290039a1bc775137271a38ee35c06d432c/results/followup/dobrushin/README.md}{\texttt{results/followup/dobrushin/README.md}}.
 
 \appendixfigure{figA_contraction}{Bound estimates for the actions-only audit in the primary Llama setting (10 agents, cheap talk, full history, 50 live games).
@@ -532,6 +594,25 @@ At round 2 the black point (0.261) lies above both the cutoff and the bound curv
       CRPS gain from history-length tables (pooled minus history-length): rounds 2--7 $+0.0060$ $[+0.0033, +0.0086]$; endpoint $-0.0036$ $[-0.0070, -0.0002]$; 20 agents, fresh games: $+0.0089$ $[+0.0066, +0.0111]$ and $-0.0083$ $[-0.0109, -0.0058]$.
     \item Status: exploratory; the 10-agent analysis reuses the primary games.
   \end{itemize}
+  \item Llama 3.1 70B, cheap talk, full history (§4.5): does the audit work for a model that reacts to messages?
+  \begin{itemize}
+    \item Result: message responsiveness 9.6 percentage points (8B: 3.8).
+      $D = +0.0061$ $[+0.0045, +0.0077]$ (10 agents) and $+0.0063$ $[+0.0044, +0.0079]$ (20 agents).
+      CRPS of $F$, 10 agents: order-zero 0.049, actions-only 0.069, signal-aware 0.063; minus order-zero, $+0.0197$ $[+0.0129, +0.0262]$ (actions-only) and $+0.0136$ $[+0.0082, +0.0185]$ (signal-aware); 20 agents, $+0.0195$ $[+0.0131, +0.0258]$ and $+0.0132$ $[+0.0079, +0.0178]$.
+      Late high bids (rounds 16--20), live against forecast: 23.2\% against 31.0\% and 30.0\% (10 agents); 24.7\% against 31.0\% and 30.0\% (20 agents).
+      Roundwise check, 10 agents: TV 0.400 and 0.382 at round 3 against cutoffs of 0.229 and 0.227; 20 agents: 0.504 and 0.483 at round 4 against 0.206 and 0.204.
+      Four-agent last-round calibration passed on both channels (cheap talk, per-run $p = 0.024$; counts, $p = 0.57$).
+    \item Status: exploratory, post hoc (decided after the 8B results); analysis unchanged; paired differences from 2,000 whole-run resamples.
+  \end{itemize}
+\end{itemize}
+
+\textbf{Robustness checks.}
+\begin{itemize}
+  \item Prespecified comparison (§4.1): inconclusive under conditional, high-precision and nested intervals; with 20 agents (secondary, fresh games), the nested interval $[-0.00081, +0.00008]$ also includes zero.
+  \item OLMo (§§4.2--4.3): exploratory, with different group sizes (10 and 4) and memory (full history and last round). The ten-agent ending is degenerate; the four-agent event rests on 17 of 100 games in two cohorts and did not occur in 50 games in either tested 10-agent OLMo memory setting.
+  \item Llama trade-off (§4.4): chosen after seeing the data and scored on the primary games; it recurred in fresh 20-agent games.
+  \item Calibration: the original Llama 8B cheap-talk calibration failed its per-run test ($p = 0.0076$); the diagnostics found no implementation discrepancy, the team recorded the failure and proceeded, and a disclosed fresh calibration passed (Appendix~C).
+  \item No runs were dropped, and a separately written script re-derived the headline numbers from the same inputs.
 \end{itemize}
 
 \appendixfigure{figA_llama_endpoint}{Llama 3.1 8B, 10 agents, cheap talk, full history, 50 live games.
@@ -556,9 +637,10 @@ Rounds 2--7 is an early window chosen after seeing the data, not the prespecifie
 
 \begin{itemize}
   \item Game: 20 rounds, not disclosed to agents; payoffs $(u_{LH}, u_{HH}, u_{LL}, u_{HL}) = (12, 10, 4, 0)$.
-  \item Models: Llama 3.1 8B Instruct and OLMo-3-7B-Instruct, open-weights models served with vLLM on Modal in bf16 at temperature 1, with batch-invariant serving.
+  \item Models: Llama 3.1 8B Instruct and OLMo-3-7B-Instruct, open-weights models served with vLLM on Modal (one L4) in bf16 at temperature 1, with batch-invariant serving.
+  \item Llama 3.1 70B Instruct (revision \texttt{1605565b}, exploratory, post hoc): one B200 with the same serving stack (vLLM 0.32.0, bf16, batch invariance); serving floor 0, four-agent calibration passed on both channels, start-to-end drift 0. Its configuration changes only the model, hardware, output folder and arm names, and each 70B game uses the same random draws as the 8B game with the same index.
   \item Topology: a ring, each agent with two neighbours, in every setting except one 10-agent complete-graph variant (Llama, both channels, secondary).
-  \item Settings, each with 50 live games of 20 rounds: Llama, 10 agents, cheap talk, full history (prespecified primary); Llama, 20 agents (secondary, fresh games); Llama message-free (``counts'') games (secondary); OLMo, 4 agents, last-round history, original and fresh cohorts (exploratory); OLMo, 10 agents, full history, and memory controls with 4 agents and full history and 10 agents and last-round history (exploratory); two 4-agent last-round Llama calibration settings.
+  \item Settings, each with 50 live games of 20 rounds: Llama, 10 agents, cheap talk, full history (prespecified primary); Llama, 20 agents (secondary, fresh games); Llama message-free (``counts'') games (secondary); OLMo, 4 agents, last-round history, original and fresh cohorts (exploratory); OLMo, 10 agents, full history, and memory controls with 4 agents and full history and 10 agents and last-round history (exploratory); two 4-agent last-round Llama calibration settings; Llama 3.1 70B, the Llama ring and complete-graph settings and both calibrations (exploratory, post hoc).
   \item Tests: the audit state is the agent's last bid and the number of neighbours bidding high; the signal-aware state adds the agent's own last message and its neighbours' message counts (108 states with two neighbours, plus the empty first-round history).
     Probabilities are read from the model's next-token distribution, restricted to the valid labels and renormalised.
     Full-history settings use 50 fitting and 25 held-out scoring histories per state (cheap talk) or 100 and 50 (counts), of lengths 1--19, with earlier bids and messages drawn uniformly; last-round settings are enumerated, one prompt per state.
@@ -610,6 +692,8 @@ These steps read committed tables and logs and query no model.
   \item OLMo mechanism, interventions and memory controls (§4.3): \texttt{results/extra/followup/REPRODUCE.md}.
   \item Fresh four-agent cohort (§4.3): \texttt{python scripts/report\_fresh\_cohort.py}, which reapplies the original roundwise check, with the exact cached round laws and the original cutoff, to the fresh games' logs after confirming that it reproduces the committed analysis of the original games.
   \item Diagnostic sensitivity (Appendix~F): \texttt{python scripts/report\_sensitivity.py}, which implements the plan in \texttt{results/extra/followup/sensitivity/plan.md}.
+  \item Compounding over persistence (§4.3): \texttt{python scripts/report\_persistence.py}.
+  \item 70B rerun (§4.5): the \texttt{step analysis} blocks of \texttt{interest/model-70b/run\_all.sh} and \texttt{run\_stage2.sh}, then \texttt{python interest/model-70b/compare.py} and \texttt{python scripts/report\_70b.py}, which also adds the claims to \texttt{results/followup/core/claims.csv}.
   \item Report figures: \texttt{python scripts/report\_figures.py}.
 \end{itemize}
 
@@ -619,12 +703,12 @@ These steps read committed tables and logs and query no model.
 \begin{itemize}
   \item \textbf{Stylised game.} One procurement game with frozen wording and payoffs.
     It exposes an audit failure mode; it is not a detector of real-world collusion.
-  \item \textbf{Narrow scope.} One prompt pair, two small open-weights models, mainly ring topologies and up to 20 agents.
+  \item \textbf{Narrow scope.} One prompt pair, two small open-weights models and one exploratory 70B rerun, mainly ring topologies and up to 20 agents.
     Results may not transfer to larger models, other prompts or other topologies.
   \item \textbf{Sample size.} 50 live games per setting or cohort.
     Near-binary outcomes, such as the OLMo events, give wide score intervals.
   \item \textbf{Post hoc selection and reuse.} Only the Llama endpoint comparison of §4.1 was prespecified.
-    The temporal, history-length, fresh-cohort and sensitivity analyses were chosen after the first results; the OLMo arm ran after its prespecified trigger was not met.
+    The temporal, history-length, fresh-cohort, compounding and sensitivity analyses were chosen after the first results; the OLMo arm ran after its prespecified trigger was not met, and the 70B rerun was decided after the 8B results.
   \item \textbf{Different settings for the headline examples.} The two OLMo examples come from different group sizes and memory settings, but both checks can be applied within one setting; Appendix~F does so for the four-agent setting, with simulated games from the cached chains.
   \item \textbf{Bounds need live histories.} Theorem~1 and the contraction estimates use defects measured on live histories, so they explain a gap after the fact; they do not certify an audit in advance.
   \item \textbf{Interpretation.} High bidding measures coordination in this game.
@@ -662,7 +746,7 @@ These sensitivities are conditional on the cached kernels: the alternative is a 
 
 We used LLMs extensively but with human oversight at every step.
 AI coding agents (Claude Code) wrote much of the experiment and analysis code under our direction, an independent AI reviewer (OpenAI Codex) checked the design and results, and an AI assistant (Claude) found and checked references and produced first drafts of several sections, from Results onwards, which we then heavily edited.
-An AI assistant (ChatGPT) reviewed drafts of the report against our results files, and Claude Code converted the report to LaTeX, applied the resulting revisions and wrote the report's figure, fresh-cohort and sensitivity scripts.
+An AI assistant (ChatGPT) reviewed drafts of the report against our results files, and Claude Code converted the report to LaTeX, applied the resulting revisions and wrote the report's figure, fresh-cohort, sensitivity, persistence and 70B scripts.
 The research question, design, choice of experiments and final wording are ours.
 Headline numbers were checked against our results files and re-derived from the same inputs by a separately written script.
 

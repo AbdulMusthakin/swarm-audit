@@ -80,6 +80,10 @@ model queries:
 - Diagnostic sensitivity within the four-agent setting (Appendix F; pre-registered in
   [`results/extra/followup/sensitivity/plan.md`](results/extra/followup/sensitivity/plan.md)):
   `python scripts/report_sensitivity.py`.
+- Compounding over persistence in the four-agent setting: `python scripts/report_persistence.py`.
+- Exploratory Llama 3.1 70B rerun ([`interest/model-70b/`](interest/model-70b/README.md), report
+  §4.5): `python interest/model-70b/compare.py`, then `python scripts/report_70b.py` (after the
+  persistence line), which also adds the report's claims to `results/followup/core/claims.csv`.
 - Report figures: `python scripts/report_figures.py` (after the fresh-cohort line above).
 
 ## Results

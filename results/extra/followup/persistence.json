@@ -1,0 +1,43 @@
+{
+ "setting": "OLMo-3-7B, n = 4 cycle, cheap talk, last-round history, T = 20",
+ "event": "every agent bids high in every round 16-20 (F = 1)",
+ "agent_rounds": 76,
+ "p_high_round1": 0.6224593312018546,
+ "p_all_high_round1": {
+  "actions_only": 0.1501218566948747,
+  "signal_aware": 0.15012185669487477
+ },
+ "keep_high_per_agent_round": {
+  "actions_only": 0.904991372855907,
+  "signal_aware_effective": 0.999294340135757
+ },
+ "survival_rounds_2_20": {
+  "actions_only": 0.0005069642983288104,
+  "signal_aware": 0.9477646368556505
+ },
+ "start_times_survival": {
+  "actions_only": 7.610642174313539e-05,
+  "signal_aware": 0.14228018699451397
+ },
+ "exact_P_F1": {
+  "actions_only": 7.635603166733566e-05,
+  "signal_aware": 0.14239254032335946
+ },
+ "survival_ratio_signal_over_actions": 1869.4899028983355,
+ "per_agent_round_gap": 0.09430296727984999,
+ "situations_by_neighbours": {
+  "2": {
+   "actions_only": 6,
+   "signal_aware": 108
+  },
+  "4": {
+   "actions_only": 10,
+   "signal_aware": 450
+  },
+  "9": {
+   "actions_only": 20,
+   "signal_aware": 3300
+  }
+ },
+ "note": "start x survival omits re-entry into all-high after an exit; the exact event probabilities include it"
+}
