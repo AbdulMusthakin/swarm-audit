@@ -1,4 +1,4 @@
-# Overnight follow-up: completion note (8 Nov 2026, about 01:40 UK)
+# Overnight follow-up: completion note (8 Nov 2026, about 01:40 UK; review items added about 06:15)
 
 - **Hand-off:** `02_Extra_Arms_Overnight_Handoff_2026-11-08.md`, evaluated in
   `docs/overnight-extra-plan.md`.
@@ -18,7 +18,7 @@
 | Independent calculation, CRPS identity | PASS (1e-10) | `independent_check.json`, `scripts/extra_followup_check.py` |
 | Figure 2 candidate and appendix figures | PDF and PNG at print size | `figures/` |
 | Summary and claims | 39 claims, every one with a source key | `mechanism_summary.md`, `claims.csv` |
-| Reproduction and tests | 116 passed, 1 skipped | `REPRODUCE.md` |
+| Reproduction and tests | 119 passed, 1 skipped | `REPRODUCE.md` |
 
 `unrun_tasks.md` lists what was out of scope. Nothing specified was left unrun.
 
@@ -38,7 +38,9 @@
 >
 > The high outcome arises almost entirely from an all-high first round followed by
 > persistence. In live runs it disappears at n = 10 under both memory settings
-> (0/50 each), consistent with 0.6225ⁿ. No memory effect is detectable at n = 4.
+> (0/50 each), consistent with 0.6225ⁿ. The nominal size contrast excludes 0 under
+> both memories. With a multiplicity correction, it excludes 0 only under last-round
+> memory. No memory effect is detectable at n = 4.
 
 **Required qualifiers:**
 - exploratory, chosen after earlier results;
@@ -94,6 +96,24 @@
    - **m1.** The survival diagnostic now uses first entry, as frozen. Its effect is at
      most 2e-6, and the all-entry version is kept as a labelled secondary key.
    - Codex's M4 concerns the core's wording, not this branch.
+7. **Independent review, 05:30 continuation (PR #9 note): two items acted on after the
+   06:00 check-in.**
+   - **m4, resume guard.** The observation intervention was not bound in run provenance,
+     so a cell could resume under a different intervention. `swarm.bind_observation` now
+     writes `observation.json` before a new cell's first run and rejects any later
+     session with a different (or missing) intervention. Older cells are checked
+     against the interventions their manifest sessions recorded. Runs without an
+     observer are unchanged (tested).
+     - Codex's probe is now rejected with a ProvenanceError.
+     - The four completed E2 cells each ran one intervention with 0 routing
+       mismatches. They are recorded in `observation_binding_legacy.json`; their
+       provenance is not rewritten, and no rerun is needed.
+   - **Multiplicity.** The frozen plan's nominal E3 intervals stand as the specified
+     analysis. A post hoc Bonferroni sensitivity was added
+     (`size_memory.json` `multiplicity_sensitivity`; it matches the review). Under it,
+     the full-history size contrast includes 0: [−0.23, +0.01] over the two size
+     contrasts. The wording in `mechanism_summary.md` and `claims.csv` is narrowed
+     accordingly.
 5. **Figure 2 panel A, first draft.** Its labels overlapped; it was redrawn and checked
    visually.
 6. **No GPU failure, no stop rule triggered, no extension on significance.**

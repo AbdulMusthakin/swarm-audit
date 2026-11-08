@@ -136,8 +136,17 @@ def main() -> None:
                 f"size_memory.json cells.{k}", "live", c["source"])
         for k, c in sm["contrasts"].items():
             d = c["P_F1_a_minus_b"]
-            add(f"Contrast {k} ({c['a']} - {c['b']}): P(F=1)", f(d["diff"]), f"Newcombe 95% [{f(d['lo'])}, {f(d['hi'])}]",
-                "OLMo-3-7B", f"size_memory.json contrasts.{k}", "live", "cells collected in different sessions; not jointly randomised")
+            add(f"Contrast {k} ({c['a']} - {c['b']}): P(F=1)", f(d["diff"]), f"Newcombe nominal 95% [{f(d['lo'])}, {f(d['hi'])}]",
+                "OLMo-3-7B", f"size_memory.json contrasts.{k}", "live",
+                "exploratory, nominal (unadjusted) interval; cells collected in different sessions, not jointly randomised")
+        ms = sm.get("multiplicity_sensitivity")
+        if ms:
+            for fam in ("two_size_contrasts", "all_four_contrasts"):
+                for k, d in ms[fam]["intervals"].items():
+                    add(f"Multiplicity sensitivity ({fam}) {k}: P(F=1) difference", f(d["diff"]),
+                        f"Bonferroni-adjusted Newcombe [{f(d['lo'])}, {f(d['hi'])}] (alpha {ms[fam]['alpha_per_contrast']:g} each)",
+                        "OLMo-3-7B", f"size_memory.json multiplicity_sensitivity.{fam}.intervals.{k}", "live (post hoc sensitivity)",
+                        "say 'size matters' only for last-round memory; under full history the adjusted interval includes 0")
     with open(F / "claims.csv", "w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["claim", "value", "interval_or_precision", "condition", "provenance", "evidence_type", "allowed_wording"])

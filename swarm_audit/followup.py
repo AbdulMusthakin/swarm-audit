@@ -220,7 +220,20 @@ def record_observer(name: str):
            "both_null": lambda r: nbr(own(r))}
     if name not in fns:
         raise ValueError(f"unknown observation intervention {name!r}")
-    return fns[name]
+    fn = fns[name]
+    # Identity for the resume guard (swarm.run_condition binds it in observation.json).
+    fn.observe_spec = {"observe": name, "version": OBSERVE_VERSION,
+                       "definition": OBSERVE_DEFINITIONS[name]}
+    return fn
+
+
+OBSERVE_VERSION = 1
+OBSERVE_DEFINITIONS = {
+    "unmodified": "observation equals the actual record",
+    "own_null": "own message field shown as 'none'; everything else actual",
+    "neighbour_null": "neighbour message counts shown as (0, 0, d); everything else actual",
+    "both_null": "own message 'none' and neighbour message counts (0, 0, d); actions, counts and payoff actual",
+}
 
 
 def first_entry(P: np.ndarray, v1: np.ndarray, AH: np.ndarray, T: int) -> np.ndarray:

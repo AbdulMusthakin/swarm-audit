@@ -63,15 +63,15 @@ def wilson(k: int, n: int, a: float = 0.05) -> tuple[float, float]:
     return float(c - h), float(c + h)
 
 
-def newcombe(k1: int, n1: int, k2: int, n2: int) -> dict:
+def newcombe(k1: int, n1: int, k2: int, n2: int, a: float = 0.05) -> dict:
     """Newcombe's hybrid score interval for p1 - p2 (method 10)."""
     p1, p2 = k1 / n1, k2 / n2
-    l1, u1 = wilson(k1, n1)
-    l2, u2 = wilson(k2, n2)
+    l1, u1 = wilson(k1, n1, a)
+    l2, u2 = wilson(k2, n2, a)
     d = p1 - p2
     return {"diff": d, "lo": d - float(np.sqrt((p1 - l1) ** 2 + (u2 - p2) ** 2)),
             "hi": d + float(np.sqrt((u1 - p1) ** 2 + (p2 - l2) ** 2)),
-            "method": "Newcombe hybrid score (Wilson components), 95%"}
+            "method": f"Newcombe hybrid score (Wilson components), {100 * (1 - a):g}%"}
 
 
 def boot_diff(a: np.ndarray, b: np.ndarray, seed: int) -> dict:
@@ -141,6 +141,19 @@ def main() -> None:
                            "P_F1_a_minus_b": newcombe(A["_k1"], A["_R"], Bc["_k1"], Bc["_R"]),
                            "mean_F_a_minus_b": boot_diff(A["_F"], Bc["_F"], SEED + i)}
 
+    # Multiplicity sensitivity (independent review, 8 Nov 05:30; added after the frozen
+    # plan, which specified nominal 95% intervals): Bonferroni-adjusted Newcombe intervals
+    # over the two size contrasts and over all four contrasts.
+    multiplicity = {"note": "post hoc sensitivity added after the independent review; the frozen "
+                            "plan's nominal 95% intervals are the specified analysis",
+                    "method": "Bonferroni-adjusted Newcombe hybrid score intervals"}
+    for fam, names in (("two_size_contrasts", ["size_within_last1", "size_within_full"]),
+                       ("all_four_contrasts", list(pairs))):
+        a_adj = 0.05 / len(names)
+        multiplicity[fam] = {"alpha_per_contrast": a_adj, "intervals": {
+            nm: newcombe(cells[pairs[nm][0]]["_k1"], cells[pairs[nm][0]]["_R"],
+                         cells[pairs[nm][1]]["_k1"], cells[pairs[nm][1]]["_R"], a_adj) for nm in names}}
+
     # checks and the core analysis of the new cells
     checks, analyses = {}, {}
     enum = build.load_tables(TABLES, "cheap_talk_d2_enumerated")
@@ -173,7 +186,7 @@ def main() -> None:
 
     public = {k: {kk: vv for kk, vv in v.items() if not kk.startswith("_")} for k, v in cells.items()}
     out = {"plan": "results/extra/followup/plan.json E3_size_by_memory", "cells": public,
-           "contrasts": contrasts, "checks": checks, "analyses_new_cells": analyses,
+           "contrasts": contrasts, "multiplicity_sensitivity": multiplicity, "checks": checks, "analyses_new_cells": analyses,
            "notes": {"P_F1_intervals": "Clopper-Pearson 95% (zero successes give a nonzero upper bound)",
                      "joint_randomisation": "the four cells were collected in different sessions and were not jointly randomised",
                      "n10_full_forecast": "see the 9b analysis", "no_phase_transition": "two sizes only"}}
