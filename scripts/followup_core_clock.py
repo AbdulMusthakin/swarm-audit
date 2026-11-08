@@ -28,7 +28,7 @@ sys.path.insert(0, str(REPO))
 import numpy as np  # noqa: E402
 
 from swarm_audit import build, stats  # noqa: E402
-from swarm_audit import followup as fu  # noqa: E402
+from swarm_audit import followup_core as fu  # noqa: E402
 from swarm_audit.analysis import to_jsonable  # noqa: E402
 from swarm_audit.audit import AuditTable, derive_actions_table, marginal_weights, state_weights  # noqa: E402
 from swarm_audit.ladder import render  # noqa: E402

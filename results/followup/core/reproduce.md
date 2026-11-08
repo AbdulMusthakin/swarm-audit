@@ -92,13 +92,13 @@ python scripts/followup_core_collect.py
 Tests for the new code:
 
 ```bash
-python -m pytest -q tests/test_followup.py
+python -m pytest -q tests/test_followup_core.py
 ```
 
 ## Seeds
 
 All follow-up randomness uses `numpy.random.SeedSequence([20261108, tag, ...])`
-(`swarm_audit/followup.py: seeded`):
+(`swarm_audit/followup_core.py: seeded`):
 
 - 1, 2, 3, 5, 6: bootstraps;
 - 101 + batch: Monte Carlo batches;

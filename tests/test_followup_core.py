@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from swarm_audit import followup as fu
+from swarm_audit import followup_core as fu
 from swarm_audit import stats
 from swarm_audit.audit import derive_actions_table, fit_table
 from swarm_audit.policies import ScriptedBackend

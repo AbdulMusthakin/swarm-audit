@@ -28,7 +28,7 @@ sys.path.insert(0, str(REPO))
 import numpy as np  # noqa: E402
 
 from swarm_audit import build, stats  # noqa: E402
-from swarm_audit import followup as fu  # noqa: E402
+from swarm_audit import followup_core as fu  # noqa: E402
 from swarm_audit.analysis import build_predictors, to_jsonable  # noqa: E402
 from swarm_audit.prediction import Order0  # noqa: E402
 from swarm_audit.provenance import check_tables_match_runs  # noqa: E402
