@@ -1,0 +1,557 @@
+{
+  "source_commit": "f8ad9bbb88ee538d1c9563c51e0a1d97e4401711",
+  "n20": {
+    "integrity": {
+      "run_folder": "results/runs/core_cheap_talk/cheap_talk_n20_cycle_full",
+      "n": 20,
+      "graph": "cycle",
+      "R": 50,
+      "decisions": 20000,
+      "errors": {
+        "cardinality": 0,
+        "record": 0,
+        "state": 0,
+        "action": 0,
+        "signal": 0,
+        "seed": 0,
+        "identity": 0,
+        "template": 0
+      },
+      "y": [
+        26,
+        36,
+        19,
+        31,
+        41,
+        37,
+        31,
+        37,
+        30,
+        32,
+        43,
+        27,
+        39,
+        37,
+        32,
+        36,
+        35,
+        41,
+        36,
+        39,
+        34,
+        45,
+        32,
+        39,
+        35,
+        38,
+        39,
+        38,
+        38,
+        30,
+        38,
+        31,
+        30,
+        35,
+        31,
+        36,
+        35,
+        35,
+        33,
+        38,
+        32,
+        44,
+        36,
+        40,
+        30,
+        31,
+        34,
+        35,
+        35,
+        38
+      ],
+      "mean_X": [
+        0.564,
+        0.302,
+        0.305,
+        0.29700000000000004,
+        0.33599999999999997,
+        0.29900000000000004,
+        0.34700000000000003,
+        0.329,
+        0.353,
+        0.359,
+        0.351,
+        0.32999999999999996,
+        0.37,
+        0.33999999999999997,
+        0.37,
+        0.34900000000000003,
+        0.335,
+        0.353,
+        0.359,
+        0.354
+      ],
+      "probability_reconstruction_max_error": 2.220446049250313e-16,
+      "min_valid_label_mass": 0.9867371136996448,
+      "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc"
+    },
+    "archived_CDF_max_errors": {
+      "actions_only": 0.0,
+      "actions_only_equal_w": 0.0,
+      "signal_aware": 0.0
+    },
+    "archived_paired": {
+      "endpoint": {
+        "mean": -4.103217499999843e-05,
+        "paired_run_bootstrap95": [
+          -0.00011249217499999668,
+          2.8329825000000636e-05
+        ],
+        "whole_run_SE": 3.6128614246147195e-05
+      },
+      "early": {
+        "mean": -0.0010151607083333334,
+        "paired_run_bootstrap95": [
+          -0.0012584807083333323,
+          -0.000768243208333335
+        ],
+        "whole_run_SE": 0.00012579880492169998
+      },
+      "middle": {
+        "mean": -0.00011135852083333397,
+        "paired_run_bootstrap95": [
+          -0.00020279227083333471,
+          -1.9323937500000497e-05
+        ],
+        "whole_run_SE": 4.7516267413742466e-05
+      },
+      "late": {
+        "mean": -0.00010328301785714242,
+        "paired_run_bootstrap95": [
+          -0.00016862658928571694,
+          -3.6654089285714074e-05
+        ],
+        "whole_run_SE": 3.396411953925275e-05
+      }
+    },
+    "archived_per_run_D_max_error": 0.0,
+    "higher_precision": {
+      "runs_per_predictor": 500000,
+      "paired": {
+        "endpoint": {
+          "mean": -0.00026512022535999795,
+          "paired_run_bootstrap95": [
+            -0.000386609265359998,
+            -0.00013912904535999822
+          ],
+          "whole_run_SE": 6.36503736949768e-05
+        },
+        "early": {
+          "mean": -0.0009834047472666735,
+          "paired_run_bootstrap95": [
+            -0.0011932163972666688,
+            -0.0007641519306000066
+          ],
+          "whole_run_SE": 0.00011051058548429483
+        },
+        "middle": {
+          "mean": -0.00016204479323332944,
+          "paired_run_bootstrap95": [
+            -0.00023562782656666285,
+            -8.410935989999716e-05
+          ],
+          "whole_run_SE": 3.8794393111958453e-05
+        },
+        "late": {
+          "mean": -0.00012412466519999706,
+          "paired_run_bootstrap95": [
+            -0.00018214483662856677,
+            -6.644585091428296e-05
+          ],
+          "whole_run_SE": 2.955530997494552e-05
+        }
+      },
+      "MC_batches": [
+        {
+          "endpoint": -0.00025731019999999873,
+          "early": -0.0009094038566666734,
+          "middle": -0.00015641918000000268,
+          "late": -0.00011542049142857058
+        },
+        {
+          "endpoint": -0.0001757366159999983,
+          "early": -0.000792875453333333,
+          "middle": -0.00018579922666666957,
+          "late": -4.9711448571428394e-05
+        },
+        {
+          "endpoint": -0.00013343633599999808,
+          "early": -0.0010166241366666737,
+          "middle": -0.00011714915333333638,
+          "late": -7.805096571428721e-05
+        },
+        {
+          "endpoint": -0.00013462674400000082,
+          "early": -0.0010289739233333341,
+          "middle": -0.0001370085933333308,
+          "late": -9.51823285714272e-05
+        },
+        {
+          "endpoint": -0.0003860527479999996,
+          "early": -0.0010283661333333315,
+          "middle": -0.00017217531333333334,
+          "late": -0.00016513156285714314
+        },
+        {
+          "endpoint": -0.0002215576719999993,
+          "early": -0.0008890758133333318,
+          "middle": -0.00016462874666666662,
+          "late": -0.0001102501657142839
+        },
+        {
+          "endpoint": -0.00039770803200000246,
+          "early": -0.0010180718700000032,
+          "middle": -0.00011610275666666781,
+          "late": -0.00020024311428572041
+        },
+        {
+          "endpoint": -0.0004194999159999964,
+          "early": -0.0010236617866666682,
+          "middle": -0.00010187518000000006,
+          "late": -0.00017509514571428548
+        },
+        {
+          "endpoint": -0.00022969295199999724,
+          "early": -0.0010827955633333315,
+          "middle": -0.0002903710900000008,
+          "late": -8.822965428571098e-05
+        },
+        {
+          "endpoint": -0.00029484388000000086,
+          "early": -0.0010441905699999999,
+          "middle": -0.00017722779000000155,
+          "late": -0.0001655508200000022
+        }
+      ],
+      "estimated_pooled_MC_SE": {
+        "endpoint": 3.374629871960433e-05,
+        "early": 2.8337839737020357e-05,
+        "middle": 1.692354824577287e-05,
+        "late": 1.557916187651658e-05
+      }
+    },
+    "clock": {
+      "pooled_runs": 500000,
+      "clock_runs": 200000,
+      "pooled_minus_clock": {
+        "endpoint": {
+          "mean": -0.008330502066740004,
+          "paired_run_bootstrap95": [
+            -0.010808510136740005,
+            -0.005667813446740006
+          ],
+          "whole_run_SE": 0.0013302532586743098
+        },
+        "early": {
+          "mean": 0.00899404401803334,
+          "paired_run_bootstrap95": [
+            0.0067899767263666705,
+            0.011222586934700006
+          ],
+          "whole_run_SE": 0.0011423916562220346
+        },
+        "middle": {
+          "mean": -0.002029705464300006,
+          "paired_run_bootstrap95": [
+            -0.0027314401143000064,
+            -0.0012885597143000038
+          ],
+          "whole_run_SE": 0.00036771945887337085
+        },
+        "late": {
+          "mean": -0.003735127540107142,
+          "paired_run_bootstrap95": [
+            -0.004944730597249997,
+            -0.002521427418678571
+          ],
+          "whole_run_SE": 0.0006206029266855425
+        }
+      },
+      "fit_count_range": [
+        [
+          9,
+          25
+        ],
+        [
+          9,
+          25
+        ],
+        [
+          11,
+          27
+        ]
+      ],
+      "combined_MC_SE_approx": {
+        "endpoint": 6.92470846527615e-05,
+        "early": 2.93548229184084e-05,
+        "middle": 1.8976832624628318e-05,
+        "late": 2.8715426566798697e-05
+      }
+    },
+    "source_table_sensitivity": {
+      "mean": -0.0003056377986249999,
+      "sd": 0.00020826213259372934,
+      "lo": -0.0006781475981250006,
+      "hi": 7.577018937500107e-05,
+      "frac_positive": 0.075,
+      "table_only_sd_approx": 0.00011978803395117297
+    },
+    "source_nested_sensitivity": {
+      "mean": -0.0002990924986249999,
+      "sd": 0.0002301291613677093,
+      "lo": -0.0008124911775000021,
+      "hi": 7.65281806250003e-05,
+      "frac_positive": 0.075
+    }
+  },
+  "complete_graph": {
+    "counts": {
+      "integrity": {
+        "run_folder": "results/runs/second_topology_counts/counts_n10_complete_full",
+        "n": 10,
+        "graph": "complete",
+        "R": 50,
+        "decisions": 10000,
+        "errors": {
+          "cardinality": 0,
+          "record": 0,
+          "state": 0,
+          "action": 0,
+          "signal": 0,
+          "seed": 0,
+          "identity": 0,
+          "template": 0
+        },
+        "y": [
+          25,
+          31,
+          24,
+          31,
+          26,
+          25,
+          34,
+          29,
+          29,
+          23,
+          34,
+          21,
+          29,
+          28,
+          23,
+          31,
+          30,
+          28,
+          31,
+          30,
+          30,
+          29,
+          25,
+          26,
+          27,
+          24,
+          30,
+          25,
+          24,
+          36,
+          30,
+          33,
+          28,
+          25,
+          32,
+          29,
+          24,
+          26,
+          26,
+          30,
+          27,
+          21,
+          27,
+          26,
+          29,
+          31,
+          30,
+          27,
+          22,
+          21
+        ],
+        "mean_X": [
+          0.67,
+          0.53,
+          0.48200000000000004,
+          0.618,
+          0.526,
+          0.558,
+          0.508,
+          0.506,
+          0.542,
+          0.548,
+          0.538,
+          0.5519999999999999,
+          0.5519999999999999,
+          0.536,
+          0.55,
+          0.55,
+          0.538,
+          0.5780000000000001,
+          0.602,
+          0.496
+        ],
+        "probability_reconstruction_max_error": 5.551115123125783e-17,
+        "min_valid_label_mass": 0.9952781760246465,
+        "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc"
+      },
+      "archived_action_CDF_max_error": 0.0,
+      "order0_p": 0.5525290643511261,
+      "archived_order0_per_run_score_max_error": 4.163336342344337e-17,
+      "archived_action_per_run_score_max_error": 0.0,
+      "original_paired_order0_minus_actions": {
+        "mean": -0.0006204564094254958,
+        "paired_run_bootstrap95": [
+          -0.0024789909028820633,
+          0.0012257523245051251
+        ],
+        "whole_run_SE": 0.0009448997933724546
+      },
+      "higher_precision_100k_paired_order0_minus_actions": {
+        "mean": -0.0006609557634254967,
+        "paired_run_bootstrap95": [
+          -0.002612025817354402,
+          0.0012769934028429865
+        ],
+        "whole_run_SE": 0.0009908887705872805
+      }
+    },
+    "cheap_talk": {
+      "integrity": {
+        "run_folder": "results/runs/second_topology_cheap_talk/cheap_talk_n10_complete_full",
+        "n": 10,
+        "graph": "complete",
+        "R": 50,
+        "decisions": 10000,
+        "errors": {
+          "cardinality": 0,
+          "record": 0,
+          "state": 0,
+          "action": 0,
+          "signal": 0,
+          "seed": 0,
+          "identity": 0,
+          "template": 0
+        },
+        "y": [
+          19,
+          10,
+          15,
+          22,
+          11,
+          13,
+          15,
+          21,
+          12,
+          15,
+          15,
+          17,
+          12,
+          13,
+          17,
+          11,
+          11,
+          10,
+          11,
+          12,
+          13,
+          20,
+          11,
+          11,
+          17,
+          13,
+          24,
+          17,
+          16,
+          14,
+          19,
+          11,
+          14,
+          19,
+          18,
+          12,
+          15,
+          16,
+          15,
+          17,
+          9,
+          10,
+          12,
+          12,
+          19,
+          23,
+          14,
+          21,
+          14,
+          8
+        ],
+        "mean_X": [
+          0.5940000000000001,
+          0.314,
+          0.288,
+          0.312,
+          0.296,
+          0.256,
+          0.32999999999999996,
+          0.314,
+          0.29,
+          0.284,
+          0.316,
+          0.296,
+          0.302,
+          0.296,
+          0.302,
+          0.296,
+          0.318,
+          0.306,
+          0.262,
+          0.29
+        ],
+        "probability_reconstruction_max_error": 2.220446049250313e-16,
+        "min_valid_label_mass": 0.9919392814764566,
+        "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc"
+      },
+      "archived_action_CDF_max_error": 0.0,
+      "order0_p": 0.38670875021605816,
+      "archived_order0_per_run_score_max_error": 8.673617379884035e-17,
+      "archived_action_per_run_score_max_error": 0.0,
+      "original_paired_order0_minus_actions": {
+        "mean": 0.01676683210668311,
+        "paired_run_bootstrap95": [
+          0.012067271944539684,
+          0.021186061973350472
+        ],
+        "whole_run_SE": 0.0023602459008454564
+      },
+      "higher_precision_100k_paired_order0_minus_actions": {
+        "mean": 0.01679233961668311,
+        "paired_run_bootstrap95": [
+          0.012085279813564305,
+          0.02122405281723101
+        ],
+        "whole_run_SE": 0.0023660765719364604
+      }
+    }
+  },
+  "interpretation": [
+    "n20 is a secondary result; original n10 primary is unchanged",
+    "A conditional n20 score advantage for actions-only does not establish the sign after audit-table uncertainty",
+    "Clock conditioning can improve early forecasts while worsening endpoint and late scores",
+    "K10 comparisons are within-topology order0-vs-action contrasts; changing degree, topology and fitted tables cannot isolate a single causal graph effect"
+  ]
+}

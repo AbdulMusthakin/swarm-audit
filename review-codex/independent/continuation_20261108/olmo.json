@@ -70,6 +70,7 @@
         0,
         0
       ],
+      "kernel_check": "exact enumerated comparison",
       "F1_count": 9,
       "F0_count": 41,
       "F1_CP95": [
@@ -231,6 +232,7 @@
         0,
         0
       ],
+      "kernel_check": "exact enumerated comparison",
       "F1_count": 4,
       "F0_count": 46,
       "F1_CP95": [
@@ -392,6 +394,7 @@
         0,
         20
       ],
+      "kernel_check": "exact enumerated comparison",
       "F1_count": 7,
       "F0_count": 43,
       "F1_CP95": [
@@ -553,6 +556,7 @@
         0,
         0
       ],
+      "kernel_check": "exact enumerated comparison",
       "F1_count": 8,
       "F0_count": 42,
       "F1_CP95": [
@@ -758,6 +762,7 @@
         0,
         0
       ],
+      "kernel_check": "full-history kernel not independently re-queried; fitted table is an approximation",
       "F1_count": 5,
       "F0_count": 45,
       "F1_CP95": [

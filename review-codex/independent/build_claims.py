@@ -288,6 +288,62 @@ def main():
             'not a sampling assertion','consumers must apply corrected classification rather than stale original JSON flag',
             'Use the derived classification map; the stored old analysis remains a historical record.',
             'independent/continuation_20261108/olmo.json:fixes.classification')
+    continuation_llama=ROOT/'independent/continuation_20261108/llama.json'
+    if continuation_llama.exists():
+        fresh=json.loads(continuation_llama.read_text());fc=fresh['source_commit'];n20=fresh['n20']
+        add('Completed secondary n20 original comparison','original secondary result; continuation reproduction',
+            'D=-0.000041032175; original CDFs and per-run scores reproduce exactly',
+            'Llama n20 cheap talk cycle full history','50 complete runs;20000 original reference paths per predictor',
+            'results/analysis/core_cheap_talk/cheap_talk_n20_cycle_full.json; results/runs/core_cheap_talk/cheap_talk_n20_cycle_full',fc,
+            'yes: all20000 decisions, identities, graph/state wiring, probabilities from logprobs, draws and random streams',
+            'original conditional run interval crosses0; reference MC variation material',
+            'secondary condition; shared fitted table with n10; does not replace primary',
+            'The n20 cell is complete and the original secondary analysis reproduces; its original small sign is not reliable without MC sensitivity.',
+            'independent/continuation_20261108/llama.json:n20')
+        add('Secondary n20 higher-precision endpoint contrast','exploratory MC sensitivity of a secondary cell; continuation',
+            str(n20['higher_precision']['paired']['endpoint']),
+            'actions-only minus signal-aware endpoint CRPS, Llama n20 cycle',
+            '500000 review reference paths per predictor; same50 live runs',
+            'results/followup/core/temporal/core_cheap_talk__cheap_talk_n20_cycle_full.json',fc,
+            'yes: independent chains and seeds; pooled MCSE0.00003375',
+            'review conditional interval[-0.00038661,-0.00013913]; source nested table/run/MC interval[-0.00081,+0.00008]',
+            'table/nested sensitivities inspected from source, not independently resampled for n20',
+            'The conditional n20 result favours actions-only; the sign is not established once the reported table uncertainty is included.',
+            'independent/continuation_20261108/llama.json:n20.higher_precision')
+        add('Secondary n20 clock gain and late cost','exploratory C2 extension; continuation',
+            'early pooled-minus-clock+0.008994;endpoint-0.008331',
+            'signal-aware Llama n20 length-block clock audit',
+            '500k pooled and200k clock reference paths; same50 live runs',
+            'results/followup/core/clock/core_cheap_talk__cheap_talk_n20_cycle_full.json',fc,
+            'yes: independent block fitting and time-varying chain',
+            'early conditional95%[0.006790,0.011223]; endpoint[-0.010809,-0.005668]; MC error separately recorded',
+            'same-run exploratory evaluation; same audit fitting histories as n10; residual cause not identified',
+            'Early improvement and later deterioration extend to n20, conditional on the fitted audit.',
+            'independent/continuation_20261108/llama.json:n20.clock')
+        for channel in ('cheap_talk','counts'):
+            x=fresh['complete_graph'][channel]
+            add('Complete-graph '+channel+' baseline comparison','original secondary topology result; continuation',
+                str(x['original_paired_order0_minus_actions']),
+                'Llama n10 complete graph d9, full history; order0 minus actions-only CRPS',
+                '50 live runs; original20k reference; independent100k reference sensitivity',
+                f'results/analysis/second_topology_{channel}/{channel}_n10_complete_full.json',fc,
+                'yes: all10000 decisions; original CDF and per-run action score exact; analytic baseline agrees within1e-16',
+                'paired run intervals conditional on fitted audit/reference; table uncertainty not evaluated here',
+                'within-topology comparison; cannot isolate degree/topology changes from changed fitted tables or claim general graph transfer',
+                'The action audit improves cheap-talk endpoint CRPS over order0 on K10; the counts difference is inconclusive.',
+                f'independent/continuation_20261108/llama.json:complete_graph.{channel}')
+    probe=ROOT/'independent/continuation_20261108/provenance_guard.json'
+    if probe.exists():
+        fresh=json.loads(probe.read_text())
+        add('Observation intervention missing from immutable resume identity','minor prospective provenance safeguard gap; continuation',
+            'A scripted run resumed from unmodified to both-none without rejection; fingerprint unchanged',
+            'actual run_condition with a scripted CPU backend; temporary files only','two synthetic test runs, no model queries',
+            'swarm_audit/swarm.py:run_condition; swarm_audit/provenance.py:run_payload; scripts/run_swarm.py',fresh['source_commit'],
+            'yes: concrete offline reproduction; real E2 cells separately verified unmixed',
+            'deterministic program behaviour, not statistical uncertainty',
+            'no error found in completed live cells; concerns future resume or reproducibility guarantees',
+            'Bind a versioned observer ID to future run provenance or reject a changed observer before appending; preserve original logs.',
+            'independent/continuation_20261108/provenance_guard.json; independent/continuation_provenance_probe.py')
     with (ROOT/'claims.csv').open('w',newline='') as f:
         w=csv.DictWriter(f,fieldnames=list(rows[0]),lineterminator='\n');w.writeheader();w.writerows(rows)
     print('Wrote',len(rows),'claim rows')

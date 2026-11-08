@@ -1,0 +1,19 @@
+{
+  "source_commit": "9aa31705b9ae5ee45f27a87feeb1a2e2415f318f",
+  "backend": "scripted:hidden_signal; offline CPU only",
+  "changed_observation_on_resume_accepted": true,
+  "fingerprint_before": "237132b155eae12333e1f46fa46bb0f7dfddbc25d196a3a783f69ced58a4272b",
+  "fingerprint_after": "237132b155eae12333e1f46fa46bb0f7dfddbc25d196a3a783f69ced58a4272b",
+  "fingerprint_unchanged": true,
+  "immutable_design_has_observe": false,
+  "session_observe_names": [
+    "unmodified",
+    "both_null"
+  ],
+  "runs_logged": 2,
+  "rejection": null,
+  "actual_intervention_logs_checked_in_this_review": "all four real E2 cells have a single correct treatment; no real mixed evidence found",
+  "scope": "prospective resume safeguard gap; does not invalidate the checked completed experiments",
+  "first_run_observations_equal_actual": true,
+  "second_run_all_observed_message_fields_none": true
+}

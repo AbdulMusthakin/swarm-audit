@@ -137,3 +137,21 @@ This uses the prior independently calculated exact laws after checking that the
 current enumerated kernel has the same byte hash. New intervention live logs and
 the full-memory n4 live cell are checked independently. Existing E3 outcomes are
 re-read to check the completed table, without rerunning their prior integrity audits.
+
+Additional continuation commands:
+
+```sh
+OPENBLAS_NUM_THREADS=1 python review-codex/independent/continuation_llama.py --source ../core-continuation-snapshot --out review-codex/independent/continuation_20261108/llama.json
+OPENBLAS_NUM_THREADS=1 python review-codex/independent/continuation_provenance_probe.py --source ../extra-continuation-snapshot --out review-codex/independent/continuation_20261108/provenance_guard.json
+```
+
+`continuation_llama.py` reuses only review-owned independent code, generalises the
+score support to n20 and independently implements the complete-graph chain. It
+reproduces archived CDFs before using fresh seeds for the precision sensitivity.
+The n20 table-bootstrap arrays are source evidence, not an independently rerun
+sensitivity in this continuation.
+
+The provenance probe is deliberately different: it imports the actual project
+runner under test and uses its scripted CPU backend in a temporary directory.
+It never invokes the LLM backend or a remote service. It demonstrates the missing
+observer binding and leaves all original run evidence unchanged.

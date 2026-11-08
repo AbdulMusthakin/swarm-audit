@@ -107,3 +107,26 @@ Use “consistent with history-content shift; controlled content interventions r
 to be done.” More histories might reduce estimation variance even if they cannot
 remove a population misspecification. The new n10 last1 cell must remain distinct
 from the CPU forecast and from an independent measurement of a new kernel.
+
+## Completed-run continuation
+
+The size-by-memory table is now complete: n4 last1/full have8/50 and5/50 all-high
+late outcomes; both n10 cells have0/50. Report the cells as exploratory observations.
+The full-memory size contrast's nominal95% interval excludes0, but it does not
+survive a two-size-comparison Bonferroni sensitivity. A useful sentence is:
+“The estimated late all-high frequency is lower at n10; nominal intervals exclude
+zero within both memory settings, while the full-memory contrast is sensitive to
+multiplicity. No memory effect or phase transition is established.”
+
+The live E2 cells independently validate the recorded intervention wiring and
+probabilities. Non-rejection does not establish equivalence of the treatments.
+The literal-none result remains a conditional cached-kernel explanation, now
+supported by implementation checks on fresh live samples.
+
+For Figure1 or3, a small n20 panel can show that early forecast error and the
+clock audit's early-gain/late-cost pattern extend to the secondary size. Mark
+shared audit tables and the same-run exploratory evaluation. Do not promote n20
+to a replacement primary result: conditional precision can make its endpoint D
+negative while table sensitivity still spans0. The K10 cheap-talk improvement over
+order0 is an additional secondary result; its counts comparison is inconclusive.
+Keep these in a small table or supplement rather than adding a fourth main figure.

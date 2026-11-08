@@ -285,3 +285,60 @@ independent first-hit result within9e-16; the derived classification correctly m
 OLMo arm91 exploratory and preserves the old analysis. The core also corrected the
 MC docstring, stale status sentences and causal content-shift wording. Focused
 regression checks and additional Llama comparisons are recorded in the next checkpoint.
+
+### New minor finding m4: observation intervention is not bound by the resume guard
+
+At extra `9aa3170`, `Condition` and immutable `run_payload` omit the `observe`
+argument. The intervention name appears in session metadata, but
+`run_condition` checks provenance before appending without comparing that name.
+A deterministic reproduction using only `ScriptedBackend('hidden_signal')` in a
+temporary directory accepts run0 under `unmodified`, then run1 under `both_null`
+with the **same fingerprint** and no rejection. Both session names are recorded.
+See `independent/continuation_provenance_probe.py` and
+`independent/continuation_20261108/provenance_guard.json`.
+
+**Impact:** no real mixed treatment or bad probability was found in the completed
+E2 cells; their actual/observed logs were independently checked. This is a
+prospective configuration-identity gap, not an invalidation of those results.
+
+**Minimal fix:** reject changed observer names against recorded session metadata
+before appending, and include a stable, versioned observation specification in
+future run provenance. Preserve the immutable original evidence; use a derived
+validation record for legacy cells rather than rewriting their provenance. The
+CPU reproduction should reject after such a fix.
+
+### Completed Llama n20 and complete-graph comparisons
+
+All50 n20 cheap-talk runs are committed at core `f8ad9bb`. Their20000 decisions have
+zero cardinality, graph-record, state, sampling, seed-stream, identity or template
+errors. The original predictor CDFs and per-run action/signal score contrast
+reproduce exactly: D=-0.000041032175 at the original20k reference.
+
+Independent500k reference paths per predictor give D=**-0.00026512**, conditional
+run interval **[-0.00038661,-0.00013913]**, estimated MCSE **0.00003375**. The source's
+separate2m reference gives -0.00031084; the point difference is compatible with MC
+variation. This conditional n20 result favours actions-only, but source table and
+nested sensitivities span zero (nested approximately[-0.00081,+0.00008]). Those
+n20 table resamples were inspected, not independently re-run here. The original
+n10 primary remains unchanged, and n20 shares its fitted audit table.
+
+The n20 clock result also independently reproduces: early improvement
+**+0.008994 [0.006790,0.011223]**, endpoint deterioration
+**-0.008331 [-0.010809,-0.005668]**. References use500k pooled and200k clock paths;
+MC error is separately reported. This extends the exploratory timing pattern,
+without identifying a causal content mechanism.
+
+Both complete-graph cells have50 runs. Each cell's10000 decisions pass independent
+wiring, state, seed, probability-reconstruction and provenance checks. Original
+action-audit predictor CDFs and per-run scores reproduce exactly; analytic order0
+scores agree within1e-16. Paired endpoint improvement, order0 minus actions-only:
+
+- cheap talk: **+0.0167668 [0.0120673,0.0211861]**;
+- counts: **-0.0006205 [-0.0024790,0.0012258]**.
+
+An independent100k reference preserves both conclusions. These are conditional
+within-topology comparisons, not an isolated causal topology/degree effect, a
+signal-aware-versus-actions-only comparison, or a generalisation guarantee.
+
+No critical numerical invalidation was found in this continuation. The original
+G5 failure, exception, confirmation and all exploratory labels remain intact.
