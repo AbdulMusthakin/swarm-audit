@@ -179,6 +179,11 @@ Repeated games such as the prisoner's dilemma are well studied for language-mode
 Cheap talk, non-binding messages before each round, mostly makes pairs of small open-weight models play more consistently \citep{lore2026}, and models conform to opinions presented in their prompts \citep{bellina2026}.
 Our agents can each send one of three fixed messages, and we ask whether an audit that reads them predicts the group better.
 
+\textbf{Collusion between LLM agents}.
+LLM-based pricing agents in oligopoly settings quickly and autonomously reach supracompetitive prices, and seemingly innocuous changes to their prompts change how far \citep{fish2024}.
+Communicating agents could also coordinate covertly through steganography, a capability current models show only to a limited extent \citep{motwani2024}.
+These works ask whether agents coordinate; we ask whether tests of single agents can forecast a group's coordination before it is deployed.
+
 \textbf{Bounding the gap}.
 Our bound uses a standard argument in which per-round errors add up over time, as in imitation learning \citep{ross2010} and in measuring how far two probabilistic models drift apart \citep{bian2017}.
 We use it to explain the gap, not as a new result.
@@ -429,7 +434,7 @@ Jack Rossiter - Literature Support
 Petra Yang - Literature Support
 
 \clearpage
-\begin{thebibliography}{11}
+\begin{thebibliography}{13}
 
 \bibitem[Akata et~al.(2025)]{akata2025}
 Akata, E., Schulz, L., Coda-Forno, J., Oh, S.\,J., Bethge, M., \& Schulz, E. (2025).
@@ -448,6 +453,12 @@ Bian, G., \& Abate, A. (2017).
 On the relationship between bisimulation and trace equivalence in an approximate probabilistic context.
 In Foundations of Software Science and Computation Structures (FoSSaCS 2017), LNCS 10203 (pp.~321--337). Springer.
 \url{https://doi.org/10.1007/978-3-662-54458-7_19}
+
+\bibitem[Fish et~al.(2024)]{fish2024}
+Fish, S., Gonczarowski, Y.\,A., \& Shorrer, R.\,I. (2024).
+Algorithmic collusion by large language models.
+arXiv:2404.00806 (accepted to EC 2026).
+\url{https://arxiv.org/abs/2404.00806}
 
 \bibitem[Flint et~al.(2026)]{flint2026}
 Flint, A., Aiello, L.\,M., Pastor-Satorras, R., \& Baronchelli, A. (2026).
@@ -487,6 +498,12 @@ arXiv:2609.16270.
 METR. (2026, August 26).
 Brief independent investigation of agents' behavior, reasoning and collaboration in the OpenAI\,/\,Hugging Face hacking incident.
 \url{https://metr.org/blog/2026-08-26-openai-hugging-face-incident-investigation/}
+
+\bibitem[Motwani et~al.(2024)]{motwani2024}
+Motwani, S.\,R., Baranchuk, M., Strohmeier, M., Bolina, V., Torr, P.\,H.\,S., Hammond, L., \& Schroeder de Witt, C. (2024).
+Secret collusion among AI agents: Multi-agent deception via steganography.
+arXiv:2402.07510.
+\url{https://arxiv.org/abs/2402.07510}
 
 \bibitem[Ross and Bagnell(2010)]{ross2010}
 Ross, S., \& Bagnell, D. (2010).
