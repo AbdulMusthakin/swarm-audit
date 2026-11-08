@@ -1,0 +1,139 @@
+{
+  "interventions": {
+    "unmodified": {
+      "P_F1": 0.14239254032336024,
+      "max_y_difference_from_pipeline": 7.771561172376096e-16
+    },
+    "own_null": {
+      "P_F1": 0.14115522046941759,
+      "max_y_difference_from_pipeline": 4.218847493575595e-15
+    },
+    "neighbour_null": {
+      "P_F1": 0.14092211534146937,
+      "max_y_difference_from_pipeline": 6.661338147750939e-16
+    },
+    "both_null": {
+      "P_F1": 0.14125133962339956,
+      "max_y_difference_from_pipeline": 2.1094237467877974e-15
+    }
+  },
+  "factorial_interaction_P_F1": 0.0015665441358728438,
+  "llama_control": {
+    "both": {
+      "P_F1": 7.129326647009528e-11,
+      "E_F": 0.2735750988718174,
+      "max_y_difference_from_pipeline": 3.608224830031759e-16
+    },
+    "neither": {
+      "P_F1": 1.5142023041248744e-11,
+      "E_F": 0.2731963400170588,
+      "max_y_difference_from_pipeline": 8.049116928532385e-16
+    },
+    "own_only": {
+      "P_F1": 1.9597641397990886e-11,
+      "E_F": 0.2738944706090386,
+      "max_y_difference_from_pipeline": 2.7755575615628914e-16
+    },
+    "neighbours_only": {
+      "P_F1": 2.6319256196271654e-11,
+      "E_F": 0.27360472445710726,
+      "max_y_difference_from_pipeline": 8.881784197001252e-16
+    }
+  },
+  "olmo_n10_full_simulation": {
+    "actions": {
+      "MC_runs": 100000,
+      "P_F0": 0.9791,
+      "mean_F": 0.0023569999999999997,
+      "mean_F_MC_SE": 0.00010324743149503093,
+      "CRPS_at_all_zero_observed": 1.8264889999999957e-05,
+      "EX_t": [
+        0.622318,
+        0.465105,
+        0.33993799999999996,
+        0.243926,
+        0.17254,
+        0.120469,
+        0.083264,
+        0.05695,
+        0.038887,
+        0.026349,
+        0.018034,
+        0.012497,
+        0.008868,
+        0.006389000000000001,
+        0.004710000000000001,
+        0.0036049999999999997,
+        0.002792,
+        0.002209,
+        0.001742,
+        0.0014370000000000001
+      ],
+      "round3_mean_error_vs_observed": 0.203938,
+      "max_abs_EX_difference_from_archived_20k": 0.000894000000004419
+    },
+    "signal": {
+      "MC_runs": 100000,
+      "P_F0": 0.96885,
+      "mean_F": 0.007105200000000001,
+      "mean_F_MC_SE": 0.00022877081258422565,
+      "CRPS_at_all_zero_observed": 7.378606800000003e-05,
+      "EX_t": [
+        0.623095,
+        0.47474800000000006,
+        0.352368,
+        0.261075,
+        0.192793,
+        0.141813,
+        0.10365200000000001,
+        0.075668,
+        0.055095000000000005,
+        0.040247,
+        0.029681999999999997,
+        0.022323000000000003,
+        0.017025000000000002,
+        0.013408999999999999,
+        0.010816000000000001,
+        0.009035,
+        0.007755,
+        0.00683,
+        0.006201,
+        0.005705
+      ],
+      "round3_mean_error_vs_observed": 0.21636800000000006,
+      "max_abs_EX_difference_from_archived_20k": 0.0007669999999994626
+    }
+  },
+  "n4_full_history_surrogate_exact": {
+    "P_F1": 0.11159407613383451,
+    "P_F0": 0.8654155833244193,
+    "E_F": 0.12168423775201347,
+    "survival_16_20": 0.11159407613383446,
+    "max_row_normalization_error": 1.7763568394002505e-15,
+    "label": "exact composition of a fitted finite-state surrogate; not exact for full-history LLM process"
+  },
+  "n10_last1_forecast": {
+    "actions": {
+      "MC_runs": 100000,
+      "P_F1": 0.0,
+      "P_F1_MC_SE": 0.0,
+      "mean_F": 4.2000000000000004e-06,
+      "P_F1_MC_binomial_95": [
+        0.0,
+        3.68881141579242e-05
+      ],
+      "MC_SE_note": "plug-in MC SE; a zero event count does not establish zero population probability"
+    },
+    "signal": {
+      "MC_runs": 100000,
+      "P_F1": 0.00782,
+      "P_F1_MC_SE": 0.0002785470804011415,
+      "mean_F": 0.007988,
+      "P_F1_MC_binomial_95": [
+        0.007283371144314846,
+        0.008385463348478499
+      ],
+      "MC_SE_note": "plug-in MC SE; a zero event count does not establish zero population probability"
+    }
+  }
+}
