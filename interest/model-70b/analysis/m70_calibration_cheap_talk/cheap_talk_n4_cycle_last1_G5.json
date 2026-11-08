@@ -1,0 +1,41 @@
+{
+ "per_decision": {
+  "pass": true,
+  "decisions": 4000,
+  "floor": 0.0,
+  "max_abs_diff_p_H": 0.0,
+  "max_abs_diff_signal": 0.0,
+  "worst": null,
+  "states_seen": 105,
+  "states_with_several_prompts": {},
+  "states_whose_prompt_differs_from_table": []
+ },
+ "per_run": {
+  "pass": true,
+  "gap": 0.17107630484993264,
+  "p_value": 0.02449877506124694,
+  "alpha": 0.01,
+  "rule": "discrete Monte Carlo p-value (1 + #{null >= gap}) / (1 + sims) > alpha",
+  "threshold_q99": 0.19093216469901897,
+  "sims": 20000,
+  "runs": 50,
+  "chain": "signal_aware",
+  "exact_mean_y": 4.347433845943167,
+  "swarm_mean_y": 4.74,
+  "n_profiles": 1296
+ },
+ "finding_actions_only_chain": {
+  "pass": true,
+  "gap": 0.08552897691815653,
+  "p_value": 0.496075196240188,
+  "alpha": 0.01,
+  "rule": "discrete Monte Carlo p-value (1 + #{null >= gap}) / (1 + sims) > alpha",
+  "threshold_q99": 0.19199457637406847,
+  "sims": 20000,
+  "runs": 50,
+  "chain": "actions_only",
+  "exact_mean_y": 4.813734338559572,
+  "swarm_mean_y": 4.74,
+  "n_profiles": 16
+ }
+}
