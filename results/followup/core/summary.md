@@ -84,7 +84,7 @@ detectably. The sign of D is not established.
 - **It fails later on Llama.** Rounds 8–13: −0.0014 [−0.0022, −0.0006]. Rounds 14–20:
   −0.0015 [−0.0028, −0.0001]. Endpoint: **−0.0036 [−0.0070, −0.0002]**. The late
   teacher-forced bias grows to −0.039, against −0.020 for the pooled table.
-- **Why, most likely: content shift.** Swarm histories before the last round contain about
+- **A candidate explanation: content shift (not tested).** Swarm histories before the last round contain about
   35% high bids (Llama, rounds 8–20). p_test uses 50% by construction. Long synthetic
   histories therefore push P(high) up more than real ones.
 - **Reading.** The pooled audit's adequate late-round fit is consistent with two errors
@@ -108,11 +108,17 @@ round 2. Size, degree and topology all change at once, so this is not a size con
   condition.
 - The OLMo analyses reuse the extra arm's runs and tables. They are not an independent
   OLMo study.
-- Clock conditioning does not address history-content shift. A content-matched audit (for
-  example, synthetic histories whose bid rate follows the forecast) is the obvious next test.
-- No new GPU histories were collected for C2. The late failure is a content effect, which
-  more histories of the same p_test would not fix. The early gain is outside the
-  table-resampling interval.
+- **The cause of the late error is not established.** Clock conditioning changes only
+  history-length conditioning. The late deterioration is **consistent with** a
+  history-content shift, but no controlled content intervention was run. A length-matched
+  content intervention, or fresh predictive validation, would test it. The early
+  improvement is supported as an operational result; the causal attribution of the
+  remaining error is not (Codex review M4).
+- No new GPU histories were collected for C2. More histories from the same p_test would
+  reduce fitting variance, but they cannot correct a misspecified history population, if
+  that is the problem. Fitting variance does not explain the late deterioration: it holds
+  in every table resample (0 of 200 favour the clock audit in rounds 8–13 or at the
+  endpoint). The early gain is also outside the table-resampling interval.
 - The related-work check could not read full texts (`related_work.md`).
 - The toy procurement game exposes an audit failure mode. It is not a detector of real-world
   collusion, and high bidding alone does not show intentional coordination.

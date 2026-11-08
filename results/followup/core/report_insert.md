@@ -67,7 +67,7 @@ In the extra arm's OLMo-3-7B runs every run ends all-low, so the endpoint cannot
 discriminate. The swarm still converges much faster than forecast: by round 5 only 20% of
 runs lack consensus, against 71% forecast.
 
-**History length explains most of the early bias; content explains the rest (exploratory).**
+**History length explains most of the early bias; the rest is consistent with content shift (exploratory).**
 Matching the audit's history length to the round cuts the early teacher-forced bias by about
 two-thirds: from −0.058 to −0.020 for Llama, and from −0.047 to −0.016 for OLMo. Early-round
 CRPS improves by +0.0060 (+0.0033 to +0.0086) for Llama and by +0.041 (+0.029 to +0.051) for
@@ -75,10 +75,12 @@ OLMo (Figure 3).
 
 The repair is not uniformly better. For Llama it is worse in rounds 8–13 and 14–20, and at
 the endpoint (−0.0036; −0.0070 to −0.0002). Its late teacher-forced bias grows to −0.039,
-against −0.020 for the pooled audit. The likely reason is a shift in history content.
-Before the last round, the swarm's histories contain about 35% high bids, whereas the
-synthetic histories contain 50% by construction. Long synthetic histories therefore raise
-the model's propensity to bid high more than real histories do. The pooled audit's
+against −0.020 for the pooled audit. This residual is consistent with a shift in history
+content, although we did not test that cause directly. Before the last round, the swarm's
+histories contain about 35% high bids, whereas the synthetic histories contain 50% by
+construction. If longer high-bid-rich histories raise the model's propensity to bid high,
+the clock-indexed audit would over-predict late, as observed. The deterioration holds in
+every table resample, so it is not fitting noise. The pooled audit's
 acceptable late-round fit is consistent with these two errors offsetting each other; this is
 our interpretation, not a causal test.
 

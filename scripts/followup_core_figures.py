@@ -183,8 +183,8 @@ def figure3() -> None:
     c_.legend(frameon=False, fontsize=7, loc="lower right")
     c_.set_title("(c) paired improvement, 95% intervals", fontsize=9, color=INK, loc="left")
     _int_rounds(a, b)
-    fig.suptitle("Exploratory repair: matching history length fixes the early bias and exposes a "
-                 "content shift later (same 50 runs; not an independent validation)",
+    fig.suptitle("Exploratory repair: matching history length reduces the early bias; later rounds get "
+                 "worse (same 50 runs; not an independent validation)",
                  fontsize=10, color=INK, x=0.01, ha="left")
     fig.tight_layout()
     save(fig, "fig3_clock_audit")
