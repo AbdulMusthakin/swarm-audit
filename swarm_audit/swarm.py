@@ -224,8 +224,9 @@ def run_condition(cond: Condition, backend: Backend, runs_root: Path, chunk: int
         "condition": {**asdict(cond), "name": cond.name},
         "backend": backend.describe(), "git_commit": git_commit(),
         "time": _dt.datetime.now(_dt.timezone.utc).isoformat(),
-        "runs_added": len(todo), "runs": list(todo), "seconds": round(time.time() - t0, 2), "decisions": n_dec,
-        **(extra_manifest or {})}, summary)
+        "runs_added": len(todo), "runs": list(todo), "seconds": round(time.time() - t0, 2),
+        "decisions": n_dec,
+        **(extra_manifest or {}), **(extra_manifest or {}).get("session", {})}, summary)
     return out
 
 
