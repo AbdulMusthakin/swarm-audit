@@ -120,3 +120,20 @@ Shared local backup: `/workspace/shared/swarm-audit-review/review.bundle` and
 checkpoint archives. The prescribed projectless output path under `/codex/browser/`
 was unavailable in this cloud executor (read-only/permission-denied root), so these
 are preserved in the workspace and the now-authorised repository branch instead.
+
+## Continuation: 05:30 Europe/London, 8 Nov
+
+One new research-ref fetch selected core `f8ad9bbb88ee538d1c9563c51e0a1d97e4401711`
+and extra `9aa31705b9ae5ee45f27a87feeb1a2e2415f318f`. Ref records are in
+`independent/continuation_20261108/refs.txt`. No later research-branch polling is used.
+
+```sh
+git worktree add --detach ../core-continuation-snapshot f8ad9bbb88ee538d1c9563c51e0a1d97e4401711
+git worktree add --detach ../extra-continuation-snapshot 9aa31705b9ae5ee45f27a87feeb1a2e2415f318f
+OPENBLAS_NUM_THREADS=1 python review-codex/independent/continuation_olmo.py --source ../extra-continuation-snapshot --out review-codex/independent/continuation_20261108/olmo.json
+```
+
+This uses the prior independently calculated exact laws after checking that the
+current enumerated kernel has the same byte hash. New intervention live logs and
+the full-memory n4 live cell are checked independently. Existing E3 outcomes are
+re-read to check the completed table, without rerunning their prior integrity audits.

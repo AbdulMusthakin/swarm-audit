@@ -248,3 +248,40 @@ committed snapshot; the size-by-memory design is not complete.
 
 The initial E1/E2 diagnostic and primary-flag corrections are not resolved in either
 final snapshot reviewed here. No additional branch poll was made after this refresh.
+
+## Continuation at 05:30 London: fixed new snapshots
+
+New sources: core `f8ad9bbb88ee538d1c9563c51e0a1d97e4401711`, extra
+`9aa31705b9ae5ee45f27a87feeb1a2e2415f318f`. Research refs were fetched once in this
+continuation. PR9 had no new comment after the earlier review note; the source
+commits contain explicit responses. Earlier findings above describe their original
+snapshots; the current disposition is recorded here rather than erasing that history.
+
+**New independently verified result:** all four E2 live intervention cells pass the
+specified tests. Event counts are 9,4,7,8 of50 and exact-law Monte Carlo p-values
+reproduce as 0.5437228,0.2295885,1,0.8440578 (per-cell alpha0.0025). All16k logged
+actual records, transformed observed records, next states, probabilities, prompt
+hashes, action/signal draws and seed streams agree. These are live implementation
+validations of the cached kernel, not independent new kernel information or proof
+that interventions are equivalent.
+
+The newly completed OLMo n4 full-memory cell has F1=5/50 and F0=45/50. Its4000
+records, graph states, draws, seed streams and provenance pass. The full-history
+kernel was not re-queried; its fitted table remains a surrogate, not an exact live
+law. Combined E3 counts are n4last1=8,n4full=5,n10last1=0,n10full=0 of50 each. All
+four reported Newcombe contrast intervals reproduce.
+
+**Material report qualification:** the full-memory size contrast is -0.10, nominal
+95% interval[-0.21360,-0.00898]. Correcting for even the two size comparisons gives
+[-0.23425,+0.00992]; correcting all four E3 contrasts gives[-0.25370,+0.02855].
+The specified nominal analysis is valid as reported, but wording that size matters
+under both memories needs explicit exploratory/nominal qualification. The last1
+size contrast remains negative under this sensitivity. Cells were not jointly
+randomised across sessions, and the group-wide extreme event has START probability
+p(H|START)^n; this does not establish a general dynamical size effect or phase transition.
+
+**Corrections confirmed:** first-entry survival now agrees with this review's prior
+independent first-hit result within9e-16; the derived classification correctly marks
+OLMo arm91 exploratory and preserves the old analysis. The core also corrected the
+MC docstring, stale status sentences and causal content-shift wording. Focused
+regression checks and additional Llama comparisons are recorded in the next checkpoint.

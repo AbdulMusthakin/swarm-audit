@@ -1,0 +1,8 @@
+origin 982822f554e547cc5c4468b70d5aaaae88356814
+origin/build-handoff 4e7de1d4e0c54ca6a81401d3d40ccd53ee4ea986
+origin/claude/funny-turing-qv2y66 f8ad9bbb88ee538d1c9563c51e0a1d97e4401711
+origin/claude/hand-off-review-tzsnyk 475e8e619ddf150e90e8f9e957074e22fbd07941
+origin/codex/independent-audit-20261108 2986f04fc0e331b11d276f6d6f3d91f234ca5e9d
+origin/extra-arms 9aa31705b9ae5ee45f27a87feeb1a2e2415f318f
+origin/independent-check f56955e52336148d418a33dbe13bdf4e6d1d0c75
+origin/main 982822f554e547cc5c4468b70d5aaaae88356814

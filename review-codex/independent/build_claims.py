@@ -232,6 +232,62 @@ def main():
             'no new kernel information; low power for rare event; n4full and E2live absent in this snapshot',
             'The new live sample validates the enumerated-kernel serving and wiring path; zero events does not refute its rare-event forecast or complete the size-by-memory experiment.',
             'independent/new_results_review.json:E3_n10_last1_live; E3_provenance_check')
+    continuation=ROOT/'independent/continuation_20261108/olmo.json'
+    if continuation.exists():
+        fresh=json.loads(continuation.read_text());fe=fresh['extra_source_commit']
+        add('Completed E2 live observation-intervention validation','exploratory live; continuation',
+            'F1 counts9/4/7/8 of50; MC p0.5437228/0.2295885/1/0.8440578;0 implementation mismatches',
+            'OLMo n4 last1; unmodified/own-none/neighbour-none/both-none',
+            '4 independent cells x50 runs;16000 decisions',
+            'results/extra/followup/observation_live.json; results/extra/followup/runs/followup_obs_*',fe,
+            'yes: every record, observed field, next state, probability, prompt hash, draw and seed; exact null p-values',
+            'prespecified familywise alpha0.01/4; binomial intervals in output',
+            'non-rejection is implementation consistency, not equivalence; uses existing enumerated prompts',
+            'All four live intervention implementations agree with their cached-kernel laws at the specified checks.',
+            'independent/continuation_20261108/olmo.json:E2_live')
+        add('Completed n4 full-memory OLMo cell','exploratory new live cell; continuation',
+            'F1=5/50;F0=45/50;P(F1)95%CI[0.0333,0.2181]',
+            'OLMo n4 cycle full history arm93','50 runs;4000 decisions',
+            'results/extra/followup/runs/followup_olmo_n4_full/cheap_talk_n4_cycle_full',fe,
+            'yes: outcomes, graph/state wiring, draws, seeds and provenance',
+            'Clopper-Pearson95%; fitted-surrogate forecast0.11159 has separate estimation/approximation uncertainty',
+            'full-history kernel was not re-queried and is not exactly the fitted table',
+            'The new live cell has five late all-high outcomes; distinguish it from the earlier CPU forecast.',
+            'independent/continuation_20261108/olmo.json:E3.n4_full')
+        add('Completed size-by-memory contrast table','exploratory live factorial cells; continuation',
+            'F1 counts n4last1=8,n4full=5,n10last1=0,n10full=0, each/50',
+            'OLMo cycle degree2 T20','4 cells x50 runs across separate sessions',
+            'results/extra/followup/size_memory.json; results/extra/followup/size_memory.csv',fe,
+            'yes: all outcomes and all four Newcombe intervals',
+            'nominal95% Newcombe intervals; no joint session randomisation',
+            'group-wide extreme event changes with n; no persistence observations from all-high starts at n10',
+            'The estimated late all-high frequency is lower at n10, consistent with rarer all-high starts; memory effects are not established.',
+            'independent/continuation_20261108/olmo.json:E3_contrasts')
+        add('Multiplicity sensitivity of size contrast','exploratory reporting qualification; continuation',
+            'Full-memory n10-n4=-0.10: nominal95%[-0.21360,-0.00898]; two-size-comparison correction[-0.23425,+0.00992]',
+            'two size contrasts; four planned E3 contrasts as another sensitivity','50 independent runs per cell',
+            'results/extra/followup/mechanism_summary.md; results/extra/followup/size_memory.json',fe,
+            'yes: independently calculated Wilson/Newcombe intervals',
+            'Bonferroni sensitivity, not a retroactive replacement of the specified nominal analysis',
+            'full-memory size evidence is not robust to even two-comparison familywise correction',
+            'Label the intervals nominal and the size pattern exploratory; avoid claiming both memory contrasts establish a corrected size effect.',
+            'independent/continuation_20261108/olmo.json:E3_contrasts.size_within_full')
+        add('Review first-entry correction verified','resolved minor finding m1; continuation',
+            'P(ever allH)=0.15023057291869008; corrected survival curves agree within9e-16',
+            'OLMo exact cached-kernel diagnostic','1296-profile chain',
+            'scripts/extra_followup_exact.py; results/extra/followup/audit_ablations.json',fe,
+            'yes: compared against independently calculated first-hit laws saved before the fix',
+            'finite arithmetic','does not change endpoint law or main mechanism',
+            'The specified first-entry diagnostic is now implemented correctly; retain the all-entry curve only as a labelled secondary result.',
+            'independent/continuation_20261108/olmo.json:fixes.first_entry')
+        add('Exploratory classification correction verified','resolved material finding M2; continuation',
+            'OLMo arm91 corrected primary=false; original analysis retained as provenance',
+            'explicit frozen arm identity plus original primary condition','classification/code review',
+            'results/extra/analysis/classification.json; swarm_audit/analysis.py',fe,
+            'yes: derived override checked; focused regression tests separately recorded',
+            'not a sampling assertion','consumers must apply corrected classification rather than stale original JSON flag',
+            'Use the derived classification map; the stored old analysis remains a historical record.',
+            'independent/continuation_20261108/olmo.json:fixes.classification')
     with (ROOT/'claims.csv').open('w',newline='') as f:
         w=csv.DictWriter(f,fieldnames=list(rows[0]),lineterminator='\n');w.writeheader();w.writerows(rows)
     print('Wrote',len(rows),'claim rows')
