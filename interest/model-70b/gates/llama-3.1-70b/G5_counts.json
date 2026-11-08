@@ -15,8 +15,8 @@
  },
  "finding_not_gate": null,
  "folder": "interest/model-70b/runs/m70_calibration_counts/counts_n4_cycle_last1",
- "git_commit": "23c61bf17f67cf1649c987a4e5d641998b4b7e92",
- "time": "2026-11-08T13:33:32.527700+00:00",
+ "git_commit": "918d19a32f87ca7cdc361af7d05b7b177b4ecf86",
+ "time": "2026-11-08T15:15:06.899926+00:00",
  "result": {
   "per_decision": {
    "pass": true,
