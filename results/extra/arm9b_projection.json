@@ -1,0 +1,15 @@
+{
+ "label": "EXPLORATORY arm 9 (Abdul, 7 Nov 20:15)",
+ "audit": {"channel": "cheap_talk", "d": 2, "sizes": {"n_fit": 50, "n_score": 25},
+           "histories": 8102, "label_read_outs": 24306},
+ "runs": {"arm": "olmo_core_cheap_talk", "n": 10, "T": 20, "runs": 50, "decisions": 10000},
+ "rates_used": {"audit_histories_per_s": 2.0, "swarm_decisions_per_s": 4.0,
+                "basis": "slowest measured on this account: the Llama d = 4 audit session (1,502 histories in 754 s, cold start included) and below arm 8's 13.2 decisions/s; OLMo X2 batch throughput 3.7 prompts/s"},
+ "projected_seconds": {"audit": 4051, "runs": 2500, "idle_and_cold_start": 2400},
+ "projected_usd": 1.99,
+ "margin": 1.25,
+ "projected_usd_with_margin": 2.49,
+ "spent_before_usd": 3.16,
+ "left_of_cap_usd": 21.84,
+ "decision": "full sizes (50/25 per state); the reduced 25/15 fallback is not needed"
+}

@@ -64,7 +64,7 @@ def one(args) -> None:
         path.write_text(json.dumps(to_jsonable(res), indent=1) + "\n")
         print(json.dumps(to_jsonable(res), indent=1))
         rec = calibration.gate_record(to_jsonable(res), data, tabs, floor)
-        gpath = calibration.write_gate(rec)
+        gpath = calibration.write_gate(rec, build.gates_dir(cfg))
         print(f"G5 {data.channel}: {'PASS' if rec['pass'] else 'FAIL'} ({rec['required']}); "
               f"record {gpath}")
         if not rec["pass"]:     # review C3: a failed required check is a failed command

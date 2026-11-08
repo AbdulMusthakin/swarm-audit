@@ -50,10 +50,10 @@ def main() -> None:
     ap.add_argument("--n", type=int, nargs="*")
     ap.add_argument("--backend", default="modal")
     ap.add_argument("--chunk", type=int, help="runs per lockstep batch (default: all)")
-    ap.add_argument("--runs", type=int, help="extend each condition to this many runs (resume "
-                    "adds the missing run indices with their own seeds)")
     ap.add_argument("--max-runs", type=int,
                     help="run only the first that many unfinished runs (arm 8's 5-run benchmark)")
+    ap.add_argument("--runs", type=int, help="extend each condition to this many runs (resume "
+                    "adds the missing run indices with their own seeds)")
     ap.add_argument("--runs-root", help="default: <results_dir>/runs (results/runs)")
     args = ap.parse_args()
     cfg = build.load(args.config)
@@ -90,6 +90,19 @@ def main() -> None:
         be, _ = build.modal_backend(cfg, log_name=f"swarm_{args.arm}")
         if args.arm.startswith(("core", "second")):   # review C3: G5 must have passed
             calibration.require_g5(fingerprint(kernel_identity(be)), conds[0].channel)
+        after = cfg["arms"][args.arm].get("after_calibration")
+        if after:   # arm 9b: 9a's G5 (this config's gate records) and the lock-in stop
+            problems: list[str] = []
+            calibration._channel_ok(after["channel"], fingerprint(kernel_identity(be)),
+                                    build.gates_dir(cfg), problems)
+            if problems:
+                raise SystemExit("Stopping before " + args.arm + " (G5 on " + after["arm"] + "): "
+                                 + "; ".join(problems))
+            lk = build.results_root(cfg) / after["lock_in_file"]
+            if not lk.exists():
+                raise SystemExit(f"Stopping: the lock-in check has not run ({lk})")
+            if json.loads(lk.read_text()).get("stop") is not False:
+                raise SystemExit(f"Stopping: the lock-in stop applies or is undecided ({lk})")
         panel = build.drift_panel(cfg)
         for c in conds:
             t0 = time.time()
@@ -102,7 +115,7 @@ def main() -> None:
             extra = {"drift_panel_start": start}
             if cfg.get("results_dir"):   # extra arms: record the workspace and the model
                 extra.update(workspace=build.current_workspace(), model=cfg["model"],
-                             session={"started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(t0))})
+                             started=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(t0)))
             run_condition(c, mixer, root, args.chunk, extra_manifest=extra, max_runs=args.max_runs)
             end = build.panel_outputs(be, panel)
             drift = {"start_vs_end": build.panel_max_change(start, end),

@@ -1,0 +1,43 @@
+{
+ "workspace": "sensomichele",
+ "secret": "huggingface",
+ "model": "allenai/Olmo-3-7B-Instruct",
+ "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+ "weights": {
+  "path": "/__modal/volumes/vo-voSPOxNEoUJ2MVAmxX2GyZ/hf/hub/models--allenai--Olmo-3-7B-Instruct/snapshots/6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+  "gb": 14.605767559,
+  "seconds": 44.85507774353027
+ },
+ "seconds": 64.2,
+ "label_check": {
+  "pass": true,
+  "action_ids": [
+   473,
+   445
+  ],
+  "signal_ids": [
+   1579,
+   3428,
+   7000
+  ],
+  "configured": {
+   "actions": [
+    473,
+    445
+   ],
+   "signals": [
+    1579,
+    3428,
+    7000
+   ]
+  },
+  "problems": [],
+  "prompts_checked": 148,
+  "signal_positions_checked": 250,
+  "max_prompt_tokens": {
+   "counts": 758,
+   "cheap_talk": 1594
+  },
+  "max_model_len": 4096
+ }
+}

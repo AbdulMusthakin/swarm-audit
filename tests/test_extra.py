@@ -163,3 +163,40 @@ def test_core_pilot_payoff_check(tmp_path):
     p.write_text(json.dumps({"frozen_payoffs": {**cfg["payoffs"], "uLH": 11}}))
     with pytest.raises(SystemExit):
         build.check_core_pilot_payoffs(cfg, p)
+
+
+def test_olmo_config_differs_only_in_model_and_arms():
+    a, b = build.load("extra-scale.yaml"), build.load("extra-olmo.yaml")
+    for k in set(a) | set(b):
+        if k in ("model", "arms", "_path", "serving_subdir"):
+            continue
+        assert a.get(k) == b.get(k), k
+    assert b["model"]["hf_id"] == "allenai/Olmo-3-7B-Instruct"
+    assert b["model"]["revision"] == "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc"
+    assert build.spend_file(a) == build.spend_file(b)
+    assert build.serving_dir(b) == build.serving_dir(a) / "olmo-3-7b"
+    (ca,) = build.conditions(b, "olmo_calibration_cheap_talk")
+    (cb,) = build.conditions(b, "olmo_core_cheap_talk")
+    assert (ca.arm_id, ca.n, ca.last_k, ca.runs) == (9, 4, 1, 50)
+    assert (cb.arm_id, cb.n, cb.last_k, cb.runs) == (91, 10, None, 50)
+    calib = build.load("calibration.yaml")["arms"]["calibration_cheap_talk"]
+    olmo = b["arms"]["olmo_calibration_cheap_talk"]
+    assert {k: v for k, v in calib.items() if k != "arm_id"} == {k: v for k, v in olmo.items() if k != "arm_id"}
+
+
+def test_extra_gates_never_touch_core_gates_and_lock_in_count():
+    from swarm_audit.swarm import RunData
+
+    assert build.gates_dir(build.load("core.yaml")) is None
+    g = build.gates_dir(build.load("extra-olmo.yaml"))
+    assert g == build.results_root(build.load("extra-olmo.yaml")) / "gates" / "olmo-3-7b"
+    R, T, n = 50, 20, 4
+    acts = np.zeros((R, T, n), np.int8)
+    acts[:6, 17, 2] = 1            # 6 runs with a high bid in round 18
+    acts[6:, 14, :] = 1            # round 15 does not count
+    d = RunData("cheap_talk", n, "cycle", T, np.arange(R), acts, *(np.zeros((R, T, n)),) * 2,
+                np.empty((R, T, n), object), np.empty((R, T, n), object))
+    lk = build.lock_in(d)
+    assert lk["runs_all_low"] == 44 and lk["stop"] is False
+    acts[5, 17, 2] = 0
+    assert build.lock_in(d)["stop"] is True

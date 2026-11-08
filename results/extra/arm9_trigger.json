@@ -1,0 +1,23 @@
+{
+ "rule_fixed_before_result": "results/extra/README.md, commit a2657c5 (about 19:00 UTC 7 Nov)",
+ "reading": "d4.signal_responsiveness_length1_mean, strictly below 0.05 triggers arm 9",
+ "source": "core branch claude/funny-turing-qv2y66, results/serving/signal_responsiveness.json (commit 846ce77, 19:12 UTC); measured by the core's G4, not on this account",
+ "value": 0.055284065452479714,
+ "triggered": false,
+ "reported_not_deciding": {
+  "d4_length5_mean": 0.022457479812774368,
+  "d2_length1_mean": 0.03786814984999434,
+  "d2_length5_mean": 0.03828653627969985
+ },
+ "abdul_7_nov_20_15": "Trigger uses the d = 4 screening grid, as committed in a2657c5 before any result; 0.0553 is above 0.05, so the trigger is NOT met.",
+ "exploratory_arm": {
+  "decided_by": "Abdul, 7 Nov 2026, 20:15",
+  "decision": "after arm 8 finishes, run arm 9 (9a, then 9b subject to the lock-in stop) as an EXPLORATORY arm",
+  "decided_after_seeing": [
+   "Llama's d = 2 responsiveness on the final prompt (0.038)",
+   "the core's arm 4b CRPS null"
+  ],
+  "design": "unchanged from docs/handoff-extra-arms.md section 4; same $25 cap and stop rules",
+  "status": "not a triggered arm: not chosen before results, so exploratory, not confirmatory"
+ }
+}

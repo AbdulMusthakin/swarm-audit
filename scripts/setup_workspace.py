@@ -59,7 +59,7 @@ def main() -> None:
     labels = build.check_final_labels(tok, cfg)
     out = {"workspace": ws, "secret": "huggingface", "model": m["hf_id"], "revision": m["revision"],
            "weights": dl, "seconds": round(time.time() - t0, 1), "label_check": labels}
-    path = build.results_root(cfg) / "serving" / "workspace_setup.json"
+    path = build.serving_dir(cfg) / "workspace_setup.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(out, indent=1, default=str) + "\n")
     print(json.dumps(out, indent=1, default=str))

@@ -204,10 +204,11 @@ def run_condition(cond: Condition, backend: Backend, runs_root: Path, chunk: int
     # Review C2: bind the configuration before computing; a resume must match it.
     prov = bind_run_provenance(out, cond, backend, git_commit())
     todo = [r for r in range(cond.runs) if not run_file(out, r).exists()]
-    if max_runs is not None:
-        todo = todo[:max_runs]
     if len(todo) < cond.runs:
         log(f"{cond.name}: {cond.runs - len(todo)} runs already logged, {len(todo)} to run")
+    if max_runs is not None:
+        todo = todo[:max_runs]
+        log(f"{cond.name}: running {len(todo)} of them now (max_runs)")
     chunk = chunk or max(len(todo), 1)
     t0 = time.time()
     n_dec = 0
@@ -223,8 +224,8 @@ def run_condition(cond: Condition, backend: Backend, runs_root: Path, chunk: int
         "condition": {**asdict(cond), "name": cond.name},
         "backend": backend.describe(), "git_commit": git_commit(),
         "time": _dt.datetime.now(_dt.timezone.utc).isoformat(),
-        "runs": todo, "runs_added": len(todo),
-        "seconds": round(time.time() - t0, 2), "decisions": n_dec,
+        "runs_added": len(todo), "runs": list(todo), "seconds": round(time.time() - t0, 2),
+        "decisions": n_dec,
         **(extra_manifest or {}), **(extra_manifest or {}).get("session", {})}, summary)
     return out
 

@@ -149,7 +149,7 @@ def main() -> None:
            "by_pair": {k: float(max(float(x.max()) for x in v)) for k, v in diffs.items()},
            "seconds": {"alone": t_alone, "batch": t_batch, "warm": t_warm, "total": sec},
            "throughput_prompts_per_s_batch": len(allq) / t_batch}
-    out = build.results_root(cfg) / "serving" / f"g3_batchinv{int(args.batch_invariant)}.json"
+    out = build.serving_dir(cfg) / f"g3_batchinv{int(args.batch_invariant)}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     res["workspace"] = build.current_workspace()
     res["model"] = {k: cfg["model"][k] for k in ("hf_id", "revision")}
