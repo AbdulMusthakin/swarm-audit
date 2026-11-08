@@ -25,7 +25,7 @@ sys.path.insert(0, str(REPO))
 
 from swarm_audit import build, calibration, decisions  # noqa: E402
 from swarm_audit.provenance import fingerprint, kernel_identity  # noqa: E402
-from swarm_audit.swarm import run_condition  # noqa: E402
+from swarm_audit.swarm import run_condition, run_file  # noqa: E402
 
 
 def check_pilot_frozen(cfg: dict) -> None:
@@ -50,6 +50,8 @@ def main() -> None:
     ap.add_argument("--n", type=int, nargs="*")
     ap.add_argument("--backend", default="modal")
     ap.add_argument("--chunk", type=int, help="runs per lockstep batch (default: all)")
+    ap.add_argument("--runs", type=int, help="extend each condition to this many runs (resume "
+                    "adds the missing run indices with their own seeds)")
     ap.add_argument("--max-runs", type=int,
                     help="run only the first that many unfinished runs (arm 8's 5-run benchmark)")
     ap.add_argument("--runs-root", help="default: <results_dir>/runs (results/runs)")
@@ -61,6 +63,10 @@ def main() -> None:
         raise SystemExit("this arm needs Abdul's approval (approved: false in the config)")
     # approved: if_budget (arm 7) is enforced through the G4 plan below.
     conds = build.conditions(cfg, args.arm, args.n)
+    if args.runs:
+        from dataclasses import replace
+
+        conds = [replace(c, runs=args.runs) for c in conds]
     root = Path(args.runs_root)
 
     if args.backend.startswith("scripted:"):
@@ -83,12 +89,16 @@ def main() -> None:
     with build.gpu_session(cfg, need):
         be, _ = build.modal_backend(cfg, log_name=f"swarm_{args.arm}")
         if args.arm.startswith(("core", "second")):   # review C3: G5 must have passed
-            calibration.require_g5(fingerprint(kernel_identity(be)))
+            calibration.require_g5(fingerprint(kernel_identity(be)), conds[0].channel)
         panel = build.drift_panel(cfg)
         for c in conds:
             t0 = time.time()
             start = build.panel_outputs(be, panel)
-            mixer = build.PanelMixer(be, panel, min_batch=c.n * min(c.runs, args.chunk or c.runs))
+            todo = sum(not run_file(root / c.arm / c.name, r).exists() for r in range(c.runs))
+            if args.max_runs is not None:
+                todo = min(todo, args.max_runs)
+            mixer = build.PanelMixer(be, panel,
+                                     min_batch=c.n * max(1, min(todo, args.chunk or todo)))
             extra = {"drift_panel_start": start}
             if cfg.get("results_dir"):   # extra arms: record the workspace and the model
                 extra.update(workspace=build.current_workspace(), model=cfg["model"],

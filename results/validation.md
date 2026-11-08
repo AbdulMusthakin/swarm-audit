@@ -154,8 +154,14 @@ at fixed action counts.
 | d = 4, the screening grid | 0.055 (screening, old wording: 0.051) | 0.022 |
 | d = 2, the cycle's degree | 0.038 | 0.038 |
 
-By the settled rule the core continues either way. The two grids sit on opposite sides of
-the 0.05 bar, which matters for the extra-arms trigger (arm 9): flagged to Abdul.
+By the settled rule the core continues either way.
+
+**Extra-arms trigger for arm 9 (Abdul, 7 Nov 2026, 20:15):** the trigger uses the d = 4
+screening grid at history length 1, as committed on `extra-arms` in `a2657c5` (18:55 UTC)
+before this measurement existed. Llama's 0.0553 is above 0.05, so **the arm 9 trigger is
+NOT met.** Separately, Abdul decided to run arm 9 after arm 8 as an **exploratory** arm,
+chosen after seeing Llama's d = 2 responsiveness (0.038) and the arm 4b CRPS null; it is
+labelled exploratory and is not a triggered arm (details: `docs/core-repairs-2026-11-07.md`).
 
 A first G4 attempt crashed on its first call (the server's `info()` returned
 `torch.__version__`, which needs torch to unpickle); fixed in `797660f`, and about 3 minutes
@@ -196,8 +202,28 @@ sampling variation: mean y 5.82 against 5.47 (about 1.2 standard errors);
 largest CDF gap at y ≤ 5 (0.32 observed vs 0.52 exact).
 Under the null, P(p < 0.01) = 1%, and about 2% for at least one of the two G5 per-run tests.
 
-**Status:** by the hand-off and review C3, a failed G5 stops the core launch; nothing has
-been rerun or loosened. Abdul decides how to proceed.
+**Decision (Abdul, 7 Nov 2026):** G5 cheap talk is recorded as **"per-decision PASS; per-run
+p = 0.0076, attributed to chance after diagnostics"**. An independent check (branch
+`independent-check`) reproduced G5 exactly and found no wiring, sampling or draw problem
+(logged uniforms uniform and independent, KS p = 0.85 and 0.40). The failed record is kept
+unchanged; the approved exception is `results/gates/G5_cheap_talk_exception.json`, bound to
+the same 50 runs and kernel. The core arms launch. As a disclosed confirmation, arm 4b runs
+once more with fresh seeds (run indices 50–99, same table); its per-run test is reported on
+the new 50 and on all 100 pooled, with the original 50 kept. If the new or pooled test
+fails, the cheap-talk core is paused (not counts). Launch checks enforce this
+(`calibration.require_g5`).
+
+**Confirmation: PASS** (`results/gates/G5_cheap_talk_confirmation.json`, `scripts/confirm_g5.py`).
+Arm 4b runs 50–99, fresh seeds, same table, drift 0; per decision exact (max difference 0,
+4,000 decisions).
+
+| runs | gap | MC p | mean y (exact 5.47) | per-run test |
+|---|---|---|---|---|
+| original 50 (runs 0–49) | 0.203 | 0.0076 | 5.82 | fail (kept; excepted) |
+| new 50 (runs 50–99) | 0.064 | 0.744 | 5.44 | pass |
+| all 100 pooled | 0.103 | 0.084 | 5.63 | pass |
+
+The cheap-talk core is therefore cleared under Abdul's rule 3.
 
 ## Drift panel: not run
 

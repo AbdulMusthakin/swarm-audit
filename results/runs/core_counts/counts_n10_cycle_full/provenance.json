@@ -1,0 +1,71 @@
+{
+ "fingerprint": "7a34bb053ddac5e9bae5079edd362be5f549033aa6558bb49714c1b7ba93587e",
+ "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc",
+ "payload": {
+  "kernel": {
+   "templates": {
+    "cheap_talk": "7df81f5308f515f855107eb9a06703e1bbc9d21c23e2e84799554641221c2991",
+    "counts": "2598208c29c8cb6c5ecea266c8c3b2b59b02c32acf3a3362395f4a13519f4357"
+   },
+   "backend": {
+    "backend": "llm",
+    "labels": [
+     " H",
+     " L",
+     " high",
+     " low",
+     " none"
+    ],
+    "action_ids": [
+     473,
+     445
+    ],
+    "signal_ids": [
+     1579,
+     3428,
+     7000
+    ],
+    "chat_kwargs": {},
+    "model": "llama-3.1-8b",
+    "hf_id": "meta-llama/Llama-3.1-8B-Instruct",
+    "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+    "serving": {
+     "hf_id": "meta-llama/Llama-3.1-8B-Instruct",
+     "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+     "method": "logprob_token_ids",
+     "dtype": "bfloat16",
+     "engine_kwargs": {
+      "max_model_len": 4096,
+      "gpu_memory_utilization": 0.9,
+      "enforce_eager": true
+     },
+     "vllm_version": "0.32.0",
+     "batch_invariant": true,
+     "gpu": "L4",
+     "serving_code_sha256": "7e5b3b5089c7bcd0807fae2b14f8226fec4c2954f5d15f77afb3371dbe04afd9"
+    }
+   },
+   "payoffs": {
+    "uLH": 12.0,
+    "uHH": 10.0,
+    "uLL": 4.0,
+    "uHL": 0.0
+   }
+  },
+  "design": {
+   "arm": "core_counts",
+   "arm_id": 5,
+   "condition_id": 10,
+   "channel": "counts",
+   "n": 10,
+   "graph": "cycle",
+   "T": 20,
+   "last_k": null,
+   "base_seed": 20261107,
+   "own_signal_in_state": true
+  },
+  "sampling": "v1: one numpy PCG64 stream per run, SeedSequence([base_seed, arm_id, condition_id, run]); agents draw in index order; a = H iff u < p_H; on cheap talk each agent then draws its signal from P(m | h, a) for its sampled a; vLLM's own sampling is not used"
+ },
+ "created": "2026-11-07T20:55:26.163755+00:00",
+ "git_commit": "0b2ba94f42371d8018347ce9a357da43520af084"
+}

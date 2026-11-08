@@ -102,5 +102,93 @@
   "usd": 0.1333,
   "time": "2026-11-07T19:26:02.461934+00:00",
   "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "calibration_cheap_talk/cheap_talk_n4_cycle_last1",
+  "seconds": 2518.2,
+  "containers": 1,
+  "usd": 0.5596,
+  "time": "2026-11-07T20:55:13.511402+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-07T20:55:13.514093+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "core_counts/counts_n10_cycle_full",
+  "seconds": 709.2,
+  "containers": 1,
+  "usd": 0.1576,
+  "time": "2026-11-07T21:07:11.591088+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-07T21:07:11.593815+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-07T22:13:54.239250+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "audit/counts_d2",
+  "seconds": 81.6,
+  "containers": 1,
+  "usd": 0.0181,
+  "time": "2026-11-07T22:15:36.438818+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-07T22:15:36.440909+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "audit/cheap_talk_d2",
+  "seconds": 3603.7,
+  "containers": 1,
+  "usd": 0.8008,
+  "time": "2026-11-07T23:15:45.303667+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-07T23:15:45.326327+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "core_counts/counts_n20_cycle_full",
+  "seconds": 1392.1,
+  "containers": 1,
+  "usd": 0.3094,
+  "time": "2026-11-07T23:39:33.021527+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-07T23:39:33.025480+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
  }
 ]
