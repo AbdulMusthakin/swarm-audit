@@ -1,0 +1,459 @@
+[
+  {
+    "root": "/workspace/work/core-final-snapshot",
+    "snapshot_commit": "3912f32915bea8f3850c30b779e3be50522f5108",
+    "conditions": [
+      {
+        "manifest": "results/extra/runs/extra_rr4/manifest.json",
+        "condition": "counts_n100_random_regular_d4_seed20261108_full",
+        "log_count": 50,
+        "run_min": 0,
+        "run_max": 49,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 50,
+          "decisions": 100000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc"
+      },
+      {
+        "manifest": "results/extra/runs/olmo_calibration_cheap_talk/manifest.json",
+        "condition": "cheap_talk_n4_cycle_last1",
+        "log_count": 50,
+        "run_min": 0,
+        "run_max": 49,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 50,
+          "decisions": 4000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "95a642bba7f5092e9fb2612d00e6b6f67c99e19c7372a4f83b5e17bbadcee588"
+      },
+      {
+        "manifest": "results/extra/runs/olmo_core_cheap_talk/manifest.json",
+        "condition": "cheap_talk_n10_cycle_full",
+        "log_count": 50,
+        "run_min": 0,
+        "run_max": 49,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 50,
+          "decisions": 10000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "95a642bba7f5092e9fb2612d00e6b6f67c99e19c7372a4f83b5e17bbadcee588"
+      },
+      {
+        "manifest": "results/pilot/pilot/manifest.json",
+        "condition": "counts_n10_cycle_full",
+        "log_count": 5,
+        "run_min": 0,
+        "run_max": 4,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 5,
+          "decisions": 1000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": null
+      },
+      {
+        "manifest": "results/runs/benchmark/manifest.json",
+        "condition": "counts_n10_cycle_full",
+        "log_count": 1,
+        "run_min": 0,
+        "run_max": 0,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 1,
+          "decisions": 200,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": null
+      },
+      {
+        "manifest": "results/runs/benchmark/manifest.json",
+        "condition": "cheap_talk_n20_cycle_full",
+        "log_count": 1,
+        "run_min": 0,
+        "run_max": 0,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 1,
+          "decisions": 400,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": null
+      },
+      {
+        "manifest": "results/runs/calibration_cheap_talk/manifest.json",
+        "condition": "cheap_talk_n4_cycle_last1",
+        "log_count": 100,
+        "run_min": 0,
+        "run_max": 99,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 100,
+          "decisions": 8000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc"
+      },
+      {
+        "manifest": "results/runs/calibration_counts/manifest.json",
+        "condition": "counts_n4_cycle_last1",
+        "log_count": 50,
+        "run_min": 0,
+        "run_max": 49,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 50,
+          "decisions": 4000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc"
+      },
+      {
+        "manifest": "results/runs/core_cheap_talk/manifest.json",
+        "condition": "cheap_talk_n10_cycle_full",
+        "log_count": 50,
+        "run_min": 0,
+        "run_max": 49,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 50,
+          "decisions": 10000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc"
+      },
+      {
+        "manifest": "results/runs/core_cheap_talk/manifest.json",
+        "condition": "cheap_talk_n20_cycle_full",
+        "log_count": 25,
+        "run_min": 0,
+        "run_max": 24,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 25,
+          "decisions": 10000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc"
+      },
+      {
+        "manifest": "results/runs/core_counts/manifest.json",
+        "condition": "counts_n10_cycle_full",
+        "log_count": 50,
+        "run_min": 0,
+        "run_max": 49,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 50,
+          "decisions": 10000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc"
+      },
+      {
+        "manifest": "results/runs/core_counts/manifest.json",
+        "condition": "counts_n20_cycle_full",
+        "log_count": 50,
+        "run_min": 0,
+        "run_max": 49,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 50,
+          "decisions": 20000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc"
+      }
+    ],
+    "source_hashes": {
+      "results/audit/llama-3.1-8b/cheap_talk_d2_actions.json": "e257c0a605e988a174bcc7a32cd853e316ea4bd62a11c8de02e42d4dda2aadb4",
+      "results/audit/llama-3.1-8b/cheap_talk_d2_actions_equal.json": "3cd01933749cbe8f366f0d98ae384c3e5650895129427a3ecc1ead180bfd8a56",
+      "results/audit/llama-3.1-8b/cheap_talk_d2_enumerated_actions.json": "cf12009f63975d47c90df2a99cc8b94a1e592037bbd0bd63c61486893a1e3558",
+      "results/audit/llama-3.1-8b/cheap_talk_d2_enumerated_actions_equal.json": "9770e893f755c48a3e08109e2fe5cb4a214ee9d8d140072e934592c837627777",
+      "results/audit/llama-3.1-8b/cheap_talk_d2_enumerated_signal.json": "01d7d47dd4e00bf3234d3447fc3fc70b3377d4a393d83cd6335f9d973421fdc3",
+      "results/audit/llama-3.1-8b/cheap_talk_d2_signal.json": "85a3356c3ae78ff5e803814ffd4f484533da410820ba600a97ad88da2a90afb3",
+      "results/audit/llama-3.1-8b/counts_d2_actions.json": "033c55caf86a9e1f65b01e4af15817655701c4a55c80697c5e3740c717ee9003",
+      "results/audit/llama-3.1-8b/counts_d2_enumerated_actions.json": "192cc229219156e8027893415913816f8e917138b234b9ce6bf085af64cb5a1f",
+      "results/extra/audit/llama-3.1-8b/counts_d4_actions.json": "0536f69cc5adee45f82be1a122aacbb14891e064163c78c28b0f3cd2bb3ba6e9",
+      "results/extra/audit/olmo-3-7b/cheap_talk_d2_actions.json": "95d24c9da459f190a3469cecc9e88d061d5c4b9ee051167164956af9dd379dfd",
+      "results/extra/audit/olmo-3-7b/cheap_talk_d2_actions_equal.json": "92483cff69037b17c8c26c1bbdc8cb617a44c1ef6d7cdb73627ccc5059b63ed1",
+      "results/extra/audit/olmo-3-7b/cheap_talk_d2_enumerated_actions.json": "3744d691e31348fac44b61d42e95db1e4e805ecf8a2e3e43ed8c5e003ced7c39",
+      "results/extra/audit/olmo-3-7b/cheap_talk_d2_enumerated_actions_equal.json": "dd98e461e152ee03a69c305753ddd250feca9d5fcd854c1c1056b80db05eca5c",
+      "results/extra/audit/olmo-3-7b/cheap_talk_d2_enumerated_signal.json": "16b05c22b998e616f5cb91e747b576ca48ba8a16b822300c03b5efc12d10b038",
+      "results/extra/audit/olmo-3-7b/cheap_talk_d2_signal.json": "48337469cf3902630746cad8268c9f21b9a90058361c0ba73fce3b2a944a6ab1",
+      "results/gates/G5_cheap_talk.json": "5d0116ffc3ff4e6ba65a8eb5c0f8658478e9235d2fb5746a58661e996281900d",
+      "results/gates/G5_cheap_talk_confirmation.json": "3bec88818fcc478cf1aa0cf32a89766fadcad7bc04411540408ba0c19f8ca41f",
+      "results/gates/G5_cheap_talk_exception.json": "5af0d8e39503006167a98c234fe5e734bcd5fae7e78b104b6d14c4d17ec4da4d",
+      "results/gates/G5_cheap_talk_investigation.json": "a7cfde10e7f7118afbad0025bfaf3e72bc5cb912558c2828147a41c6bc26417a",
+      "results/gates/G5_counts.json": "efdff594d9d9792083d3863f8cf3d118cf1ffe1735939e1152ac88dc3494bb1a",
+      "configs/calibration.yaml": "3f28adb25b80b6a2d7956d1864e94ff508d255dcf2b91bd6cf41ae94c849a6c3",
+      "configs/core.yaml": "0e469767237b7d48c921ac11a07403f60705e8c9264ef0c4fefd6993093be2b0",
+      "configs/extra-olmo.yaml": "966f09249c3d1af1e17135266f953e91ac8d6583d67533bef8873195a85e42f2",
+      "configs/extra-scale.yaml": "a31c1e37b87df395eadead4f20e8441725995c2c06cf52aca57ae427f18ceeee",
+      "configs/free-text.yaml": "6f1d839c54835e096d0d2661eb3ac809c841114e9fbf453d057a1df612c49b59",
+      "configs/harness.yaml": "e93b85875889a93af2665dad773e445d3f4945a57dd28d3701f1c0602db70c8a",
+      "configs/model-70b.yaml": "a6059c3352a39f9ef1e0b88f1f56c0a6ed32496ee75984872d9ba417087e90ba",
+      "configs/pilot.yaml": "f89e34391b1177be37227e1e5ce2ac3c504fad5f5da7c35d87ae5f512b6df387",
+      "configs/scale.yaml": "b12e770aafe76edd0871600143f90ded0e7c14d5de87561b5babcec562f7f349",
+      "configs/screening.yaml": "d18a02b9eab578ac0bde5f185e7d9b849484325c003d87ed7e77a3d7c5bc4bf7",
+      "configs/second-family.yaml": "05b6f4f11d5f1e9d16f6861dbb2b3289fb88bd1e00ebe80f569a14f934134067",
+      "configs/secondary.yaml": "56591ab9f3b9419557ccf759515ab9f508e1ab78cbef2a350cf3111a29cd5b69",
+      "swarm_audit/prompts/cheap_talk.txt": "7df81f5308f515f855107eb9a06703e1bbc9d21c23e2e84799554641221c2991",
+      "swarm_audit/prompts/counts.txt": "2598208c29c8cb6c5ecea266c8c3b2b59b02c32acf3a3362395f4a13519f4357",
+      "swarm_audit/prompts/free_text.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "provenance_without_logs": []
+  },
+  {
+    "root": "/workspace/work/extra-final-snapshot",
+    "snapshot_commit": "76a647ec5f62b361f4048dbca05d30956e8e42de",
+    "conditions": [
+      {
+        "manifest": "results/extra/followup/runs/followup_olmo_n10_last1/manifest.json",
+        "condition": "cheap_talk_n10_cycle_last1",
+        "log_count": 50,
+        "run_min": 0,
+        "run_max": 49,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 50,
+          "decisions": 10000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "95a642bba7f5092e9fb2612d00e6b6f67c99e19c7372a4f83b5e17bbadcee588"
+      },
+      {
+        "manifest": "results/extra/runs/extra_rr4/manifest.json",
+        "condition": "counts_n100_random_regular_d4_seed20261108_full",
+        "log_count": 50,
+        "run_min": 0,
+        "run_max": 49,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 50,
+          "decisions": 100000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc"
+      },
+      {
+        "manifest": "results/extra/runs/olmo_calibration_cheap_talk/manifest.json",
+        "condition": "cheap_talk_n4_cycle_last1",
+        "log_count": 50,
+        "run_min": 0,
+        "run_max": 49,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 50,
+          "decisions": 4000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "95a642bba7f5092e9fb2612d00e6b6f67c99e19c7372a4f83b5e17bbadcee588"
+      },
+      {
+        "manifest": "results/extra/runs/olmo_core_cheap_talk/manifest.json",
+        "condition": "cheap_talk_n10_cycle_full",
+        "log_count": 50,
+        "run_min": 0,
+        "run_max": 49,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 50,
+          "decisions": 10000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "95a642bba7f5092e9fb2612d00e6b6f67c99e19c7372a4f83b5e17bbadcee588"
+      },
+      {
+        "manifest": "results/pilot/pilot/manifest.json",
+        "condition": "counts_n10_cycle_full",
+        "log_count": 5,
+        "run_min": 0,
+        "run_max": 4,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 5,
+          "decisions": 1000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": null
+      },
+      {
+        "manifest": "results/runs/benchmark/manifest.json",
+        "condition": "counts_n10_cycle_full",
+        "log_count": 1,
+        "run_min": 0,
+        "run_max": 0,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 1,
+          "decisions": 200,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": null
+      },
+      {
+        "manifest": "results/runs/benchmark/manifest.json",
+        "condition": "cheap_talk_n20_cycle_full",
+        "log_count": 1,
+        "run_min": 0,
+        "run_max": 0,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 1,
+          "decisions": 400,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": null
+      },
+      {
+        "manifest": "results/runs/calibration_cheap_talk/manifest.json",
+        "condition": "cheap_talk_n4_cycle_last1",
+        "log_count": 100,
+        "run_min": 0,
+        "run_max": 99,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 100,
+          "decisions": 8000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc"
+      },
+      {
+        "manifest": "results/runs/calibration_counts/manifest.json",
+        "condition": "counts_n4_cycle_last1",
+        "log_count": 50,
+        "run_min": 0,
+        "run_max": 49,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 50,
+          "decisions": 4000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc"
+      },
+      {
+        "manifest": "results/runs/core_cheap_talk/manifest.json",
+        "condition": "cheap_talk_n10_cycle_full",
+        "log_count": 50,
+        "run_min": 0,
+        "run_max": 49,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 50,
+          "decisions": 10000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc"
+      },
+      {
+        "manifest": "results/runs/core_counts/manifest.json",
+        "condition": "counts_n10_cycle_full",
+        "log_count": 50,
+        "run_min": 0,
+        "run_max": 49,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 50,
+          "decisions": 10000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc"
+      },
+      {
+        "manifest": "results/runs/core_counts/manifest.json",
+        "condition": "counts_n20_cycle_full",
+        "log_count": 50,
+        "run_min": 0,
+        "run_max": 49,
+        "missing_within_range": [],
+        "summary": {
+          "runs_logged": 50,
+          "decisions": 20000,
+          "p_valid_below_0.9": 0,
+          "p_valid_flagged_examples": []
+        },
+        "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc"
+      }
+    ],
+    "source_hashes": {
+      "results/audit/llama-3.1-8b/cheap_talk_d2_actions.json": "e257c0a605e988a174bcc7a32cd853e316ea4bd62a11c8de02e42d4dda2aadb4",
+      "results/audit/llama-3.1-8b/cheap_talk_d2_actions_equal.json": "3cd01933749cbe8f366f0d98ae384c3e5650895129427a3ecc1ead180bfd8a56",
+      "results/audit/llama-3.1-8b/cheap_talk_d2_enumerated_actions.json": "cf12009f63975d47c90df2a99cc8b94a1e592037bbd0bd63c61486893a1e3558",
+      "results/audit/llama-3.1-8b/cheap_talk_d2_enumerated_actions_equal.json": "9770e893f755c48a3e08109e2fe5cb4a214ee9d8d140072e934592c837627777",
+      "results/audit/llama-3.1-8b/cheap_talk_d2_enumerated_signal.json": "01d7d47dd4e00bf3234d3447fc3fc70b3377d4a393d83cd6335f9d973421fdc3",
+      "results/audit/llama-3.1-8b/cheap_talk_d2_signal.json": "85a3356c3ae78ff5e803814ffd4f484533da410820ba600a97ad88da2a90afb3",
+      "results/audit/llama-3.1-8b/counts_d2_actions.json": "033c55caf86a9e1f65b01e4af15817655701c4a55c80697c5e3740c717ee9003",
+      "results/audit/llama-3.1-8b/counts_d2_enumerated_actions.json": "192cc229219156e8027893415913816f8e917138b234b9ce6bf085af64cb5a1f",
+      "results/extra/audit/llama-3.1-8b/counts_d4_actions.json": "0536f69cc5adee45f82be1a122aacbb14891e064163c78c28b0f3cd2bb3ba6e9",
+      "results/extra/audit/olmo-3-7b/cheap_talk_d2_actions.json": "95d24c9da459f190a3469cecc9e88d061d5c4b9ee051167164956af9dd379dfd",
+      "results/extra/audit/olmo-3-7b/cheap_talk_d2_actions_equal.json": "92483cff69037b17c8c26c1bbdc8cb617a44c1ef6d7cdb73627ccc5059b63ed1",
+      "results/extra/audit/olmo-3-7b/cheap_talk_d2_enumerated_actions.json": "3744d691e31348fac44b61d42e95db1e4e805ecf8a2e3e43ed8c5e003ced7c39",
+      "results/extra/audit/olmo-3-7b/cheap_talk_d2_enumerated_actions_equal.json": "dd98e461e152ee03a69c305753ddd250feca9d5fcd854c1c1056b80db05eca5c",
+      "results/extra/audit/olmo-3-7b/cheap_talk_d2_enumerated_signal.json": "16b05c22b998e616f5cb91e747b576ca48ba8a16b822300c03b5efc12d10b038",
+      "results/extra/audit/olmo-3-7b/cheap_talk_d2_signal.json": "48337469cf3902630746cad8268c9f21b9a90058361c0ba73fce3b2a944a6ab1",
+      "results/gates/G5_cheap_talk.json": "5d0116ffc3ff4e6ba65a8eb5c0f8658478e9235d2fb5746a58661e996281900d",
+      "results/gates/G5_cheap_talk_confirmation.json": "3bec88818fcc478cf1aa0cf32a89766fadcad7bc04411540408ba0c19f8ca41f",
+      "results/gates/G5_cheap_talk_exception.json": "5af0d8e39503006167a98c234fe5e734bcd5fae7e78b104b6d14c4d17ec4da4d",
+      "results/gates/G5_cheap_talk_investigation.json": "a7cfde10e7f7118afbad0025bfaf3e72bc5cb912558c2828147a41c6bc26417a",
+      "results/gates/G5_counts.json": "efdff594d9d9792083d3863f8cf3d118cf1ffe1735939e1152ac88dc3494bb1a",
+      "results/extra/followup/audit_ablations.json": "a777200444a97fc9ee9e8ed1fe304b782af62aea58b0510b37229c02d80198ec",
+      "results/extra/followup/e3_benchmark.json": "b1f8faa1a4174a31871836a8c7b48b9d34752ecff9514ba25d4591860c5ef7be",
+      "results/extra/followup/e3_forecast.json": "3df962a14f02ff22e681ee964383cc6b80a148dd4666a105d1dce35b45115a58",
+      "results/extra/followup/independent_check.json": "7e9913467d012d8135e02df3dc701192abac209d9d23a1278d3c3cbb06ed0720",
+      "results/extra/followup/observation_interventions.json": "dabaa8a9fdac83e3b3ecb758956865b8d5d454b0903abaa756fdb531bcc1d556",
+      "results/extra/followup/plan.json": "2ebe48b7a8f29d332d18ce453b0d777eeead828b18359010e6efb497e8674fdd",
+      "configs/calibration.yaml": "3f28adb25b80b6a2d7956d1864e94ff508d255dcf2b91bd6cf41ae94c849a6c3",
+      "configs/core.yaml": "0e469767237b7d48c921ac11a07403f60705e8c9264ef0c4fefd6993093be2b0",
+      "configs/extra-followup-olmo.yaml": "4ad5f1f601b76f549a26dc38ff55e136612d01aadc5691414e0a8a0d3cbbcbfa",
+      "configs/extra-olmo.yaml": "966f09249c3d1af1e17135266f953e91ac8d6583d67533bef8873195a85e42f2",
+      "configs/extra-scale.yaml": "a31c1e37b87df395eadead4f20e8441725995c2c06cf52aca57ae427f18ceeee",
+      "configs/free-text.yaml": "6f1d839c54835e096d0d2661eb3ac809c841114e9fbf453d057a1df612c49b59",
+      "configs/harness.yaml": "e93b85875889a93af2665dad773e445d3f4945a57dd28d3701f1c0602db70c8a",
+      "configs/model-70b.yaml": "a6059c3352a39f9ef1e0b88f1f56c0a6ed32496ee75984872d9ba417087e90ba",
+      "configs/pilot.yaml": "f89e34391b1177be37227e1e5ce2ac3c504fad5f5da7c35d87ae5f512b6df387",
+      "configs/scale.yaml": "b12e770aafe76edd0871600143f90ded0e7c14d5de87561b5babcec562f7f349",
+      "configs/screening.yaml": "d18a02b9eab578ac0bde5f185e7d9b849484325c003d87ed7e77a3d7c5bc4bf7",
+      "configs/second-family.yaml": "05b6f4f11d5f1e9d16f6861dbb2b3289fb88bd1e00ebe80f569a14f934134067",
+      "configs/secondary.yaml": "56591ab9f3b9419557ccf759515ab9f508e1ab78cbef2a350cf3111a29cd5b69",
+      "swarm_audit/prompts/cheap_talk.txt": "7df81f5308f515f855107eb9a06703e1bbc9d21c23e2e84799554641221c2991",
+      "swarm_audit/prompts/counts.txt": "2598208c29c8cb6c5ecea266c8c3b2b59b02c32acf3a3362395f4a13519f4357",
+      "swarm_audit/prompts/free_text.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "provenance_without_logs": [
+      "results/runs/core_cheap_talk/cheap_talk_n20_cycle_full"
+    ]
+  }
+]

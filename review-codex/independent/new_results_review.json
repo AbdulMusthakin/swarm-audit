@@ -1,0 +1,218 @@
+{
+  "core_source_commit": "3912f32915bea8f3850c30b779e3be50522f5108",
+  "extra_source_commit": "76a647ec5f62b361f4048dbca05d30956e8e42de",
+  "C2_clock_comparison": {
+    "endpoint": {
+      "review": {
+        "mean": -0.003581394820500001,
+        "bootstrap_95": [
+          -0.006859847420500002,
+          -0.00030049122050000737
+        ],
+        "whole_run_SE": 0.0017060757428829332
+      },
+      "review_MC_SE_approx": 5.1686753634889445e-05,
+      "source_mean": -0.0035866349774999963,
+      "difference_in_combined_MC_SE": 0.0819256709123674
+    },
+    "early": {
+      "review": {
+        "mean": 0.005975975744583331,
+        "bootstrap_95": [
+          0.003326850661250001,
+          0.008544447161249996
+        ],
+        "whole_run_SE": 0.0013409055068925393
+      },
+      "review_MC_SE_approx": 3.3098365586364405e-05,
+      "source_mean": 0.005962235297916662,
+      "difference_in_combined_MC_SE": 0.22204903539248064
+    },
+    "middle": {
+      "review": {
+        "mean": -0.0012749816079166648,
+        "bootstrap_95": [
+          -0.0019721186079166638,
+          -0.0005541970245833319
+        ],
+        "whole_run_SE": 0.0003636480045309195
+      },
+      "review_MC_SE_approx": 5.0794053625311604e-05,
+      "source_mean": -0.0014074115312499957,
+      "difference_in_combined_MC_SE": 2.3003553377616934
+    },
+    "late": {
+      "review": {
+        "mean": -0.0015055767617857168,
+        "bootstrap_95": [
+          -0.002780837618928575,
+          -0.0002324812617857196
+        ],
+        "whole_run_SE": 0.0006601866000796906
+      },
+      "review_MC_SE_approx": 2.553413717264953e-05,
+      "source_mean": -0.0014550034785714317,
+      "difference_in_combined_MC_SE": -1.5048156595050703
+    }
+  },
+  "clock_fit_count_min_max": [
+    [
+      9,
+      25
+    ],
+    [
+      9,
+      25
+    ],
+    [
+      11,
+      27
+    ]
+  ],
+  "empty_fit_cells": 0,
+  "signed_errors_by_block": {
+    "pooled": [
+      -0.05768363445250433,
+      -0.022503474505642374,
+      -0.019698450163621584
+    ],
+    "clock": [
+      -0.01951034184562141,
+      -0.03296866329365746,
+      -0.039046541876223376
+    ]
+  },
+  "E3_n10_last1_live": {
+    "n_runs": 50,
+    "events_F1": 0,
+    "events_F0": 50,
+    "y": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "F1_Clopper_Pearson_95": [
+      0.0,
+      0.07112173646419764
+    ],
+    "mean_F": 0.0,
+    "EX_t": [
+      0.5900000000000001,
+      0.312,
+      0.176,
+      0.08399999999999999,
+      0.046,
+      0.018,
+      0.006,
+      0.002,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "log_errors": {
+      "record": 0,
+      "state": 0,
+      "action_draw": 0,
+      "signal_draw": 0,
+      "seed_replay": 0
+    },
+    "max_probability_difference_from_enumerated_kernel": 0.0,
+    "prompt_hash_errors": 0,
+    "probability_of_no_F1_in50_under_forecast_p00814": 0.6645364597035744,
+    "interpretation": "fresh live run sample validates the same enumerated last1 kernel on n10 wiring; no new kernel information; zero high outcomes has low power for a forecast near0.8%"
+  },
+  "E3_provenance_check": {
+    "folder": "results/extra/followup/runs/followup_olmo_n10_last1/cheap_talk_n10_cycle_last1",
+    "table": "results/extra/audit/olmo-3-7b/cheap_talk_d2_enumerated_signal.json",
+    "errors": {
+      "run_fingerprint": 0,
+      "run_kernel_fingerprint": 0,
+      "table_fingerprint": 0,
+      "table_kernel_fingerprint": 0,
+      "table_run_kernel_match": 0,
+      "template_hashes": 0,
+      "table_prompt": 0,
+      "table_raw_joint": 0,
+      "draw_seed_replay": 0
+    },
+    "decisions": 10000,
+    "kernel_fingerprint": "95a642bba7f5092e9fb2612d00e6b6f67c99e19c7372a4f83b5e17bbadcee588",
+    "raw_design": {
+      "arm": "followup_olmo_n10_last1",
+      "arm_id": 92,
+      "condition_id": 10,
+      "channel": "cheap_talk",
+      "n": 10,
+      "graph": "cycle",
+      "T": 20,
+      "last_k": 1,
+      "base_seed": 20261107,
+      "own_signal_in_state": true
+    },
+    "max_table_probability_sum_error": 2.220446049250313e-16,
+    "max_probability_reconstruction_error_from_logs": 2.220446049250313e-16,
+    "min_logged_valid_label_mass": 0.9896110741221753,
+    "run_creation_commit": "a4fbb63e053210a7127b936be0b8bc14d6c32458"
+  },
+  "unreviewed_new_core_items": [
+    "full C1/C2 200-resample arrays were read at summary level, not every value independently recomputed",
+    "counts and OLMo clock controls not independently re-simulated",
+    "no new controlled content intervention validates content causation"
+  ]
+}

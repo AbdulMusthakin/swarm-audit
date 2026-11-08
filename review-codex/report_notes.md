@@ -45,11 +45,13 @@ Neither a finite zero estimate nor a small endpoint score supplies a safety cert
    only/neither; a small own-message occupancy versus synthetic weighting panel.
    Separate exact-model probabilities from live binomial intervals. Label selection
    after earlier results.
-3. **Averaging versus none.** Compare the averaged laws with deterministic own-none,
-   neighbour-none and both-none laws on one P(F=1) scale. Mark cached-law results as
-   model-based counterfactuals. Replace this figure with size-by-memory only if
-   completed live cells add a stronger result with appropriate independent-run
-   intervals; CPU forecasts must not be presented as live cells.
+3. **Clock matching: gain and cost.** Plot the exploratory pooled-minus-clock
+   signal-aware CRPS comparison by early/middle/late blocks and endpoint, alongside
+   the corresponding teacher-forced signed bias. Show the early improvement and
+   later deterioration together. Label the same-run evaluation exploratory and
+   the table uncertainty conditional. Include literal-none comparisons beside
+   Figure 2 or in the appendix; do not add a fourth main figure. The new n10
+   last1 live cell is useful validation but has little power for its rare event.
 
 An eight-page allocation could give one page to question/related work, two to setup
 and protocol, two to the primary results, two to the exploratory case study, and one
@@ -93,3 +95,15 @@ Distinguish binary-action from six-outcome joint TV. The OLMo full-history all-l
 endpoint is uninformative about incremental signal value; collapsed intervals do
 not mean high precision. Keep the original failed gate, exception and confirmation.
 Every exact result is conditional on its specified kernel and state space.
+
+## Final-refresh addition
+
+The committed C2 result provides a useful operational repair experiment: matching
+synthetic history-length blocks improves early forecasts but worsens later Llama
+scores. Describe the result as improvement under length conditioning, not proof
+that history content causes the remaining failure. The new core summary's phrase
+“The late failure is a content effect” is stronger than the controlled evidence.
+Use “consistent with history-content shift; controlled content interventions remain
+to be done.” More histories might reduce estimation variance even if they cannot
+remove a population misspecification. The new n10 last1 cell must remain distinct
+from the CPU forecast and from an independent measurement of a new kernel.

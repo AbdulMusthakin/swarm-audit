@@ -1,0 +1,27 @@
+{
+  "main_focused_tests": {
+    "passed": 72,
+    "skipped": 8,
+    "source_commit": "982822f554e547cc5c4468b70d5aaaae88356814"
+  },
+  "initial_core_followup_tests": {
+    "passed": 11,
+    "source_commit": "f020fe2a0c93c42177a48ccdf9141ead9c185d1a"
+  },
+  "initial_extra_followup_tests": {
+    "passed": 5,
+    "source_commit": "4a817051abffbdf208eb38a2b09160ab9d49aa0f"
+  },
+  "claim_rows": 31,
+  "original_primary_CDF_and_per_run_D_max_error": 0,
+  "calibration_exact_MC_p_reproduction": true,
+  "paid_compute_calls": 0,
+  "merges": 0,
+  "original_evidence_changes": 0,
+  "known_limits": [
+    "optional tokenizer-dependent tests skipped",
+    "serving checks read from saved evidence, not rerun",
+    "counts and scale arms not independently replicated end to end",
+    "new C2 interval arrays not exhaustively recomputed"
+  ]
+}

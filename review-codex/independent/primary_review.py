@@ -83,12 +83,13 @@ def binned(counts,n=10):
 
 def read_runs(folder):
     arrays=[]; rowsall=[]; errors={'record':0,'state':0,'action_draw':0,'signal_draw':0,'seed_replay':0}
+    design=json.loads((Path(folder)/'provenance.json').read_text())['payload']['design']
     for file in sorted(Path(folder).glob('run_*.jsonl.gz')):
         rows=[json.loads(x) for x in gzip.open(file,'rt')];rowsall.extend(rows)
         by={(x['round'],x['agent']):x for x in rows};n=rows[0]['n']; T=max(x['round'] for x in rows)
         assert len(by)==T*n
         A=np.zeros((T,n),int); rid=rows[0]['run']
-        replay=np.random.default_rng(np.random.SeedSequence([20261107,6,10,rid]))
+        replay=np.random.default_rng(np.random.SeedSequence([design['base_seed'],design['arm_id'],design['condition_id'],rid]))
         for t in range(1,T+1):
             for i in range(n):
                 r=by[t,i]; A[t-1,i]=r['action']=='H'

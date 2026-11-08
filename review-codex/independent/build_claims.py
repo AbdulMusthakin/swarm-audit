@@ -212,8 +212,28 @@ def main():
         'is_primary_contrast boolean in arm9b output is incorrect',
         'Label the second model and follow-ups exploratory; later freezing does not retroactively preregister selection.',
         'independent/secondary_checks.json:OLMo_n10_archived_is_primary_contrast')
+    fresh_path=ROOT/'independent/new_results_review.json'
+    if fresh_path.exists():
+        fresh=json.loads(fresh_path.read_text())
+        fc=fresh['core_source_commit'];fe=fresh['extra_source_commit']
+        add('Clock-indexed early improvement and late cost','exploratory C2 committed at final refresh','Review pooled-minus-clock CRPS: early+0.00597598; endpoint-0.00358139; early signed bias-0.0576836 to-0.0195103',
+            'Llama n10 same50 runs; signal-aware pooled minus length-block clock audit','200k review simulations per predictor; source200k',
+            'results/followup/core/clock/core_cheap_talk__cheap_talk_n10_cycle_full.json',fc,
+            'yes: new time-inhomogeneous simulation; early/endpoint effects reproduce; middle differs by2.3 estimated combined MC SE',
+            'conditional whole-run intervals; source nested table/run sensitivity read but not fully recomputed here',
+            'same-run exploratory evaluation; block fitting counts9-27 per state; no empty cells; no causal content identification',
+            'Length conditioning improves early forecasts but worsens later Llama scores; remaining failure is consistent with content shift, not proven to be caused by it.',
+            'independent/new_results_review.json:C2_clock_comparison; signed_errors_by_block')
+        add('New OLMo n10 last1 live cell','exploratory E3 live sample at final refresh','0/50 F1;50/50 F0; all saved probabilities and draws match the enumerated kernel',
+            'OLMo n10 last1 cycle arm92; same enumerated kernel used at n4','50 live runs;10000 decisions',
+            'results/extra/followup/runs/followup_olmo_n10_last1/cheap_talk_n10_cycle_last1',fe,
+            'yes: every state/record/draw/seed/prompt/probability; all kernel/provenance checks pass',
+            '0/50 F1; binomial95% upper0.07112; probability of0/50 about0.665 under p0.00814',
+            'no new kernel information; low power for rare event; n4full and E2live absent in this snapshot',
+            'The new live sample validates the enumerated-kernel serving and wiring path; zero events does not refute its rare-event forecast or complete the size-by-memory experiment.',
+            'independent/new_results_review.json:E3_n10_last1_live; E3_provenance_check')
     with (ROOT/'claims.csv').open('w',newline='') as f:
-        w=csv.DictWriter(f,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
+        w=csv.DictWriter(f,fieldnames=list(rows[0]),lineterminator='\n');w.writeheader();w.writerows(rows)
     print('Wrote',len(rows),'claim rows')
 
 if __name__=='__main__':main()

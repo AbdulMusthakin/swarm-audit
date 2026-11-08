@@ -16,7 +16,7 @@ All computations were local CPU calculations. No paid compute, model queries, ag
 credentials, Modal workspaces, deployed servers, original evidence, or agent branches
 were modified. After the user's subsequent authorisation to coordinate corrections,
 a concrete note was posted on [PR 9](https://github.com/AbdulMusthakin/swarm-audit/pull/9#issuecomment-6715458905).
-No code was pushed or merged. `coordination.md` preserves that note.
+The user then explicitly asked that the commits be visible to the repository; the isolated review branch was pushed. No merge or agent-branch edit occurred. `coordination.md` preserves the initial note.
 
 ## Results independently established
 
@@ -202,3 +202,49 @@ and degree. Initially partial n=20 cheap talk and absent follow-up live cells ar
 not complete results. Final-refresh results are separately documented. No
 comprehensive novelty claim, independent live replication, or new safety validation
 is asserted.
+
+## Final one-time refresh: new committed results
+
+The final fetch examined core `3912f32915bea8f3850c30b779e3be50522f5108` and extra
+`76a647ec5f62b361f4048dbca05d30956e8e42de`. It did not inspect live jobs or uncommitted
+output. Detailed new checks are in `independent/new_results_review.json`.
+
+**C2 clock audit:** independently fitting length blocks from stored fitting histories
+and simulating 200k paths per forecast reproduces the consequential result. Signal-
+aware improvement (pooled minus clock) is **+0.005976** early, with conditional
+run interval **[+0.003327,+0.008544]**, and **−0.003581** at the endpoint, interval
+**[−0.006860,−0.000300]**. Middle/late directions also reproduce; the middle-block
+point estimate differs by 2.3 estimated combined MC SE, so agreement is distributional,
+not bitwise. Per-state block fitting counts range 9–27, with no empty cells. Signed
+teacher-forced error changes exactly from **−0.057684 to −0.019510** early, and
+**−0.019698 to −0.039047** late. The core's new uncertainty analysis agrees with this
+review's earlier conclusion that MC/table variation matters but does not rescue the
+primary endpoint contrast. Its full 200-resample C1/C2 arrays were not independently
+recomputed here; the review's original 200-resample primary sensitivity is separate.
+
+### M4. Qualify the newly committed causal explanation
+
+Core `results/followup/core/summary.md` appropriately calls history-content shift an
+interpretation earlier, but its Limitations then says “The late failure is a content
+effect” and that more histories of the same p_test would not fix it. The clocks change
+history-length conditioning; there is no controlled content intervention establishing
+that remaining cause. Finite block estimates also contain uncertainty.
+
+**Fix:** say the residual is **consistent with history-content shift**, and separate
+reducing fitting variance from fixing population misspecification. A controlled,
+length-matched content intervention or fresh predictive validation would strengthen
+the claim. The early operational improvement is supported; causal attribution of the
+remaining error is not. This qualification affects the explanation, not the reproduced
+score improvement.
+
+**New E3 n10 last1 live cell:** 50 complete runs at extra `76a647e`; every run has
+F=0. All 10k logged records, graph states, draws, seed streams, probabilities, prompt
+hashes and provenance match the existing enumerated kernel. This is fresh live sampling
+and a serving/wiring validation, not fresh kernel information. The high-event forecast
+was about0.00814; P(no F=1 in50) is **0.66454**, so the zero count is unsurprising.
+Its two-sided95% upper limit is0.07112. Do not infer memory has no effect or reject the
+rare-event forecast. The n4 full-memory live cell and E2 live cells are absent in this
+committed snapshot; the size-by-memory design is not complete.
+
+The initial E1/E2 diagnostic and primary-flag corrections are not resolved in either
+final snapshot reviewed here. No additional branch poll was made after this refresh.
