@@ -137,13 +137,21 @@ def score_predictors(data: RunData, preds: dict[str, ModelRuns], B: int, rng) ->
     return res
 
 
+def is_primary_contrast(channel: str, n: int, graph: str, design: dict) -> bool:
+    """The primary contrast is the core's Llama arm 6 (cheap talk, n = 10, cycle, full
+    history) only. Independent review M2 (8 Nov): other arms with the same channel, n,
+    graph and memory (e.g. OLMo arm 91, exploratory) must not inherit the label, so the
+    frozen arm identity from the run provenance is part of the test."""
+    return (channel == "cheap_talk" and n == 10 and graph == "cycle"
+            and design.get("last_k", "missing") is None
+            and design.get("arm") == "core_cheap_talk" and design.get("arm_id") == 6)
+
 def is_primary(data) -> bool:
     """True only for the frozen primary experiment (core arm 6, cheap talk, n = 10 cycle,
-    full history)."""
-    design = data.meta.get("design", {})
-    return ((design.get("arm"), design.get("arm_id")) == PRIMARY_ARM
-            and data.channel == "cheap_talk" and data.n == 10 and data.graph == "cycle"
-            and design.get("last_k", "missing") is None)
+    full history). Wrapper over is_primary_contrast."""
+    return is_primary_contrast(data.channel, data.n, data.graph, data.meta.get("design", {}))
+
+
 
 
 def analyse_condition(data: RunData, g: Graph, tables: Tables, n_model: int = 20000,
@@ -153,7 +161,7 @@ def analyse_condition(data: RunData, g: Graph, tables: Tables, n_model: int = 20
     T = data.T
     preds = build_predictors(tables, g, T, n_model, seed + 1, pt=pt)
     design = data.meta.get("design", {})
-    primary = is_primary(data)
+    primary = is_primary_contrast(data.channel, data.n, data.graph, design)
     out: dict = {"condition": {"channel": data.channel, "n": data.n, "graph": data.graph,
                                "T": T, "runs": data.R, "last_k": design.get("last_k"),
                                "run_fingerprint": data.meta.get("fingerprint"),

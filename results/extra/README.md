@@ -7,11 +7,19 @@ Separate arms on a second Modal account. Nothing here feeds the core's primary c
 - **Branch:** `extra-arms`, with the core branch (`claude/funny-turing-qv2y66`) merged in.
 - **Configs:** `configs/extra-scale.yaml` (arm 8). `configs/extra-olmo.yaml` (arm 9) only if
   its trigger is met.
-- **Spend ledger:** `results/extra/spend.json`, cap $25. Spent: **$5.16** (wall-clock
+- **Spend ledger:** `results/extra/spend.json`, cap $25. Spent: **$6.59** (wall-clock
   estimates at the L4 list price; each session's 10-minute idle scaledown counted as an
-  upper bound). Arm 8 and its checks $2.57; arm 9 (OLMo X2, tables, runs) $2.59.
+  upper bound). Arm 8 and its checks $2.57; arm 9 (OLMo X2, tables, runs) $2.59;
+  overnight follow-up $1.43.
 
-Completion note: `completion_note.md`.
+Completion notes: `completion_note.md` (arms 8 and 9), `followup/completion_note.md`
+(overnight follow-up).
+
+**Overnight follow-up (EXPLORATORY, 8 Nov):** why the actions-only audit erases OLMo's
+persistent high bidding, observation interventions, and OLMo size by memory. Plan
+`docs/overnight-extra-plan.md`; results, summary, claims and Figure 2 candidate in
+`followup/` (start at `followup/mechanism_summary.md`). Classification of every extra
+analysis (arm 9b is not the primary contrast): `analysis/classification.json`.
 
 ## Status
 

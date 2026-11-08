@@ -26,7 +26,7 @@ import subprocess
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Sequence
+from typing import Callable, Sequence
 
 import numpy as np
 
@@ -109,8 +109,16 @@ def run_file(out_dir: Path, run: int) -> Path:
     return out_dir / f"run_{run:03d}.jsonl.gz"
 
 
-def simulate(cond: Condition, backend: Backend, runs: Sequence[int]) -> dict[int, list[dict]]:
-    """Run the given runs of a condition in lockstep. Returns run -> decision lines."""
+def simulate(cond: Condition, backend: Backend, runs: Sequence[int],
+             observe: Callable[[Record], Record] | None = None) -> dict[int, list[dict]]:
+    """Run the given runs of a condition in lockstep. Returns run -> decision lines.
+
+    observe (overnight follow-up E2, docs/overnight-extra-plan.md): an optional map from
+    an agent's actual record to the record it is shown in later prompts. The actual
+    outputs, neighbour counts and payoffs are unchanged and logged as "record"; the
+    transformed one is logged as "observed_record", and "state"/"state_sig" are then the
+    observed states the kernel was queried in. None (the default) leaves every run as
+    before."""
     g = cond.make_graph()
     cheap = cond.channel == "cheap_talk"
     hist: dict[int, list[History]] = {r: [() for _ in range(g.n)] for r in runs}
@@ -152,6 +160,9 @@ def simulate(cond: Condition, backend: Backend, runs: Sequence[int]) -> dict[int
             recs = build_records(g, acts, sigs if cheap else None)
             for i, (row, rec) in enumerate(zip(rows, recs)):
                 row["record"] = _rec_dict(rec)
+                if observe is not None:
+                    rec = observe(rec)
+                    row["observed_record"] = _rec_dict(rec)
                 hist[r][i] = hist[r][i] + (rec,)
             lines[r].extend(rows)
     return lines
@@ -196,7 +207,8 @@ def update_manifest(arm_dir: Path, cond: Condition, provenance: dict, session: d
 
 
 def run_condition(cond: Condition, backend: Backend, runs_root: Path, chunk: int | None = None,
-                  extra_manifest: dict | None = None, log=print, max_runs: int | None = None) -> Path:
+                  extra_manifest: dict | None = None, log=print, max_runs: int | None = None,
+                  observe: Callable[[Record], Record] | None = None) -> Path:
     """Run every unfinished run of `cond`, `chunk` runs at a time in lockstep (all at
     once by default), writing each run's log as it completes. Returns the folder.
     max_runs: run only the first that many unfinished runs (e.g. a benchmark)."""
@@ -214,7 +226,7 @@ def run_condition(cond: Condition, backend: Backend, runs_root: Path, chunk: int
     n_dec = 0
     for c in range(0, len(todo), chunk):
         part = todo[c:c + chunk]
-        lines = simulate(cond, backend, part)
+        lines = simulate(cond, backend, part, observe)
         for r in part:
             write_run(run_file(out, r), lines[r])
             n_dec += len(lines[r])
