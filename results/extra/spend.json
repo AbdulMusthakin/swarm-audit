@@ -142,5 +142,37 @@
   "usd": 0.1333,
   "time": "2026-11-07T23:58:38.554848+00:00",
   "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "followup_olmo_n10_last1/cheap_talk_n10_cycle_last1",
+  "seconds": 254.0,
+  "containers": 1,
+  "usd": 0.0565,
+  "time": "2026-11-08T00:56:26.822839+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-08T00:56:26.824760+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "followup_olmo_n10_last1/cheap_talk_n10_cycle_last1",
+  "seconds": 251.7,
+  "containers": 1,
+  "usd": 0.0559,
+  "time": "2026-11-08T01:01:41.510053+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-08T01:01:41.514264+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
  }
 ]
