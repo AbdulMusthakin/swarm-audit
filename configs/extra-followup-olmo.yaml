@@ -1,0 +1,105 @@
+# Extra-arms overnight follow-up (docs/overnight-extra-plan.md), E3 and E2 live cells.
+# EXPLORATORY: chosen after the arm 9 results. Copied from extra-olmo.yaml; only the arms
+# differ (a test checks this). Runs go to results/extra/followup/runs (--runs-root);
+# the spend ledger, serving checks and G5 records stay shared with arm 9.
+#
+# (Original header of extra-olmo.yaml follows.)
+# Extra arm 9 (docs/handoff-extra-arms.md section 4): OLMo-3-7B on the signal comparison.
+# EXPLORATORY (Abdul, 7 Nov 20:15): the pre-registered trigger was NOT met (Llama d = 4
+# responsiveness 0.0553 >= 0.05); Abdul decided to run it after seeing Llama's d = 2 value
+# (0.038) and the core's arm 4b CRPS null. Same design, cap and stop rules as the hand-off.
+# Copied from extra-scale.yaml (itself core.yaml); only the model block and arms differ.
+
+# Hand-off section 1. GPU scripts refuse to start until every item is set.
+inputs:
+  model_confirmed: true     # Abdul, 7 Nov 2026: Llama 3.1 8B Instruct
+  prompts_approved:         # GPU runs need both templates approved
+    cheap_talk: true        # Abdul approved the rewording (messages are about the NEXT bid), 7 Nov 2026
+    counts: true            # Abdul approved counts.txt as drafted, 7 Nov 2026
+  pilot_rule: all_low_fallback   # Abdul, 7 Nov 2026: the one fallback in configs/pilot.yaml; otherwise no tuning
+  modal_account: teammate   # Abdul, 7 Nov 2026: a teammate's workspace, never Abdul's own
+  forbidden_workspaces: [abdulmusthakin, aliyusufbelal]   # extra arms: never Abdul's nor the core's workspace
+
+model:
+  name: olmo-3-7b           # arm 9 only (exploratory)
+  hf_id: allenai/Olmo-3-7B-Instruct
+  revision: 6e5971d9eba42665f5bd5a0fcf047f299ce1dccc   # configs/screening.yaml
+  gated: false
+  chat_kwargs: {}           # results/screening/tokenizers.json: no think block
+  engine_kwargs: {}
+  labels: {H: " H", L: " L", sig_high: " high", sig_low: " low", sig_none: " none"}
+  label_ids: {actions: [473, 445], signals: [1579, 3428, 7000]}   # results/screening/tokenizers.json (olmo-3-7b)
+
+# Every output (serving checks, audit tables, runs, analysis, spend ledger) goes here.
+results_dir: results/extra
+# OLMo's serving checks (X1, X2) go to results/extra/serving/olmo-3-7b/; the spend ledger
+# and the deployed-server record stay shared with arm 8 (one $25 cap, one server app).
+serving_subdir: olmo-3-7b
+# The payoffs must equal the core pilot's frozen payoffs (results/pilot/summary.json on
+# the core branch); run_swarm.py checks this before any GPU run.
+check_core_pilot: true
+
+payoffs: {uLH: 12, uHH: 10, uLL: 4, uHL: 0}
+T: 20
+
+# p_test (hand-off section 5; described in results/audit/README.md). FLAGGED for Abdul.
+p_test: {L_min: 1, L_max: 19, p_own_H: 0.5, p_neighbour_H: 0.5, seed: 20261108}
+
+# The current cheap-talk draft shows agents their own past messages, so the signal-aware
+# state includes the own last signal (108 states on the cycle; 36 without).
+own_signal_in_state: true
+
+# If G4 shows the audit is too slow, reduce histories per state (Abdul, 7 Nov 2026);
+# never change the prompt for speed.
+audit:
+  actions: {n_fit: 100, n_score: 50}   # actions-only tables, fitted directly
+  signal: {n_fit: 50, n_score: 25}     # signal-aware tables (cheap talk)
+
+seeds: {base_seed: 20261107}
+
+analysis: {n_model: 20000, bootstrap: 2000, noise_floor_draws: 1000, ks_sims: 20000, seed: 7}
+
+serving:
+  gpu: L4
+  vllm_version: "0.32.0"
+  method: logprob_token_ids
+  max_model_len: 4096
+  gpu_memory_utilization: 0.90
+  enforce_eager: true
+  batch_invariant: true   # set by check_serving.py --decide (G3)
+  numerical_floor: 0.0   # the G3 floor; set by check_serving.py --decide
+  max_containers: 1
+  deployed: true             # use the deployed server (scripts/deploy_server.py), kept warm between steps
+  scaledown_window_s: 600    # idle seconds before the GPU shuts down (Abdul, 7 Nov 2026: keep it warm)
+  timeout_minutes: 30
+  cost_cap_usd: 25.0         # for everything in docs/handoff-extra-arms.md (results/extra/spend.json)
+  l4_usd_per_hour: 0.80      # Modal list price; check before running
+
+# Decisions settled in advance on 7 Nov 2026 (Abdul asked Claude to settle every open
+# point that could be settled before the GPU gates). The scripts named apply them
+# mechanically. Still a stop for Abdul: a failed G5, a G3 floor above max_floor, a plan
+# that cannot fit arms 1-4b plus n = 10 in both channels, and raising the cost cap.
+decisions:
+  g3:                          # scripts/check_serving.py --decide
+    # Floor 0 with default settings: keep them. Otherwise use batch invariance if its
+    # maximum difference is smaller and it keeps at least half the default throughput;
+    # the chosen setting's maximum is the numerical floor.
+    min_throughput_ratio: 0.5
+    max_floor: 0.07            # about two bf16 steps in P(H) near 0.5; above this, stop
+  g4:                          # scripts/benchmark.py
+    cost_margin: 1.25          # projected cost x 1.25 (cold starts, queueing) must fit what is left of the cap
+    max_gpu_hours: 12          # projected GPU time must also fit this (the sprint ends 8 Nov)
+    reduced_signal_audit: {n_fit: 25, n_score: 15}   # first cut if over budget (Abdul: histories, never the prompt)
+    cut_order: [n20]           # then the hand-off's cut order; arms 1-4b and n = 10 are never cut
+  arm7: if_budget              # second topology runs last, only if the G4 plan still fits it with the margin
+  signal_responsiveness_below_bar: continue   # report it; changing the model or prompt would be tuning
+  drift_pause_above_floor_by: 0.035           # about one bf16 step; a smaller excess is recorded and reported, runs go on
+  pilot_readings_disagree: primary            # tau <= 5 governs
+  weighting_disagreement: primary             # p_test's weights give the headline; equal weights are the sensitivity check
+
+arms:
+  # E3: complete the size-by-memory two-by-two (existing cells: 9a n = 4 last-1, 9b n = 10 full).
+  followup_olmo_n10_last1: {arm_id: 92, channel: cheap_talk, graph: cycle, n: [10], runs: 50, last_k: 1}
+  followup_olmo_n4_full: {arm_id: 93, channel: cheap_talk, graph: cycle, n: [4], runs: 50, last_k: null}
+  # E2 live cells (arm_ids 94-97, results/extra/followup/plan.json) are NOT here: they need the
+  # observation hook, so they get their own runner and config if they run.
