@@ -108,8 +108,10 @@ def bootstrap_mean(v: np.ndarray, B: int = 2000, rng: np.random.Generator | None
 
 def bootstrap_diff_of_means(v_swarm: np.ndarray, model_mean: float, B: int = 2000,
                             rng: np.random.Generator | None = None) -> dict:
-    """E_swarm F - E_model F with a whole-run bootstrap of the swarm side (the model side
-    is fixed: its 20,000 runs make its sampling noise negligible)."""
+    """E_swarm F - E_model F with a whole-run bootstrap of the swarm side. The model side is
+    held fixed, so the interval is conditional on the simulated reference. Its simulation
+    error is not automatically negligible: assess it against the size of the contrast
+    (for the primary contrast it is not; see results/followup/core/uncertainty.json)."""
     r = bootstrap_mean(v_swarm, B, rng)
     return {k: (r[k] - model_mean if k in ("mean", "lo", "hi") else r[k]) for k in r}
 

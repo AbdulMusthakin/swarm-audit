@@ -190,5 +190,101 @@
   "usd": 0.1333,
   "time": "2026-11-07T23:39:33.025480+00:00",
   "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "core_cheap_talk/cheap_talk_n20_cycle_full",
+  "seconds": 3979.2,
+  "containers": 1,
+  "usd": 0.8843,
+  "time": "2026-11-08T00:46:04.607829+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-08T00:46:04.610508+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "core_cheap_talk/cheap_talk_n20_cycle_full",
+  "seconds": 3955.1,
+  "containers": 1,
+  "usd": 0.8789,
+  "time": "2026-11-08T01:52:17.117211+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-08T01:52:17.122346+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "audit/counts_d9_actions",
+  "seconds": 274.4,
+  "containers": 1,
+  "usd": 0.061,
+  "time": "2026-11-08T01:57:28.212795+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-08T01:57:28.215177+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "audit/cheap_talk_d9_actions",
+  "seconds": 1364.0,
+  "containers": 1,
+  "usd": 0.3031,
+  "time": "2026-11-08T02:20:15.271677+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-08T02:20:15.275004+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "second_topology_counts/counts_n10_complete_full",
+  "seconds": 718.6,
+  "containers": 1,
+  "usd": 0.1597,
+  "time": "2026-11-08T02:32:19.197077+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-08T02:32:19.199894+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "second_topology_cheap_talk/cheap_talk_n10_complete_full",
+  "seconds": 3929.3,
+  "containers": 1,
+  "usd": 0.8732,
+  "time": "2026-11-08T03:38:08.832429+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 600.0,
+  "containers": 1,
+  "usd": 0.1333,
+  "time": "2026-11-08T03:38:08.835075+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
  }
 ]

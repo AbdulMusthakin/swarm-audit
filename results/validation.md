@@ -167,7 +167,7 @@ A first G4 attempt crashed on its first call (the server's `info()` returned
 `torch.__version__`, which needs torch to unpickle); fixed in `797660f`, and about 3 minutes
 of L4 time is recorded for it.
 
-## G5, calibration (arms 4 and 4b): counts PASS; cheap talk FAIL on the per-run test — stopped for Abdul
+## G5, calibration (arms 4 and 4b): counts PASS; cheap talk FAIL on the per-run test — stopped for Abdul (later: excepted as chance by Abdul; confirmation PASS, below)
 
 Cycle, n = 4, last round only, 50 runs each, under the frozen payoffs (pilot: no change),
 batch invariance on, numerical floor 0. Enumerated tables: 7 states (counts) and 108 + START
@@ -225,14 +225,34 @@ Arm 4b runs 50–99, fresh seeds, same table, drift 0; per decision exact (max d
 
 The cheap-talk core is therefore cleared under Abdul's rule 3.
 
-## Drift panel: not run
+## Drift panel: PASS in every condition (max difference 0 against floor 0)
 
-Recorded per condition in `results/runs/<arm>/<condition>/drift.json` by `scripts/run_swarm.py`.
+Recorded per condition in `results/runs/<arm>/<condition>/drift.json` by
+`scripts/run_swarm.py`. The panel has 136 prompts, measured fresh at the start and end of
+each session and mixed into a swarm batch.
 
-## G6, pilot: rule fixed (Abdul, 7 Nov 2026), not run
+| condition | start vs end | start vs mixed | action |
+|---|---|---|---|
+| calibration counts n = 4, last-1 | 0 | 0 | ok |
+| calibration cheap talk n = 4, last-1 (runs 0–99) | 0 | 0 | ok |
+| core counts n = 10 | 0 | 0 | ok |
+| core counts n = 20 | 0 | 0 | ok |
+| core cheap talk n = 10 | 0 | **lost** | ok (see note) |
+| core cheap talk n = 20 (two sessions, runs 0–24 and 25–49) | 0, 0 | 0, 0 | ok |
 
-No tuning except one fallback: 5 counts runs at n = 10 on the cycle; if 3 or more reach
-all-low consensus by round 5 (tau <= 5, the paper's consensus time), set uLH = 11 and freeze
-it for both channels; otherwise change nothing. `scripts/run_pilot.py` applies the rule
-mechanically and stops for Abdul if other readings of "by round 5" would decide differently.
-Core arms refuse to launch until `results/pilot/summary.json` has frozen the payoffs.
+**Note on cheap talk n = 10.** The job hit its 2-hour background limit after the 50 runs
+and the manifest were written, but before the end panel. The end panel was measured fresh
+afterwards (22:13 UTC, 7 Nov) and matched the start panel exactly. The mixed-batch
+measurement was lost; this is disclosed in its `drift.json`.
+
+Arm 7's drift records are added when its runs finish (see `results/README.md`).
+
+## G6, pilot: PASS, no change (payoffs frozen at (12, 10, 4, 0))
+
+The rule was fixed by Abdul on 7 Nov 2026: no tuning except one fallback. Run 5 counts runs
+at n = 10 on the cycle. If 3 or more reach all-low consensus by round 5, set uLH = 11 and
+freeze it for both channels; otherwise change nothing.
+
+**Result:** 0 of 5 runs reached all-low consensus by round 5, so nothing changed (commit
+`9edb338`, `results/pilot/summary.json`: "no change; payoffs frozen as they are").
+Pilot runs never enter the analysis.

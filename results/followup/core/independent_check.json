@@ -1,0 +1,55 @@
+{
+ "label": "independent re-derivation (imports nothing from swarm_audit)",
+ "checks": {
+  "signed_error_by_round_actions_only": {
+   "max_abs_diff": 3.8163916471489756e-17,
+   "pass": true,
+   "early_2_7_mean": -0.05632092659815902
+  },
+  "signed_error_by_round_signal_aware": {
+   "max_abs_diff": 0.0,
+   "pass": true,
+   "early_2_7_mean": -0.05768363445250433
+  },
+  "paired_D_endpoint": {
+   "independent": -9.177066199999962e-05,
+   "independent_mc_se": 2.921717949179811e-05,
+   "pipeline": -8.494073385682921e-05,
+   "pipeline_mc_se": 1.2749006687863267e-05,
+   "z": -0.21425484571209738,
+   "pass": true,
+   "independent_sims": 200000
+  },
+  "paired_D_early": {
+   "independent": -0.0006832748449999954,
+   "independent_mc_se": 3.516366885193072e-05,
+   "pipeline": -0.0007370021380569792,
+   "pipeline_mc_se": 2.0420438799434292e-05,
+   "z": 1.3212827317140932,
+   "pass": true,
+   "independent_sims": 200000
+  },
+  "clock_signed_error_2-7": {
+   "independent": -0.01951034184562141,
+   "pipeline": -0.019510341845621414,
+   "abs_diff": 3.469446951953614e-18,
+   "pass": true
+  },
+  "clock_signed_error_14-20": {
+   "independent": -0.039046541876223376,
+   "pipeline": -0.039046541876223376,
+   "abs_diff": 0.0,
+   "pass": true
+  },
+  "clock_early_crps_improvement": {
+   "independent": 0.006009521855000001,
+   "independent_mc_se": 2.847206590296468e-05,
+   "pipeline": 0.005962235297916662,
+   "pipeline_mc_se": 5.228443149482702e-05,
+   "z": 0.7942755837846489,
+   "pass": true,
+   "independent_sims": 200000
+  }
+ },
+ "pass": true
+}

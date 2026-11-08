@@ -47,6 +47,10 @@ NOTES = {
                "compare them only through one_step (action marginal).",
 }
 EXACT_MAX_N = 4
+# The pre-specified primary contrast is one frozen experiment: core arm 6 (Llama 3.1 8B,
+# configs/core.yaml). Other arms with the same channel, size, graph and memory (for example
+# the exploratory OLMo arm 91) are not the primary contrast (independent review M2).
+PRIMARY_ARM = ("core_cheap_talk", 6)
 
 
 @dataclass
@@ -141,6 +145,13 @@ def is_primary_contrast(channel: str, n: int, graph: str, design: dict) -> bool:
     return (channel == "cheap_talk" and n == 10 and graph == "cycle"
             and design.get("last_k", "missing") is None
             and design.get("arm") == "core_cheap_talk" and design.get("arm_id") == 6)
+
+def is_primary(data) -> bool:
+    """True only for the frozen primary experiment (core arm 6, cheap talk, n = 10 cycle,
+    full history). Wrapper over is_primary_contrast."""
+    return is_primary_contrast(data.channel, data.n, data.graph, data.meta.get("design", {}))
+
+
 
 
 def analyse_condition(data: RunData, g: Graph, tables: Tables, n_model: int = 20000,
