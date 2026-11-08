@@ -160,41 +160,36 @@ def test_primary_flag_needs_the_frozen_arm():
 
 
 def test_resume_rejects_a_changed_observation_intervention(tmp_path):
-    """Codex review m4: the same condition must not be resumed under a different
-    observation intervention (the fingerprint alone does not bind it)."""
+    """Codex review m4 (the core's copy of the check; the guard is swarm.bind_observation
+    from the extra-arms branch): a condition must not be resumed under a different
+    observation intervention, although the fingerprint alone does not bind it."""
     from swarm_audit.followup import record_observer
     from swarm_audit.provenance import ProvenanceError
     from swarm_audit.swarm import Condition, load_runs, run_condition
 
     be = ScriptedBackend("hidden_signal", render_prompts=False)
     c1 = Condition("probe", 1, 1, "cheap_talk", 4, "cycle", 3, 1, runs=1, base_seed=1)
-    run_condition(c1, be, tmp_path, log=lambda *a: None, observe=record_observer("unmodified"),
-                  observe_name="unmodified")
+    run_condition(c1, be, tmp_path, log=lambda *a: None, observe=record_observer("unmodified"))
     c2 = Condition("probe", 1, 1, "cheap_talk", 4, "cycle", 3, 1, runs=2, base_seed=1)
     with pytest.raises(ProvenanceError):
-        run_condition(c2, be, tmp_path, log=lambda *a: None, observe=record_observer("both_null"),
-                      observe_name="both_null")
-    # the same intervention resumes normally
-    run_condition(c2, be, tmp_path, log=lambda *a: None, observe=record_observer("unmodified"),
-                  observe_name="unmodified")
+        run_condition(c2, be, tmp_path, log=lambda *a: None, observe=record_observer("both_null"))
+    with pytest.raises(ProvenanceError):     # dropping the intervention is a change too
+        run_condition(c2, be, tmp_path, log=lambda *a: None)
+    run_condition(c2, be, tmp_path, log=lambda *a: None, observe=record_observer("unmodified"))
     assert load_runs(tmp_path / "probe" / c2.name).R == 2
-    with pytest.raises(ValueError):          # an intervention must be named
-        run_condition(c2, be, tmp_path, observe=record_observer("unmodified"))
 
 
-def test_legacy_condition_without_observation_record_is_checked_against_the_manifest(tmp_path):
+def test_plain_conditions_are_unaffected_by_the_observation_guard(tmp_path):
+    from swarm_audit.followup import record_observer
     from swarm_audit.provenance import ProvenanceError
     from swarm_audit.swarm import Condition, run_condition
 
     be = ScriptedBackend("coin", render_prompts=False)
-    c = Condition("legacy", 1, 1, "counts", 4, "cycle", 3, 1, runs=1, base_seed=1)
+    c = Condition("plain", 1, 1, "counts", 4, "cycle", 3, 1, runs=1, base_seed=1)
     out = run_condition(c, be, tmp_path, log=lambda *a: None)
-    (out / "observation.json").unlink()                     # as logged before the guard
-    c2 = Condition("legacy", 1, 1, "counts", 4, "cycle", 3, 1, runs=2, base_seed=1)
-    run_condition(c2, be, tmp_path, log=lambda *a: None)    # no intervention, as recorded
-    (out / "observation.json").unlink()
-    from swarm_audit.followup import record_observer
-    with pytest.raises(ProvenanceError):
-        run_condition(Condition("legacy", 1, 1, "counts", 4, "cycle", 3, 1, runs=3, base_seed=1), be,
-                      tmp_path, log=lambda *a: None, observe=record_observer("both_null"),
-                      observe_name="both_null")
+    assert not (out / "observation.json").exists()          # no new file for plain runs
+    c2 = Condition("plain", 1, 1, "counts", 4, "cycle", 3, 1, runs=2, base_seed=1)
+    run_condition(c2, be, tmp_path, log=lambda *a: None)
+    with pytest.raises(ProvenanceError):                    # cannot switch an intervention on
+        run_condition(Condition("plain", 1, 1, "counts", 4, "cycle", 3, 1, runs=3, base_seed=1), be,
+                      tmp_path, log=lambda *a: None, observe=record_observer("both_null"))

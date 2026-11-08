@@ -206,60 +206,16 @@ def update_manifest(arm_dir: Path, cond: Condition, provenance: dict, session: d
     path.write_text(json.dumps(man, indent=2, default=str) + "\n")
 
 
-OBSERVATION_SPEC_VERSION = 1
-
-
-def bind_observation(out: Path, arm_dir: Path, cond_name: str, observe_name: str | None) -> None:
-    """Bind the observation intervention of a condition (Codex review m4, 8 Nov 2026).
-
-    The run fingerprint (provenance.json) does not include the intervention, and it is
-    never rewritten, so the intervention is bound separately in `observation.json`,
-    written before the first run and checked on every resume. For conditions logged
-    before this guard existed, the names recorded in the manifest's sessions are checked
-    instead. Raises ProvenanceError on any change, so one condition can never mix
-    treatments."""
-    path = out / "observation.json"
-    want = {"observe": observe_name, "version": OBSERVATION_SPEC_VERSION}
-    has_runs = any(out.glob("run_*.jsonl.gz"))
-    if path.exists():
-        got = json.loads(path.read_text())
-        if got.get("observe") != observe_name:
-            raise ProvenanceError(
-                f"{out}: runs were logged under observation {got.get('observe')!r}; this session "
-                f"asks for {observe_name!r}. Use a new arm for a different intervention.")
-        return
-    if has_runs:
-        man = arm_dir / "manifest.json"
-        sessions = (json.loads(man.read_text())["conditions"].get(cond_name, {}).get("sessions", [])
-                    if man.exists() else [])
-        recorded = {s.get("observe") for s in sessions}
-        if not sessions or recorded != {observe_name}:
-            raise ProvenanceError(
-                f"{out}: cannot verify that existing runs used observation {observe_name!r} "
-                f"(manifest sessions record {sorted(map(str, recorded)) or 'none'}).")
-    out.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps({**want, "bound": _dt.datetime.now(_dt.timezone.utc).isoformat(),
-                                "legacy_check": "manifest sessions" if has_runs else None}) + "\n")
-
-
 def run_condition(cond: Condition, backend: Backend, runs_root: Path, chunk: int | None = None,
                   extra_manifest: dict | None = None, log=print, max_runs: int | None = None,
-                  observe: Callable[[Record], Record] | None = None,
-                  observe_name: str | None = None) -> Path:
+                  observe: Callable[[Record], Record] | None = None) -> Path:
     """Run every unfinished run of `cond`, `chunk` runs at a time in lockstep (all at
     once by default), writing each run's log as it completes. Returns the folder.
-    max_runs: run only the first that many unfinished runs (e.g. a benchmark).
-    observe / observe_name: an observation intervention and its name; the name is bound
-    to the condition and checked on resume (bind_observation)."""
+    max_runs: run only the first that many unfinished runs (e.g. a benchmark)."""
     out = runs_root / cond.arm / cond.name
-    observe_name = observe_name or (extra_manifest or {}).get("observe")
-    if observe is not None and not observe_name:
-        raise ValueError("an observation intervention needs a name (observe_name)")
-    if observe is None and observe_name:
-        raise ValueError(f"observe_name {observe_name!r} given without an intervention")
     # Review C2: bind the configuration before computing; a resume must match it.
     prov = bind_run_provenance(out, cond, backend, git_commit())
-    bind_observation(out, runs_root / cond.arm, cond.name, observe_name)
+    obs_spec = bind_observation(out, runs_root / cond.arm / "manifest.json", cond.name, observe)
     todo = [r for r in range(cond.runs) if not run_file(out, r).exists()]
     if len(todo) < cond.runs:
         log(f"{cond.name}: {cond.runs - len(todo)} runs already logged, {len(todo)} to run")
@@ -282,9 +238,48 @@ def run_condition(cond: Condition, backend: Backend, runs_root: Path, chunk: int
         "backend": backend.describe(), "git_commit": git_commit(),
         "time": _dt.datetime.now(_dt.timezone.utc).isoformat(),
         "runs_added": len(todo), "runs": list(todo), "seconds": round(time.time() - t0, 2),
-        "decisions": n_dec, "observe": observe_name,
+        "decisions": n_dec,
+        **({"observe": obs_spec["observe"]} if obs_spec else {}),
         **(extra_manifest or {}), **(extra_manifest or {}).get("session", {})}, summary)
     return out
+
+
+def bind_observation(folder: Path, manifest_path: Path, cond_name: str,
+                     observe: Callable[[Record], Record] | None) -> dict | None:
+    """Resume guard for the overnight follow-up's observation hook (independent review
+    m4, 8 Nov). The intervention is part of a condition's identity, but it is not in
+    Condition, so it is bound separately: observation.json is written before the first
+    run of a condition run with an observer, and every later session must name the same
+    intervention. Conditions that predate the file are checked against the observer
+    names their manifest sessions recorded. Without an observer and without a record,
+    nothing changes (core and earlier extra runs)."""
+    spec = None
+    if observe is not None:
+        spec = getattr(observe, "observe_spec", None) or {"observe": "custom", "version": 0}
+    name = spec["observe"] if spec else None
+    path = folder / "observation.json"
+    if path.exists():
+        bound = json.loads(path.read_text())
+        if bound.get("observe") != name or bound.get("version") != (spec or {}).get("version"):
+            raise ProvenanceError(f"{folder}: bound to observation {bound.get('observe')!r} "
+                                  f"(version {bound.get('version')}), asked to run with {name!r}")
+        return spec
+    sessions = []
+    if manifest_path.exists():
+        sessions = json.loads(manifest_path.read_text()).get("conditions", {}).get(
+            cond_name, {}).get("sessions", [])
+    logged = any(folder.glob("run_*.jsonl.gz"))
+    if sessions or logged:
+        prior = {s.get("observe") for s in sessions} if sessions else {None}
+        if prior != {name}:
+            raise ProvenanceError(f"{folder}: earlier sessions ran with observation "
+                                  f"{sorted(map(str, prior))}, asked to run with {name!r}")
+        return spec                          # legacy condition: consistent, left as it is
+    if spec is not None:
+        folder.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps({**spec, "bound": _dt.datetime.now(_dt.timezone.utc).isoformat()},
+                                   indent=1) + "\n")
+    return spec
 
 
 def summarise_condition(out: Path, cond: Condition) -> dict:

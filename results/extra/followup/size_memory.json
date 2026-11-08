@@ -336,6 +336,56 @@
    }
   }
  },
+ "multiplicity_sensitivity": {
+  "note": "post hoc sensitivity added after the independent review; the frozen plan's nominal 95% intervals are the specified analysis",
+  "method": "Bonferroni-adjusted Newcombe hybrid score intervals",
+  "two_size_contrasts": {
+   "alpha_per_contrast": 0.025,
+   "intervals": {
+    "size_within_last1": {
+     "diff": -0.16,
+     "lo": -0.30608633146046416,
+     "hi": -0.03593414307225222,
+     "method": "Newcombe hybrid score (Wilson components), 97.5%"
+    },
+    "size_within_full": {
+     "diff": -0.1,
+     "lo": -0.23425150569955627,
+     "hi": 0.009922038076755152,
+     "method": "Newcombe hybrid score (Wilson components), 97.5%"
+    }
+   }
+  },
+  "all_four_contrasts": {
+   "alpha_per_contrast": 0.0125,
+   "intervals": {
+    "memory_within_n4": {
+     "diff": -0.06,
+     "lo": -0.23780071499574856,
+     "hi": 0.11815088612310501,
+     "method": "Newcombe hybrid score (Wilson components), 98.75%"
+    },
+    "memory_within_n10": {
+     "diff": 0.0,
+     "lo": -0.11092986150949416,
+     "hi": 0.11092986150949416,
+     "method": "Newcombe hybrid score (Wilson components), 98.75%"
+    },
+    "size_within_last1": {
+     "diff": -0.16,
+     "lo": -0.32551083816050275,
+     "hi": -0.017102917587616784,
+     "method": "Newcombe hybrid score (Wilson components), 98.75%"
+    },
+    "size_within_full": {
+     "diff": -0.1,
+     "lo": -0.2536996949866578,
+     "hi": 0.028548398974560657,
+     "method": "Newcombe hybrid score (Wilson components), 98.75%"
+    }
+   }
+  }
+ },
  "checks": {
   "n10_last1": {
    "kernel_fingerprint_matches_tables": true,

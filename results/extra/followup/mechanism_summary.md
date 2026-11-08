@@ -112,10 +112,16 @@ P(F = 1) with Clopper–Pearson 95% intervals [S cells]:
 | n = 4 | 8/50 [0.07, 0.29] | 5/50 [0.03, 0.22] |
 | n = 10 | 0/50 [0, 0.07] | 0/50 [0, 0.07] |
 
-- **Size matters.** From n = 4 to n = 10, P(F = 1) falls under both memories. The
-  Newcombe 95% intervals exclude 0 [S contrasts]:
+- **Size matters, clearly so only under last-round memory.** From n = 4 to n = 10, P(F = 1)
+  falls under both memories, and the nominal (unadjusted, as planned) Newcombe 95%
+  intervals exclude 0 [S contrasts]:
   - last-round history: −0.16 [−0.29, −0.06]
   - full history: −0.10 [−0.21, −0.01]
+- **Correcting for multiple comparisons** (post hoc, after the independent review) changes
+  only the full-history contrast [S multiplicity_sensitivity]:
+  - Bonferroni over the two size contrasts gives [−0.31, −0.04] (last-round) and
+    [−0.23, +0.01] (full history).
+  - Over all four contrasts, last-round history stays below 0 ([−0.33, −0.02]).
 - **Memory shows no detectable effect:** −0.06 [−0.20, +0.08] at n = 4, and 0 at n = 10.
 - **The forecasts, committed before the runs, agree:** 0.008 for n = 10 last-round; 0.112
   for n = 4 full history, approximated from the 9b table.

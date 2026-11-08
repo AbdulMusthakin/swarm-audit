@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 from swarm_audit import build
 
 
@@ -205,3 +207,71 @@ def test_first_entry_excludes_reentries():
     assert abs(E.sum() - v[AH].sum()) < 1e-12
     L = fu.propagate(P, v1, 4, T)
     assert fu.all_entry(L["v"], P, AH).sum() >= E.sum() - 1e-15
+
+
+# ---------------------------------------- resume guard for the observation hook (m4)
+
+
+def test_resume_with_a_different_observer_is_rejected(tmp_path):
+    """The independent review's probe (m4): run 0 unmodified, then resume under both_null."""
+    from dataclasses import replace
+
+    import pytest
+
+    from swarm_audit.policies import ScriptedBackend
+    from swarm_audit.provenance import ProvenanceError
+    from swarm_audit.swarm import Condition, run_condition
+
+    c = Condition(arm="probe", arm_id=9001, condition_id=4, channel="cheap_talk", n=4, last_k=1, runs=1)
+    be = ScriptedBackend("hidden_signal")
+    folder = run_condition(c, be, tmp_path, observe=fu.record_observer("unmodified"), log=lambda _: None)
+    assert json.loads((folder / "observation.json").read_text())["observe"] == "unmodified"
+    with pytest.raises(ProvenanceError):
+        run_condition(replace(c, runs=2), be, tmp_path, observe=fu.record_observer("both_null"), log=lambda _: None)
+    with pytest.raises(ProvenanceError):
+        run_condition(replace(c, runs=2), be, tmp_path, log=lambda _: None)        # observer dropped
+    run_condition(replace(c, runs=2), be, tmp_path, observe=fu.record_observer("unmodified"), log=lambda _: None)
+    man = json.loads((tmp_path / "probe" / "manifest.json").read_text())["conditions"][c.name]
+    assert [s["observe"] for s in man["sessions"]] == ["unmodified", "unmodified"]
+    assert man["summary"]["runs_logged"] == 2
+
+
+def test_runs_without_observer_write_no_binding_and_resume_as_before(tmp_path):
+    from dataclasses import replace
+
+    import pytest
+
+    from swarm_audit.policies import ScriptedBackend
+    from swarm_audit.provenance import ProvenanceError
+    from swarm_audit.swarm import Condition, run_condition
+
+    c = Condition(arm="plain", arm_id=9002, condition_id=4, channel="cheap_talk", n=4, last_k=1, runs=1)
+    be = ScriptedBackend("hidden_signal")
+    folder = run_condition(c, be, tmp_path, log=lambda _: None)
+    assert not (folder / "observation.json").exists()
+    run_condition(replace(c, runs=2), be, tmp_path, log=lambda _: None)
+    man = json.loads((tmp_path / "plain" / "manifest.json").read_text())["conditions"][c.name]
+    assert all("observe" not in s for s in man["sessions"])
+    with pytest.raises(ProvenanceError):                       # adding an observer later
+        run_condition(replace(c, runs=3), be, tmp_path, observe=fu.record_observer("own_null"), log=lambda _: None)
+
+
+def test_completed_e2_cells_are_guarded_through_their_manifests():
+    """Legacy E2 cells (no observation.json): read-only check against recorded sessions."""
+    import pytest
+
+    from swarm_audit.build import REPO_ROOT
+    from swarm_audit.provenance import ProvenanceError
+    from swarm_audit.swarm import bind_observation
+
+    root = REPO_ROOT / "results/extra/followup/runs"
+    for proc in ("unmodified", "own_null", "neighbour_null", "both_null"):
+        folder = root / f"followup_obs_{proc}" / "cheap_talk_n4_cycle_last1"
+        man = folder.parent / "manifest.json"
+        assert bind_observation(folder, man, folder.name, fu.record_observer(proc))["observe"] == proc
+        other = "both_null" if proc != "both_null" else "unmodified"
+        with pytest.raises(ProvenanceError):
+            bind_observation(folder, man, folder.name, fu.record_observer(other))
+        with pytest.raises(ProvenanceError):
+            bind_observation(folder, man, folder.name, None)
+        assert not (folder / "observation.json").exists()      # legacy evidence untouched
