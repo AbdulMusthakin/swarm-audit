@@ -1,0 +1,34 @@
+[
+ {
+  "what": "G3 batch_invariant=True",
+  "seconds": 419.8,
+  "containers": 1,
+  "usd": 0.7288,
+  "time": "2026-11-08T13:31:04.861118+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 120.0,
+  "containers": 1,
+  "usd": 0.2083,
+  "time": "2026-11-08T13:31:04.861457+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "audit/counts_d2_enumerated",
+  "seconds": 0.9,
+  "containers": 1,
+  "usd": 0.0016,
+  "time": "2026-11-08T13:31:10.509174+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ },
+ {
+  "what": "idle after script (upper bound)",
+  "seconds": 120.0,
+  "containers": 1,
+  "usd": 0.2083,
+  "time": "2026-11-08T13:31:10.510197+00:00",
+  "note": "wall-clock estimate at the list price; check the Modal dashboard"
+ }
+]

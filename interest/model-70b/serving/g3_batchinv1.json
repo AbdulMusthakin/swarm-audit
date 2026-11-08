@@ -1,0 +1,24 @@
+{
+ "batch_invariant": true,
+ "prompts": 200,
+ "others": 1000,
+ "max_abs_diff_p_H": 0.0,
+ "max_abs_diff_signal": 0.0,
+ "by_pair": {
+  "alone_vs_batch": 0.0,
+  "alone_vs_warm": 0.0,
+  "batch_vs_warm": 0.0
+ },
+ "seconds": {
+  "alone": 201.96092677116394,
+  "batch": 198.1144313812256,
+  "warm": 19.699583530426025,
+  "total": 419.77592730522156
+ },
+ "throughput_prompts_per_s_batch": 6.057105439688422,
+ "workspace": "aliyusufbelal",
+ "model": {
+  "hf_id": "meta-llama/Llama-3.1-70B-Instruct",
+  "revision": "1605565b47bb9346c5515c34102e054115b4f98b"
+ }
+}

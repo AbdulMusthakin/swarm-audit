@@ -56,7 +56,7 @@ serving:
   gpu_memory_utilization: 0.90
   enforce_eager: true
   batch_invariant: true      # the core's G3 choice; G3 is re-measured on this GPU
-  numerical_floor: null      # set from interest/model-70b/serving/g3_batchinv1.json
+  numerical_floor: 0.0   # G3 on the B200 (interest/model-70b/serving/g3_batchinv1.json)
   max_containers: 1
   deployed: true
   scaledown_window_s: 120    # steps are chained back to back; a B200 idles at about $6/h
