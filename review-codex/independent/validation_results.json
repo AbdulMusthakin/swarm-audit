@@ -12,7 +12,7 @@
     "passed": 5,
     "source_commit": "4a817051abffbdf208eb38a2b09160ab9d49aa0f"
   },
-  "claim_rows": 31,
+  "claim_rows": 43,
   "original_primary_CDF_and_per_run_D_max_error": 0,
   "calibration_exact_MC_p_reproduction": true,
   "paid_compute_calls": 0,
@@ -23,5 +23,20 @@
     "serving checks read from saved evidence, not rerun",
     "counts and scale arms not independently replicated end to end",
     "new C2 interval arrays not exhaustively recomputed"
-  ]
+  ],
+  "prior_pass_claim_rows": 31,
+  "continuation": {
+    "source_core": "f8ad9bbb88ee538d1c9563c51e0a1d97e4401711",
+    "source_extra": "9aa31705b9ae5ee45f27a87feeb1a2e2415f318f",
+    "regression_tests_passed": 22,
+    "newly_rebuilt_log_decisions": 60000,
+    "real_intervention_mismatches": 0,
+    "new_resume_guard_gap_reproduced_offline": true,
+    "research_ref_fetches": 1,
+    "limits": [
+      "source n20 table-resampling sensitivity not independently rerun",
+      "no fresh live serving/weights checks",
+      "theorem/setup incorporation remains for report authors"
+    ]
+  }
 }

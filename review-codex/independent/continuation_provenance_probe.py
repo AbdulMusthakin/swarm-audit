@@ -19,7 +19,8 @@ def main():
     from swarm_audit.followup import record_observer
     c=Condition(arm='review_provenance_probe',arm_id=9001,condition_id=4,channel='cheap_talk',n=4,last_k=1,runs=1)
     backend=ScriptedBackend('hidden_signal')
-    with tempfile.TemporaryDirectory(prefix='review-only-provenance-',dir='/workspace/work') as tmp:
+    args.out.parent.mkdir(parents=True,exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='review-only-provenance-',dir=args.out.parent) as tmp:
         root=Path(tmp)
         folder=run_condition(c,backend,root,observe=record_observer('unmodified'),extra_manifest={'observe':'unmodified'},log=lambda _:None)
         first=json.loads((folder/'provenance.json').read_text())

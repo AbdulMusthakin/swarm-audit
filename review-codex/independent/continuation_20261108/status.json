@@ -1,0 +1,23 @@
+{
+  "core_source_commit": "f8ad9bbb88ee538d1c9563c51e0a1d97e4401711",
+  "extra_source_commit": "9aa31705b9ae5ee45f27a87feeb1a2e2415f318f",
+  "review_base_commit": "2986f04fc0e331b11d276f6d6f3d91f234ca5e9d",
+  "new_PR9_replies_at_fetch": 0,
+  "all_scheduled_core_and_extra_live_cells_complete_in_snapshot": true,
+  "fixes_verified": [
+    "M1 MC docstring and explicit sensitivities",
+    "M2 frozen-arm classification and derived override",
+    "M4 causal content-shift qualification",
+    "m1 first-entry diagnostic",
+    "m2 status text"
+  ],
+  "new_issues": [
+    "minor: observer absent from immutable run identity; no actual mixed treatment found",
+    "report qualification: full-memory size contrast not robust to even two-comparison multiplicity sensitivity"
+  ],
+  "tests_passed": 22,
+  "paid_compute": 0,
+  "fresh_model_queries": 0,
+  "agent_branches_changed": 0,
+  "merges": 0
+}

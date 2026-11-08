@@ -5,7 +5,7 @@ invalidation was found. Material corrections concern Monte Carlo uncertainty,
 exploratory classification and causal wording. The original endpoint null survives.
 
 - [Findings and concrete fixes](findings.md)
-- [Claim-to-evidence table: 31 rows](claims.csv)
+- [Claim-to-evidence table: 43 rows](claims.csv)
 - [Reproduction, source commits and test results](reproduce.md)
 - [Report wording, at most three figures and verified related work](report_notes.md)
 - [Independent scripts and machine-readable outputs](independent/)
@@ -19,7 +19,14 @@ are in the reproduction record and claim table. Research branches and original
 evidence were not changed. Only this isolated review branch was published, after
 explicit user authorisation. No merge, paid compute or fresh model query occurred.
 
-The new clock audit and 50 new OLMo n10 last1 live runs were independently checked.
-The remaining n4 full-memory/E2 live cells and completion of partial core arms should
-be reviewed when available; they were not present as complete committed results in
-this pass. A continuation is scheduled for 05:30 Europe/London on 8 November 2026.
+The scheduled continuation is complete. It reviewed core `f8ad9bb` and extra
+`9aa3170` after one research-ref fetch, and independently checked the completed E2
+live interventions, n4 full-memory OLMo cell, Llama n20 and both K10 arms. New
+outputs are under `independent/continuation_20261108/`.
+
+The earlier MC, primary-label, first-entry and causal-wording corrections were
+verified in source. The live results reproduce; the report should retain nominal
+interval/multiplicity qualifications. A new minor resume-identity gap is reproduced
+with a scripted CPU backend; the real intervention logs are correct. The theorem
+proof and setup wording still need incorporation by the report authors. No new
+GPU work is required by this review.

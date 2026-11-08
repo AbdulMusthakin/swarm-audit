@@ -155,3 +155,23 @@ The provenance probe is deliberately different: it imports the actual project
 runner under test and uses its scripted CPU backend in a temporary directory.
 It never invokes the LLM backend or a remote service. It demonstrates the missing
 observer binding and leaves all original run evidence unchanged.
+
+Continuation regression checks at core `f8ad9bb`:
+
+```sh
+(cd ../core-continuation-snapshot && OPENBLAS_NUM_THREADS=1 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 ../review-venv/bin/python -m pytest -q tests/test_followup.py tests/test_followup_core.py)
+```
+
+**22 passed**, 2.28s, one existing pytest-plugin deprecation warning. This includes
+primary classification, first-entry and observation-hook tests. A preliminary
+focused selection passed3 tests; the complete two-file set is the recorded result.
+The new independent log audits cover60k decisions across the newly checked cells;
+whole-run uncertainty remains computed per condition, not by treating decisions
+as independent samples. All original tracked files and detached snapshots remained
+unchanged. New machine outputs and claim-table validation passed.
+
+Known limits of this continuation: no fresh server/weight check; no independent
+rerun of the n20 table-bootstrap arrays; no exhaustive novelty search or final
+paper rewrite. The original primary comparison and calibration chronology were
+not recomputed unnecessarily. PR9 responses were checked once; the later update
+posts the new minor safeguard finding and the completed checks.

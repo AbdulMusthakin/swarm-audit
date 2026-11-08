@@ -12,6 +12,13 @@ important corrections concern simulation uncertainty and experiment classificati
 the strongest explanatory result concerns own-message retention and synthetic
 averaging in one exploratory, bounded-memory OLMo condition.
 
+**Current disposition after the scheduled continuation:** the earlier MC docstring,
+primary classification, first-entry, status-text and causal-wording corrections
+are verified. Completed new live cells and Llama secondary comparisons reproduce.
+See the continuation section for a new minor resume-provenance gap and a
+multiplicity sensitivity. The theorem proof and setup wording remain work for the
+report authors; no additional compute is required for the corrections.
+
 All computations were local CPU calculations. No paid compute, model queries, agent
 credentials, Modal workspaces, deployed servers, original evidence, or agent branches
 were modified. After the user's subsequent authorisation to coordinate corrections,
