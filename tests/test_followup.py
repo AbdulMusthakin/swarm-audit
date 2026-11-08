@@ -169,3 +169,39 @@ def test_live_own_null_routes_only_the_own_message():
                {k: v for k, v in row["record"].items() if k != "signal"}
         if row["round"] > 1:
             assert row["state_sig"].endswith("-none")
+
+
+def test_primary_contrast_label_needs_the_core_arm():
+    import json
+
+    from swarm_audit.analysis import is_primary_contrast
+    from swarm_audit.build import REPO_ROOT
+
+    core = json.loads((REPO_ROOT / "results/runs/core_cheap_talk/cheap_talk_n10_cycle_full/provenance.json")
+                      .read_text())["payload"]["design"]
+    olmo = json.loads((REPO_ROOT / "results/extra/runs/olmo_core_cheap_talk/cheap_talk_n10_cycle_full/provenance.json")
+                      .read_text())["payload"]["design"]
+    assert is_primary_contrast("cheap_talk", 10, "cycle", core)
+    assert not is_primary_contrast("cheap_talk", 10, "cycle", olmo)
+    assert not is_primary_contrast("cheap_talk", 10, "cycle", {**core, "last_k": 1})
+    assert not is_primary_contrast("counts", 10, "cycle", core)
+
+
+def test_first_entry_excludes_reentries():
+    """First-entry mass equals the hitting probability computed with AH made absorbing."""
+    d, g = 2, make("cycle", 4)
+    J = _scripted_J(d, 4)
+    P = fu.transition_matrix(fu.agent_vectors(J, g))
+    v1 = fu.start_law(np.full(6, 1 / 6), 4)
+    AH = fu.all_high(4)
+    T = 8
+    E = fu.first_entry(P, v1, AH, T)
+    Pa = P.copy()
+    Pa[AH] = 0.0
+    Pa[np.ix_(AH, AH)] = np.eye(int(AH.sum()))             # absorb on entry
+    v = v1.copy()
+    for _ in range(T - 1):
+        v = v @ Pa
+    assert abs(E.sum() - v[AH].sum()) < 1e-12
+    L = fu.propagate(P, v1, 4, T)
+    assert fu.all_entry(L["v"], P, AH).sum() >= E.sum() - 1e-15

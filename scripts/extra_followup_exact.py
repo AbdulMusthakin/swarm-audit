@@ -98,18 +98,15 @@ def diagnostics(P_both: np.ndarray, v: np.ndarray, Ps: dict, AH: np.ndarray, Pr:
     m = Pr % 3
     comp = np.stack([(v[:, AH] @ (m[AH] == j).mean(1)) for j in range(3)], 1)   # (T, 3)
     comp_rel = comp / np.where(occ[:, None] > 0, occ[:, None], np.nan)
-    entry = np.zeros(T)
-    entry[0] = occ[0]
-    entry_prof = np.zeros((T, AH.sum()))
-    entry_prof[0] = v[0, AH]
-    for t in range(1, T):
-        flow = v[t - 1, ~AH] @ P_both[np.ix_(~AH, AH)]
-        entry_prof[t] = flow
-        entry[t] = flow.sum()
+    # first entry (plan.json); re-entries excluded (independent review m1, 8 Nov)
+    entry_prof = fu.first_entry(P_both, v[0], AH, T)
+    entry = entry_prof.sum(1)
+    all_prof = fu.all_entry(v, P_both, AH)
     pi_entry = entry_prof.sum(0) / entry_prof.sum()
+    pi_all = all_prof.sum(0) / all_prof.sum()
     w_r = v[1:, AH].sum(0) / v[1:, AH].sum()                         # occupancy over rounds 2-20
     pooled_comp = [float(w_r @ (m[AH] == j).mean(1)) for j in range(3)]
-    exit_by_variant, survival = {}, {}
+    exit_by_variant, survival, survival_all = {}, {}, {}
     for name, P in Ps.items():
         stay = P[np.ix_(AH, AH)].sum(1)
         exit_by_variant[name] = {
@@ -121,6 +118,11 @@ def diagnostics(P_both: np.ndarray, v: np.ndarray, Ps: dict, AH: np.ndarray, Pr:
             out.append(float(s.sum()))
             s = s @ Q
         survival[name] = out
+        s, out = pi_all.copy(), []
+        for _ in range(T):
+            out.append(float(s.sum()))
+            s = s @ Q
+        survival_all[name] = out
     # occupancy-weighted distribution of the agent-level (c, o) slice in all-H profiles
     a_idx = Pr // 3
     slice_w = {}
@@ -141,15 +143,22 @@ def diagnostics(P_both: np.ndarray, v: np.ndarray, Ps: dict, AH: np.ndarray, Pr:
         "own_message_share_within_all_H_rounds_2_20": dict(zip(SIGNALS, pooled_comp)),
         "audit_weight_on_each_own_message": 1 / 3,
         "entry_probability_per_round": entry.tolist(),
+        "entry_definition": "first entry into all-H (re-entries excluded), as frozen in plan.json",
+        "P_ever_all_H_by_T": float(entry.sum()),
+        "expected_entries_including_reentries": float(all_prof.sum()),
+        "tv_first_vs_all_entry_distribution": float(0.5 * np.abs(pi_entry - pi_all).sum()),
         "exit_one_step_oracle": exit_by_variant,
         "survival_from_both_entry_distribution": survival,
+        "survival_from_all_entry_mixture_secondary": survival_all,
+        "survival_max_abs_diff_first_vs_all_entry": float(max(
+            np.abs(np.array(survival[k]) - np.array(survival_all[k])).max() for k in survival)),
         "slice_H2_occupancy_weighted": {
             "distribution_over_(s_high,s_low,own)": {f"{a}-{b}-{SIGNALS[c]}": w for (a, b, c), w in
                                                      sorted(slice_w.items(), key=lambda z: -z[1])},
             "P_H_occupancy_weighted": p_h_slice, "P_H_ptest_weighted": p_h_ptest,
             "label": "ORACLE diagnostic: weights are the full chain's own occupancy, not an audit"},
         "labels": {"exit": "occupancy-weighted oracle diagnostic (both chain's all-H distribution at t)",
-                   "survival": "finite-horizon persistence in all-H from the both chain's entry distribution; not absorption"},
+                   "survival": "finite-horizon persistence in all-H from the both chain's FIRST-entry distribution; not absorption"},
     }
 
 
@@ -278,10 +287,7 @@ def run_model(name: str, spec: dict) -> tuple[dict, dict]:
         s = fu.law_summary(L["y"], L["EX"], N)
         # survival in all-H from this process's own entry distribution
         v = L["v"]
-        ent = np.zeros((T, AH.sum()))
-        ent[0] = v[0, AH]
-        for t in range(1, T):
-            ent[t] = v[t - 1, ~AH] @ P[np.ix_(~AH, AH)]
+        ent = fu.first_entry(P, v1, AH, T)          # first entry (independent review m1)
         pi = ent.sum(0) / ent.sum()
         Q = P[np.ix_(AH, AH)]
         sv, out = pi.copy(), []
@@ -289,6 +295,7 @@ def run_model(name: str, spec: dict) -> tuple[dict, dict]:
             out.append(float(sv.sum()))
             sv = sv @ Q
         s["survival_own_entry"] = out
+        s["survival_entry_definition"] = "first entry into all-H under this process"
         s["occupancy_all_H"] = v[:, AH].sum(1).tolist()
         s["evidence"] = "exact, model-based counterfactual on the cached kernel (not live)"
         procs[p] = s

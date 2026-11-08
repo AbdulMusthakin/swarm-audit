@@ -221,3 +221,26 @@ def record_observer(name: str):
     if name not in fns:
         raise ValueError(f"unknown observation intervention {name!r}")
     return fns[name]
+
+
+def first_entry(P: np.ndarray, v1: np.ndarray, AH: np.ndarray, T: int) -> np.ndarray:
+    """E[t, x] = P(the chain first enters the set AH at round t, at profile x in AH),
+    t = 1..T (round 1: the START draw). Mass that has entered is removed before the next
+    transition, so re-entries are excluded (plan.json: first entry)."""
+    E = np.zeros((T, int(AH.sum())))
+    E[0] = v1[AH]
+    u = np.where(AH, 0.0, v1)[~AH]                 # mass that has never been in AH
+    P_out_in, P_out_out = P[np.ix_(~AH, AH)], P[np.ix_(~AH, ~AH)]
+    for t in range(1, T):
+        E[t] = u @ P_out_in
+        u = u @ P_out_out
+    return E
+
+
+def all_entry(v: np.ndarray, P: np.ndarray, AH: np.ndarray) -> np.ndarray:
+    """Every entry (re-entries included): flow into AH from outside at each round."""
+    E = np.zeros((len(v), int(AH.sum())))
+    E[0] = v[0, AH]
+    for t in range(1, len(v)):
+        E[t] = v[t - 1, ~AH] @ P[np.ix_(~AH, AH)]
+    return E
