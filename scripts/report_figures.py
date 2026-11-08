@@ -10,6 +10,10 @@
   over two) without their titles, with the early window labelled "(early)".
 - figA_olmo_mechanism.pdf: Figure 2 of scripts/extra_followup_figures.py, redrawn at the
   report's text width in the report's font, with its text enlarged to at least 7 pt.
+- figA_contraction.pdf: the primary Llama setting's current-round TV bound estimates from
+  results/followup/dobrushin/ (Theorem 1, contraction with the same per-agent defects,
+  contraction with joint one-step defects) against the observed roundwise TV and its
+  simultaneous sampling cutoff.
 
 CPU only; reads committed results. Run scripts/report_fresh_cohort.py first.
 
@@ -38,6 +42,7 @@ from swarm_audit.plots import COLOURS, GRID, INK, INK2, SURFACE  # noqa: E402
 OUT = REPO / "report" / "figures"
 OLMO10 = REPO / "results/extra/analysis/olmo_core_cheap_talk/cheap_talk_n10_cycle_full.json"
 FRESH = REPO / "results/extra/followup/fresh_cohort_roundwise.json"
+CONTRACTION = REPO / "results/followup/dobrushin/dobrushin_results.json"
 WIDTH = 6.5  # inches: the width at which the report prints every figure
 
 if any("Carlito" in f.name for f in font_manager.fontManager.ttflist):
@@ -204,9 +209,56 @@ def olmo_mechanism_figure() -> None:
                 json.loads((F / "observation_interventions.json").read_text()))
 
 
+def contraction_figure() -> None:
+    """Primary Llama setting: bound estimates for the current-round bid-profile TV."""
+    res = json.loads(CONTRACTION.read_text())["results"]
+    r = next(x for x in res if x["condition"]["channel"] == "cheap_talk"
+             and x["condition"]["n"] == 10 and x["condition"]["graph"] == "cycle"
+             and x["condition"]["last_k"] is None)
+    t = np.asarray(r["rounds"])
+    cap = lambda v: np.minimum(np.asarray(v, dtype=float), 1.0)  # noqa: E731
+    th1 = cap(r["theorem1"])
+    same = cap(r["tv_contraction_same_local_defects"])
+    joint = cap(r["tv_contraction_joint_defect"])
+    lo, hi = (cap(v) for v in r["tv_contraction_joint_defect_ci"])
+    obs = np.asarray(r["observed_binned_tv"])
+    cut = r["observed_tv_null"]["max_over_rounds"]
+    blue = COLOURS["actions_only"]   # every curve concerns the actions-only audit
+
+    fig, ax = plt.subplots(figsize=(WIDTH, 3.1), facecolor=SURFACE)
+    style(ax)
+    ax.plot(t, th1, color=INK2, linewidth=1.6, linestyle=(0, (5, 3)),
+            label="Theorem 1, full trajectory (capped at 1)")
+    ax.plot(t, same, color=blue, linewidth=1.6, linestyle=(0, (1.5, 2)),
+            label="contraction, same per-agent defects")
+    ax.fill_between(t, lo, hi, color=blue, alpha=0.18, linewidth=0)
+    ax.plot(t, joint, color=blue, linewidth=2.2,
+            label="contraction, joint one-step defects (95% band)")
+    ax.axhline(cut, color=INK2, linewidth=0.9, linestyle=":",
+               label=f"sampling cutoff for the observed maximum ({cut:.3f})")
+    ax.plot(t, obs, color=INK, linewidth=1.4, marker="o", markersize=3.5,
+            label="observed roundwise TV, 50 live runs")
+    for y, txt in ((th1[-1], f"{th1[-1]:.0f}"), (same[-1], f"{same[-1]:.3f}"),
+                   (joint[-1], f"{joint[-1]:.3f}")):
+        ax.text(t[-1] + 0.3, y, txt, va="center", ha="left", fontsize=8, color=INK)
+    ax.set_xlim(1, t[-1])
+    ax.set_ylim(0, 1.05)
+    ax.set_xticks([1, 3, 5, 10, 15, 20])
+    ax.set_xlabel("round", color=INK2, fontsize=8.5)
+    ax.set_ylabel("TV distance (estimate)", color=INK2, fontsize=8.5)
+    ax.tick_params(labelsize=8)
+    ax.legend(frameon=False, fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.2),
+              ncol=2, handlelength=2.4, columnspacing=1.5)
+    fig.tight_layout()
+    fig.savefig(OUT / "figA_contraction.pdf", facecolor=SURFACE, bbox_inches="tight",
+                pad_inches=0.02)
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
     lead_figure()
+    contraction_figure()       # before the imported modules change matplotlib's defaults
     llama_figures()
     olmo_mechanism_figure()
     print(f"figures in {OUT.relative_to(REPO)}")

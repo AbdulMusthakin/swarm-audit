@@ -7,8 +7,7 @@
 %
 % Figures (CPU only, from committed results):
 %   python scripts/report_fresh_cohort.py   # fresh four-agent cohort, needed by Figure 1
-%   python scripts/report_figures.py        # fig1_olmo_lead, figA_llama_endpoint, figA_llama_clock
-% figures/figA_olmo_mechanism.pdf is results/extra/followup/figures/fig2_mechanism.pdf.
+%   python scripts/report_figures.py        # every PDF in figures/
 
 \documentclass[11pt,letterpaper]{article}
 
@@ -268,7 +267,7 @@ The actions-only audit's roundwise maximum stays below the original cutoff in bo
 
 \subsection{4.1 The prespecified Llama comparison was inconclusive}
 
-In the primary setting (Llama 3.1 8B, 10 agents, cheap talk, full history, 50 live runs), the paired endpoint contrast $D$ was $-0.000086$ with conditional 95\% interval $[-0.000221, +0.000035]$; rechecks at 740,000 simulated runs and with nested resampling also included zero (Appendix~B, Figure~A1).
+In the primary setting (Llama 3.1 8B, 10 agents, cheap talk, full history, 50 live runs), the paired endpoint contrast $D$ was $-0.000086$ with conditional 95\% interval $[-0.000221, +0.000035]$; rechecks at 740,000 simulated runs and with nested resampling also included zero (Appendix~B, Figure~\ref{fig:llama-endpoint}).
 An order-zero audit that ignores the previous round scored close to both audits (CRPS 0.041, against 0.040 for each).
 The comparison asks whether reading messages improves the endpoint forecast, not whether either forecast is accurate, and it had little to detect: in a pre-run screen, changing neighbours' messages moved Llama's probability of bidding high by 3.8 points on average.
 
@@ -296,13 +295,13 @@ This experiment shows what the chosen omnibus check missed; how much of the miss
 The miss comes from how the actions-only audit averages out messages.
 In all-high states it gives the agent's own ``low'' message one-third of the weight, but the live logs contained 0 of 608 such messages.
 After its own ``low'', an agent's next-high probability falls from above 0.998 to 0.68--0.73, so the averaged audit predicts exits from all-high that real agents do not make.
-Keeping only the agent's own message restores the cached event forecast to 13.73\% (Appendix~B, Figure~A3).
+Keeping only the agent's own message restores the cached event forecast to 13.73\% (Appendix~B, Figure~\ref{fig:olmo-mechanism}).
 
 \subsection{4.4 Llama: history-length tables trade early bias for endpoint error}
 
 Both Llama audits overpredicted high bidding early: in rounds 2--7 the observed high-bid fraction was about 0.32, against 0.38 forecast, and the roundwise check flagged it (0.261 against a cutoff of 0.238 for the actions-only audit; 0.289 against 0.235 for the signal-aware audit).
 A candidate cause is history length: tests used 1 to 19 past rounds, but at round $t$ an agent has seen $t-1$.
-Fitting separate tables for history-length bands 1--6, 7--12 and 13--19 from the same test histories shows a trade-off (Figure~A2).
+Fitting separate tables for history-length bands 1--6, 7--12 and 13--19 from the same test histories shows a trade-off (Figure~\ref{fig:llama-clock}).
 On live histories, the signal-aware audit's early one-step error fell in magnitude from about 5.8 to 2.0 points, while its average over rounds 14--20 grew from about 2.0 to 3.9 points.
 In autonomous forecasts the CRPS gain from the banded tables was $+0.0060$ $[+0.0033, +0.0086]$ in rounds 2--7 but $-0.0036$ $[-0.0070, -0.0002]$ at the endpoint.
 The pattern recurred in fresh 20-agent Llama runs, the OLMo ten-agent runs support the early improvement, and Llama without messages showed little early bias.
@@ -337,7 +336,7 @@ Both misses trace to unrepresentative tests: histories of the wrong length, and 
 \textbf{How an auditor would use this.}
 On a new configuration, run a small batch of live group runs and compare them with the audit on two things: timing, the share of agents taking each action round by round, and a specified high-consequence event, here persistent all-high bidding.
 If either disagrees, inspect the history lengths the tests used and the states the audit weights but real agents rarely reach, as in §4.3 and §4.4.
-A retrospective contraction analysis gives a much tighter estimate for the current round than Theorem~1 (Appendix~A), but, like Theorem~1's estimate, it needs live histories, so live runs remain part of the check.
+A retrospective contraction analysis gives a much tighter estimate for the current round than Theorem~1 (Appendix~A, Figure~\ref{fig:contraction}), but, like Theorem~1's estimate, it needs live histories, so live runs remain part of the check.
 
 \parahead{Limitations}
 \begin{itemize}
@@ -503,11 +502,18 @@ Because the defects are evaluated on live histories, the bound is retrospective;
 
 \textbf{Retrospective contraction (exploratory).}
 A contraction argument targets a different quantity from Theorem~1: the TV distance between the live and audit bid profiles in a single round, rather than over the full trajectory.
-For the actions-only chain in the primary setting, combining the chain's contraction coefficient with one-step defects evaluated jointly over agents gives a plug-in estimate of an upper bound on the round-20 bid-profile TV of 0.205 [0.195, 0.217].
+For the actions-only chain in the primary setting, combining the chain's contraction coefficient with one-step defects evaluated jointly over agents gives a plug-in estimate of an upper bound on the round-20 bid-profile TV of 0.205 [0.195, 0.217] (Figure~\ref{fig:contraction}).
 The interval is a pointwise 95\% whole-run bootstrap interval, conditional on the fitted tables and coefficients.
 With the original per-agent defects in place of the joint ones, the estimate is 0.623; Theorem~1's estimate for the full trajectory is capped at 1.
 A separate round-20 bound on the absolute error in the expected high-bid share is 0.064, and averaging the bounds for rounds 16--20 gives about 0.067 for the error in $\mathbb{E}[F]$.
 These estimates use live histories and do not bound the law of the full path or of $F$.
+
+\appendixfigure{figA_contraction}{Bound estimates for the actions-only audit in the primary setting (Llama 3.1 8B, 10 agents, cheap talk, full history, 50 live runs).
+Theorem~1 bounds the full trajectory and reaches its cap of 1 by round 3.
+The contraction curves bound only the current round's bid-profile TV: with the same per-agent defects as Theorem~1 (dotted), and with one-step defects evaluated jointly over agents (solid, with a pointwise 95\% whole-run bootstrap band conditional on the fitted tables and coefficients).
+Values at the right are round-20 estimates; all curves are plug-in estimates from live histories, not certificates.
+The profile bound also covers the observed roundwise TV, but the observed value includes sampling error: the dotted line is the 95th percentile of the largest roundwise TV in 50 runs drawn from the audit itself.
+At round 2 the observed value, 0.261, exceeds that cutoff (the early discrepancy of §4.4) and lies above the bound estimate of 0.249; with sampling error, a point above a bound estimate is not a violation of the bound.}{fig:contraction}
 
 \subsection{B. Findings summary}
 
