@@ -13,9 +13,9 @@ Every task the hand-off specified is listed here, with its status.
 | E2 four deterministic interventions, exact, with the factorial interaction | done (`observation_interventions.json`) |
 | E2 full own-message grid | done (`kernel_grid_P_H` in `audit_ablations.json`; heatmap `figures/appx_kernel_grid_*`) |
 | E2 uniform-replacement sensitivity | done, as an identity with the E1 laws (see the plan's deviations) |
-| E2 live validation, 4 × 50 runs | see `completion_note.md` |
+| E2 live validation, 4 × 50 runs | done (`observation_live.json`, all pass) |
 | E3 n = 10 last-1, 50 live runs | done (arm_id 92) |
-| E3 n = 4 full history, 50 live runs | see `completion_note.md` |
+| E3 n = 4 full history, 50 live runs | done (arm_id 93) |
 | E3 CPU forecasts before spend | done (`e3_forecast.json`) |
 | Independent calculation and CRPS identity | done (`independent_check.json`, PASS) |
 | Figure 2 candidate and appendix figures | done (`figures/`) |
