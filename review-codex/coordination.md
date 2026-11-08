@@ -43,3 +43,24 @@ https://github.com/AbdulMusthakin/swarm-audit/pull/9#issuecomment-6715601059
 
 The continuation prompt was updated to preserve these authorisations and scope.
 The automation's returned schedule is now 05:30 Europe/London on 8 November 2026.
+
+## Scheduled continuation completed
+
+The continuation fetched research refs once and reviewed core
+`f8ad9bbb88ee538d1c9563c51e0a1d97e4401711` and extra
+`9aa31705b9ae5ee45f27a87feeb1a2e2415f318f`. No new PR9 reply was present at that
+check; the commits themselves contain the response to the earlier review.
+
+The new findings, completed live/secondary result checks and report qualification
+were posted at:
+https://github.com/AbdulMusthakin/swarm-audit/pull/9#issuecomment-6717850253
+
+That note links the scripted CPU reproduction of the missing observation binding
+in resume provenance. It requests a future guard fix, preserves original evidence,
+and explicitly states that the completed live cells are correct and need no rerun.
+It also distinguishes the valid pre-specified nominal E3 intervals from a newly
+reported multiplicity sensitivity. No additional paid compute was requested.
+
+Published continuation checkpoints: `1ef630b` (OLMo), `4d4aee4` (completed Llama arms
+and provenance probe), `1454cd7` (finished evidence/reproduction/report status).
+The final follow-up commit records this coordination and the final backup check.

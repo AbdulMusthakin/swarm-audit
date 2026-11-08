@@ -19,5 +19,8 @@
   "paid_compute": 0,
   "fresh_model_queries": 0,
   "agent_branches_changed": 0,
-  "merges": 0
+  "merges": 0,
+  "coordination_comment": "https://github.com/AbdulMusthakin/swarm-audit/pull/9#issuecomment-6717850253",
+  "completion_recorded_utc": "2026-11-08 05:42:36 UTC",
+  "claim_rows": 43
 }
