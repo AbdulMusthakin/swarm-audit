@@ -67,6 +67,10 @@ GPU steps run with `SWARM_AUDIT_HF_SECRET=huggingface SWARM_AUDIT_BATCH_INVARIAN
 
 See `results/README.md` and `results/validation.md`.
 
+The [Dobrushin contraction comparison](results/followup/dobrushin/README.md) gives
+current-round TV and mean-error bounds alongside Theorem 1, with figures and
+CPU-only reproduction scripts.
+
 ## Pre-existing code
 
 The repository scaffold (folder layout and empty files) was created on 3 November 2026, before the sprint. Any code written before Friday 6 November is listed here.

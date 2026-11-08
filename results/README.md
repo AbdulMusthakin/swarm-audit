@@ -28,6 +28,7 @@ cloud session's disk is temporary). Every number comes from logged data.
 
 | `gates/` | G5 gate records (`G5_<channel>.json`, the exception, the confirmation and `history.jsonl`). | `scripts/analyse.py --gate-g5`, `scripts/confirm_g5.py` |
 | `followup/core/` | Exploratory follow-up of 8 Nov (temporal scores, uncertainty, clock-indexed audit, claims map, figures, report insert): start at `followup/core/summary.md`. | `scripts/followup_core_*.py` |
+| [`followup/dobrushin/`](followup/dobrushin/README.md) | Exploratory Dobrushin contraction comparison with Theorem 1: proofs, TV and mean figures, data, and exact calibration verification. | `scripts/analyse_dobrushin.py`, `scripts/verify_dobrushin.py` |
 | `extra/` | The extra arms (8 and 9), owned by the extra-arms session. | `extra-arms` branch |
 
 ## Status
