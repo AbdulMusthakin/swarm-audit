@@ -126,7 +126,7 @@
 - **E1/E2 exact:** `4a81705`.
 - **Hook and checks:** `649ab5b`.
 - **Runs:** `335c438` (n = 10 last-1), `526e4ac` (n = 4 full), `f8aa27b` (E2 live).
-- **Review fixes:** `11571f0`.
+- **Review fixes:** `11571f0`; 05:30 continuation items (m4 guard, multiplicity) `e8648b0`.
 - **E3 analysis:** `5554d8b`.
 - This note and the final summary follow.
 
