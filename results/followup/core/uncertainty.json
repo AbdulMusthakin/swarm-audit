@@ -1,0 +1,187 @@
+{
+ "condition": {
+  "arm": "core_cheap_talk",
+  "condition": "cheap_talk_n10_cycle_full",
+  "channel": "cheap_talk",
+  "n": 10,
+  "graph": "cycle",
+  "T": 20,
+  "runs": 50,
+  "run_fingerprint": "29d6012c464e725977988a8ebdd271adc7846727026b8098fe66cef0e10b357f",
+  "kernel_fingerprint": "30c45b03786f3adb6be559aa1f78bcc1cf8071cc277ea9b772fd7a91e8c4e4cc"
+ },
+ "label": "exploratory follow-up (docs/overnight-core-plan.md C1); primary condition",
+ "layers": {
+  "conditional_on_tables_and_simulation": {
+   "endpoint": {
+    "mean": -8.643989999999803e-05,
+    "lo": -0.0002144088999999978,
+    "hi": 4.259610000000327e-05,
+    "n": 50,
+    "B": 2000
+   },
+   "2-7": {
+    "mean": -0.0006700332500000014,
+    "lo": -0.0009775282500000047,
+    "hi": -0.00036297575000000034,
+    "n": 50,
+    "B": 2000
+   },
+   "8-13": {
+    "mean": -0.00010871862500000302,
+    "lo": -0.000244224458333334,
+    "hi": 3.145637499999737e-05,
+    "n": 50,
+    "B": 2000
+   },
+   "14-20": {
+    "mean": -6.869807142856746e-05,
+    "lo": -0.00013735949999999322,
+    "hi": -6.238071428567369e-06,
+    "n": 50,
+    "B": 2000
+   }
+  },
+  "simulation_batches": {
+   "endpoint": {
+    "mean": -0.00011347085499999932,
+    "sd": 7.754918017945608e-05,
+    "min": -0.0002415626499999965,
+    "max": 2.2547600000000224e-05
+   },
+   "2-7": {
+    "mean": -0.0007484215291666683,
+    "sd": 0.00012421267998144686,
+    "min": -0.001004012499999999,
+    "max": -0.0005544826666666736
+   },
+   "8-13": {
+    "mean": -8.747021249999937e-05,
+    "sd": 0.00010030649349237221,
+    "min": -0.00023720129166666563,
+    "max": 8.419799999999963e-05
+   },
+   "14-20": {
+    "mean": -5.006950714285591e-05,
+    "sd": 7.94181810962253e-05,
+    "min": -0.00014631414285715043,
+    "max": 8.798089285714447e-05
+   }
+  },
+  "materiality": {
+   "rule": "material if the SD of per-batch endpoint D exceeds 10% of the half-width of the conditional interval (plan C1.3)",
+   "half_width": 0.00012850250000000053,
+   "threshold": 1.2850250000000054e-05,
+   "batch_sd": 7.754918017945608e-05,
+   "material": true,
+   "pooled_sd": 2.4523204004586643e-05,
+   "pooled_below_threshold": false
+  },
+  "precision_run": {
+   "n_model": 740000,
+   "endpoint": {
+    "mean": -8.494073385682921e-05,
+    "lo": -0.00022459462574872042,
+    "hi": 5.4387320197223946e-05,
+    "n": 50,
+    "B": 2000
+   },
+   "2-7": {
+    "mean": -0.0007370021380569792,
+    "lo": -0.0010282881065254447,
+    "hi": -0.0004345682416605846,
+    "n": 50,
+    "B": 2000
+   },
+   "8-13": {
+    "mean": -0.00012257708588994594,
+    "lo": -0.00020329098228634164,
+    "hi": -3.723945075481059e-05,
+    "n": 50,
+    "B": 2000
+   },
+   "14-20": {
+    "mean": -1.2021397292084069e-05,
+    "lo": -7.822230462799303e-05,
+    "hi": 5.413908533339528e-05,
+    "n": 50,
+    "B": 2000
+   }
+  },
+  "table_resampling": {
+   "endpoint": {
+    "mean": -0.00010473948375000007,
+    "sd": 7.605261265083102e-05,
+    "lo": -0.000248901673749998,
+    "hi": 4.172691125000189e-05,
+    "frac_positive": 0.105,
+    "table_only_sd_approx": 0.0
+   },
+   "2-7": {
+    "mean": -0.0006962972089583336,
+    "sd": 0.00020315189733249105,
+    "lo": -0.0010799169447916594,
+    "hi": -0.00027515510312499825,
+    "frac_positive": 0.0,
+    "table_only_sd_approx": 0.00016075417108621988
+   },
+   "8-13": {
+    "mean": -8.966897499999991e-05,
+    "sd": 9.658061816462675e-05,
+    "lo": -0.00028027649062499797,
+    "hi": 0.00010645483124999944,
+    "frac_positive": 0.18,
+    "table_only_sd_approx": 0.0
+   },
+   "14-20": {
+    "mean": -4.4133090000000195e-05,
+    "sd": 8.52640975879572e-05,
+    "lo": -0.00020851888482143122,
+    "hi": 0.00012311212410713961,
+    "frac_positive": 0.285,
+    "table_only_sd_approx": 3.102771098318164e-05
+   }
+  },
+  "nested_runs_tables_simulation": {
+   "endpoint": {
+    "mean": -0.00010606428375000009,
+    "sd": 0.00013724974002548622,
+    "lo": -0.000470444096249997,
+    "hi": 8.557758750000144e-05,
+    "frac_positive": 0.19
+   },
+   "2-7": {
+    "mean": -0.0007044452089583337,
+    "sd": 0.0002678721819447312,
+    "lo": -0.001351653943750006,
+    "hi": -0.0002171505812500011,
+    "frac_positive": 0.005
+   },
+   "8-13": {
+    "mean": -9.081497499999991e-05,
+    "sd": 0.0001189504533949858,
+    "lo": -0.0003073657614583383,
+    "hi": 0.00012230183333334022,
+    "frac_positive": 0.245
+   },
+   "14-20": {
+    "mean": -4.679709000000027e-05,
+    "sd": 0.00010482177868748001,
+    "lo": -0.00024380120535714866,
+    "hi": 0.00016414826517856945,
+    "frac_positive": 0.315
+   }
+  }
+ },
+ "labels": {
+  "paired": "D under each resampled table, scored on the same 50 runs: table estimation + simulation noise (conditional on the runs)",
+  "paired_nested": "each table resample paired with one whole-run resample: run sampling + table estimation + simulation; excludes kernel drift, prompt and model choice, so it is not total uncertainty",
+  "table_only_sd_approx": "sqrt(SD_resample^2 - SD_MC^2), an approximation"
+ },
+ "not_included": [
+  "kernel drift beyond the measured panels (measured 0)",
+  "choice of prompt, model, payoffs, p_test",
+  "serving numerics (floor 0)"
+ ],
+ "source": "results/followup/core/temporal/core_cheap_talk__cheap_talk_n10_cycle_full.json"
+}

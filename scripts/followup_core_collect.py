@@ -25,9 +25,12 @@ COND = "conditional on the audit tables and the forecast simulation; 2,000 whole
 
 def get(path: str, keys: str):
     v = json.loads((REPO / path).read_text())
+    agg = None
+    if keys.endswith("@max"):
+        keys, agg = keys[:-4], max
     for k in keys.split("/"):
         v = v[int(k)] if isinstance(v, list) else v[k]
-    return v
+    return agg(v) if agg else v
 
 
 def commit_of(path: str) -> str:
@@ -68,8 +71,11 @@ def build_claims() -> None:
           A, "scores/paired_D", "original primary", run10, "95% " + COND)
     claim("P2", "Endpoint CRPS, actions-only audit", A, "scores/crps/actions_only", "original primary", run10, "95% " + COND)
     claim("P3", "Endpoint CRPS, signal-aware audit", A, "scores/crps/signal_aware", "original primary", run10, "95% " + COND)
-    claim("S1", "Max roundwise binned TV, actions-only (vs simultaneous null q95 in S2)", A,
-          "scores/floor/actions_only/max_over_rounds", "secondary", run10, "simultaneous null 95% quantile")
+    for m, sid in (("actions_only", "S1"), ("signal_aware", "S2")):
+        claim(sid, f"Max roundwise binned TV Delta_t, {m.replace('_', '-')} forecast", A,
+              f"scores/delta/{m}@max", "secondary", run10, "point value; compare with the next row")
+        claim(sid + "q", f"  simultaneous null 95% quantile of max Delta_t, {m.replace('_', '-')}", A,
+              f"scores/floor/{m}/max_over_rounds", "secondary", run10, "null reference (1,000 draws)")
     claim("S3", "Actions-only defect shift eps(p_swarm) - eps(p_test)", A,
           "defect_shift/actions_only/pooled/difference", "secondary", run10, "decomposition, no interval")
     claim("S4", "  of which within-state", A, "defect_shift/actions_only/pooled/within_state_term",
@@ -90,8 +96,18 @@ def build_claims() -> None:
           "95% percentile over 200 nested resamples; excludes kernel drift and prompt/model choice")
     claim("E6", "Fraction of table resamples with D_early > 0", T,
           f"table_resampling/summary/paired/{k}/2-7/frac_positive", "exploratory", run10, "")
-    claim("E7", "Mean signed one-step error, round 2, actions-only (teacher-forced)", T,
-          "one_step/actions_only/by_round/signed", "exploratory", run10, "")
+    M = f"results/followup/core/mechanism/{P}.json"
+    MO = "results/followup/core/mechanism/olmo_core_cheap_talk__cheap_talk_n10_cycle_full.json"
+    olmo_runs = "olmo_core_cheap_talk/cheap_talk_n10_cycle_full, 50 runs (OLMo-3-7B, live; extra arm 9b runs, core analysis)"
+    for path, runs, tag in ((M, run10, "Llama"), (MO, olmo_runs, "OLMo")):
+        st = "exploratory" if tag == "Llama" else "exploratory (core analysis of imported runs)"
+        for blk in ("2-7", "14-20"):
+            for tab in ("signal_aware_pooled", "signal_aware_clock"):
+                claim(f"M_{tag}_{tab}_{blk}", f"{tag}: mean signed one-step error p_H - kappa(H|s), rounds {blk}, "
+                      f"{tab.replace('_', ' ')} table (teacher-forced)", path, f"errors/{tab}/by_block/{blk}",
+                      st, runs, "95% whole-run bootstrap")
+        claim(f"H_{tag}_r12", f"{tag}: swarm fraction of high bids before the last round, at round 12 "
+              "(p_test: 0.5)", path, "history_content/swarm_high_fraction_before_last_round/10", st, runs)
     for m, cid in (("signal_aware", "C1"), ("actions_only", "C2")):
         claim(cid, f"Clock-indexed audit: early CRPS improvement, pooled - clock ({m})", C,
               f"comparison/{m}/improvement_pooled_minus_clock/2-7", "exploratory", run10,
@@ -118,6 +134,10 @@ def build_claims() -> None:
     n100 = "extra_rr4/counts_n100_random_regular_d4_seed20261108_full, 50 runs (Llama, live; extra arm 8)"
     claim("I5", "n = 100 counts: endpoint CRPS order-0 minus actions-only", N,
           "crps_paired_order0_minus_actions_only", "imported (extra arm 8)", n100, "95% " + COND)
+    OT = "results/followup/core/temporal/olmo_core_cheap_talk__cheap_talk_n10_cycle_full.json"
+    claim("O0", "OLMo (existing runs): early-round D_early, actions-only - signal-aware", OT,
+          "original_simulation/paired/actions_only - signal_aware/2-7", "exploratory (core analysis of imported runs)",
+          olmo, "95% " + COND)
     OC = f"results/followup/core/clock/olmo_core_cheap_talk__cheap_talk_n10_cycle_full.json"
     claim("O1", "OLMo (existing runs): clock-indexed early CRPS improvement, pooled - clock (signal_aware)", OC,
           "comparison/signal_aware/improvement_pooled_minus_clock/2-7", "exploratory (core analysis of imported runs)",

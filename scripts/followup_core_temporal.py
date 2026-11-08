@@ -105,7 +105,7 @@ def main() -> None:
                             {"actions": tables.actions, "signal": tables.signal,
                              "actions_equal": tables.actions_equal})
     arm, cond = Path(args.runs).parent.name, Path(args.runs).name
-    published = Path(args.published) if args.published else \
+    published = Path(args.published).resolve() if args.published else \
         REPO / "results" / "analysis" / arm / f"{cond}.json"
     log: list[str] = []
 
@@ -173,10 +173,13 @@ def main() -> None:
         mc["materiality"] = {"rule": "material if the SD of per-batch endpoint D exceeds 10% of the "
                                      "half-width of the conditional interval (plan C1.3)",
                              "half_width": half, "threshold": thr, "batch_sd": sd,
-                             "material": bool(sd > thr),
+                             "material": bool(sd > thr) if thr > 0 else None,
                              "pooled_sd": sd / np.sqrt(args.mc_batches),
                              "pooled_below_threshold": bool(sd / np.sqrt(args.mc_batches) <= thr)}
-        if sd > thr and sd / np.sqrt(args.mc_batches) > thr:
+        if thr == 0:
+            mc["materiality"]["note"] = ("the conditional interval is degenerate (every run has the same "
+                                         "outcome), so the rule does not apply; no precision run")
+        elif sd > thr and sd / np.sqrt(args.mc_batches) > thr:
             need = int(an["n_model"] * np.ceil((sd / thr) ** 2))
             need = min(need, 2_000_000)
             pools = base.simulate(g, T, need, fu.seeded(104))
