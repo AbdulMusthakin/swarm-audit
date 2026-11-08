@@ -104,8 +104,8 @@ def main() -> None:
         "survival_ratio_signal_over_actions": surv_sa / surv_ao,
         "per_agent_round_gap": keep_sa - keep_ao,
         "situations_by_neighbours": {d: situations(d) for d in (2, 4, 9)},
-        "note": "start x survival omits re-entry into all-high after an exit; the exact event "
-                "probabilities include it",
+        "note": "start x survival omits later first entry into all-high and re-entry after an exit; "
+                "the exact event probabilities include both",
     }
     OUT.write_text(json.dumps(out, indent=1) + "\n")
     print(json.dumps({k: out[k] for k in ("p_high_round1", "p_all_high_round1",

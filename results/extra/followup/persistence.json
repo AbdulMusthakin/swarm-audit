@@ -39,5 +39,5 @@
    "signal_aware": 3300
   }
  },
- "note": "start x survival omits re-entry into all-high after an exit; the exact event probabilities include it"
+ "note": "start x survival omits later first entry into all-high and re-entry after an exit; the exact event probabilities include both"
 }

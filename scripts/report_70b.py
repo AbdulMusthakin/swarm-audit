@@ -168,7 +168,7 @@ def update_claims(out: dict) -> None:
             p["survival_ratio_signal_over_actions"], "survival_ratio_signal_over_actions",
             status="exploratory", src=ps, run_set=rs, kind="exact")
     with CLAIMS.open("w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=fields)
+        w = csv.DictWriter(f, fieldnames=fields, lineterminator="\n")
         w.writeheader()
         w.writerows(rows + new)
 
@@ -192,7 +192,8 @@ def main() -> None:
               f"SA-o0 {o['signal_aware']['mean']:+.4f} [{o['signal_aware']['lo']:+.4f}, {o['signal_aware']['hi']:+.4f}]; "
               f"AO-o0 {o['actions_only']['mean']:+.4f} [{o['actions_only']['lo']:+.4f}, {o['actions_only']['hi']:+.4f}]; "
               f"late {', '.join(f'{a} {v:.3f}' for a, v in c['late_high_share_rounds_16_20'].items())}; "
-              f"rw {', '.join(f'{a} {v['max_TV']:.3f}@{v['round']} vs {v['cutoff']:.3f}' for a, v in c['roundwise'].items())}")
+              "rw " + ", ".join("{} {:.3f}@{} vs {:.3f}".format(a, v['max_TV'], v['round'], v['cutoff'])
+                                 for a, v in c['roundwise'].items()))
     print("g5", json.dumps(out["g5"])[:400])
     print("contraction", {m: (round(c["delta_min"], 3), round(c["delta_max"], 3)) for m, c in out["contraction"].items()})
     print(f"wrote {OUT.relative_to(REPO)}")

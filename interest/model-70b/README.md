@@ -1,4 +1,4 @@
-# Llama 3.1 70B: the core matrix, for interest only
+# Llama 3.1 70B: exploratory rerun of the core matrix
 
 **Used in the report as an exploratory, post hoc rerun.** Abdul asked, on 8 November 2026, after
 the 8B results were seen, for runs with a 70B model in the Modal workspace used for the core
@@ -94,7 +94,8 @@ under-predicts high bids by about 9 points (F_error +0.093 [+0.056, +0.132]), an
 against 0.04 for the 8B. On cheap talk the two models are similar (actions-only CRPS 0.057 against
 0.060), and the 70B's bias is smaller than the 8B's.
 
-**In one line.** A larger model makes the messages informative and the n = 4 calibration exact. Yet
+**In one line.** Retaining messages improves the 70B audit. Its n = 4 last-round calibration
+passes; exactness there comes from exhaustive last-round tables, not model size. Yet
 the one-agent audit tables forecast the 70B's swarms worse than the 8B's on three of six conditions
 (cheap talk on the cycle at both sizes, counts on K_10). Calibrating at n = 4 did not guarantee a
 good forecast at n = 10.
@@ -136,7 +137,8 @@ bounds the absolute error in the mean high-bid fraction, and "observed" is that 
 
 **Contraction does not rescue the 70B.**
 
-- The 70B audit chain barely contracts: δ is 0.90–1.00, against 0.10–0.87 for the 8B. Its kernel
+- The computed 70B contraction coefficients (upper bounds at n = 20) are 0.90–1.00,
+  against 0.10–0.87 for the 8B. Its kernel
   is near-deterministic in the neighbours' bids (P(H) is 0.89 after two high neighbours and 0.03
   after two low ones on counts). Two configurations that differ in one neighbour therefore lead
   to almost disjoint next rounds, so earlier errors are hardly discounted.
