@@ -48,6 +48,7 @@ def main() -> None:
     os.environ["SWARM_AUDIT_VLLM_VERSION"] = srv["vllm_version"]
     os.environ["SWARM_AUDIT_GPU"] = srv["gpu"]
     ws = build.check_workspace(cfg)
+    build.apply_serving_env(cfg)
     import modal
 
     from swarm_audit import serving
