@@ -174,6 +174,11 @@ def uncertainty_json() -> None:
                "table_resampling": r["table_resampling"]["summary"]["paired"][k],
                "nested_runs_tables_simulation": r["table_resampling"]["summary"]["paired_nested"][k]},
            "labels": r["table_resampling"]["labels"],
+           "post_review_mc30": (json.loads((FU / "uncertainty_mc30.json").read_text())["summary"]
+                                if (FU / "uncertainty_mc30.json").exists() else None),
+           "caution": "the table-only SD of endpoint D is poorly determined: about 0 (10 MC batches), "
+                      "2.7e-5 (30 batches, post-review) or 5.8e-5 (Codex review, 20 batches); do not "
+                      "call table uncertainty negligible",
            "not_included": ["kernel drift beyond the measured panels (measured 0)",
                             "choice of prompt, model, payoffs, p_test", "serving numerics (floor 0)"],
            "source": str(p.relative_to(REPO))}

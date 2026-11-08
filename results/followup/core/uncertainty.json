@@ -178,6 +178,37 @@
   "paired_nested": "each table resample paired with one whole-run resample: run sampling + table estimation + simulation; excludes kernel drift, prompt and model choice, so it is not total uncertainty",
   "table_only_sd_approx": "sqrt(SD_resample^2 - SD_MC^2), an approximation"
  },
+ "post_review_mc30": {
+  "endpoint": {
+   "mc_sd_30_batches": 7.1253825084301e-05,
+   "mc_sd_10_batches_plan": 7.754918017945608e-05,
+   "table_resample_sd_incl_mc": 7.605261265083102e-05,
+   "table_only_sd_approx_30": 2.658744632102113e-05,
+   "note": "variance subtraction is approximate: MC variance can change with the table, and 200 resamples / 30 batches give imprecise SDs (relative SE about 5% / 13%)"
+  },
+  "2-7": {
+   "mc_sd_30_batches": 0.00015385425109396564,
+   "mc_sd_10_batches_plan": 0.00012421267998144686,
+   "table_resample_sd_incl_mc": 0.00020315189733249105,
+   "table_only_sd_approx_30": 0.0001326633438825735,
+   "note": "variance subtraction is approximate: MC variance can change with the table, and 200 resamples / 30 batches give imprecise SDs (relative SE about 5% / 13%)"
+  },
+  "8-13": {
+   "mc_sd_30_batches": 9.861749895555487e-05,
+   "mc_sd_10_batches_plan": 0.00010030649349237221,
+   "table_resample_sd_incl_mc": 9.658061816462675e-05,
+   "table_only_sd_approx_30": 0.0,
+   "note": "variance subtraction is approximate: MC variance can change with the table, and 200 resamples / 30 batches give imprecise SDs (relative SE about 5% / 13%)"
+  },
+  "14-20": {
+   "mc_sd_30_batches": 8.072006514948089e-05,
+   "mc_sd_10_batches_plan": 7.94181810962253e-05,
+   "table_resample_sd_incl_mc": 8.52640975879572e-05,
+   "table_only_sd_approx_30": 2.746338325393012e-05,
+   "note": "variance subtraction is approximate: MC variance can change with the table, and 200 resamples / 30 batches give imprecise SDs (relative SE about 5% / 13%)"
+  }
+ },
+ "caution": "the table-only SD of endpoint D is poorly determined: about 0 (10 MC batches), 2.7e-5 (30 batches, post-review) or 5.8e-5 (Codex review, 20 batches); do not call table uncertainty negligible",
  "not_included": [
   "kernel drift beyond the measured panels (measured 0)",
   "choice of prompt, model, payoffs, p_test",

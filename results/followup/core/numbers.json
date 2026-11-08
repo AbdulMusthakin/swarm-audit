@@ -448,7 +448,7 @@
   "run_set": "core_cheap_talk/cheap_talk_n10_cycle_full, runs 0-49 (Llama 3.1 8B, live)",
   "source_file": "results/followup/core/independent_check.json",
   "source_key": "pass",
-  "source_commit": "f29687b",
+  "source_commit": "3912f32",
   "interval_type": "consistency check",
   "value": true,
   "lo": null,

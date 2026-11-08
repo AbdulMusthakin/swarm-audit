@@ -47,6 +47,10 @@ NOTES = {
                "compare them only through one_step (action marginal).",
 }
 EXACT_MAX_N = 4
+# The pre-specified primary contrast is one frozen experiment: core arm 6 (Llama 3.1 8B,
+# configs/core.yaml). Other arms with the same channel, size, graph and memory (for example
+# the exploratory OLMo arm 91) are not the primary contrast (independent review M2).
+PRIMARY_ARM = ("core_cheap_talk", 6)
 
 
 @dataclass
@@ -133,6 +137,15 @@ def score_predictors(data: RunData, preds: dict[str, ModelRuns], B: int, rng) ->
     return res
 
 
+def is_primary(data) -> bool:
+    """True only for the frozen primary experiment (core arm 6, cheap talk, n = 10 cycle,
+    full history)."""
+    design = data.meta.get("design", {})
+    return ((design.get("arm"), design.get("arm_id")) == PRIMARY_ARM
+            and data.channel == "cheap_talk" and data.n == 10 and data.graph == "cycle"
+            and design.get("last_k", "missing") is None)
+
+
 def analyse_condition(data: RunData, g: Graph, tables: Tables, n_model: int = 20000,
                       seed: int = 0, B: int = 2000, pt: PTest = PTest(),
                       swarm_baseline: bool = True) -> dict:
@@ -140,8 +153,7 @@ def analyse_condition(data: RunData, g: Graph, tables: Tables, n_model: int = 20
     T = data.T
     preds = build_predictors(tables, g, T, n_model, seed + 1, pt=pt)
     design = data.meta.get("design", {})
-    primary = (data.channel == "cheap_talk" and data.n == 10 and data.graph == "cycle"
-               and design.get("last_k", "missing") is None)
+    primary = is_primary(data)
     out: dict = {"condition": {"channel": data.channel, "n": data.n, "graph": data.graph,
                                "T": T, "runs": data.R, "last_k": design.get("last_k"),
                                "run_fingerprint": data.meta.get("fingerprint"),

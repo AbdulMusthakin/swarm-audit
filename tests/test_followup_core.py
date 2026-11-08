@@ -141,3 +141,19 @@ def test_one_step_errors_and_ratio_tables():
     tab = fu.error_tables(np.repeat(e, 3, 0).repeat(10, 1)[:, :20], np.repeat(s, 3, 0).repeat(10, 1)[:, :20],
                           50, np.random.default_rng(0))
     assert np.isclose(tab["by_round"]["signed"]["mean"][0], 0.0)
+
+
+def test_primary_flag_needs_the_frozen_arm():
+    """Independent review M2: same channel, size, graph and memory is not enough."""
+    from types import SimpleNamespace
+
+    from swarm_audit.analysis import is_primary
+
+    def mk(arm, arm_id, **kw):
+        d = dict(channel="cheap_talk", n=10, graph="cycle")
+        d.update(kw)
+        return SimpleNamespace(meta={"design": {"arm": arm, "arm_id": arm_id, "last_k": None}}, **d)
+    assert is_primary(mk("core_cheap_talk", 6))
+    assert not is_primary(mk("olmo_core_cheap_talk", 91))
+    assert not is_primary(mk("core_cheap_talk", 6, n=20))
+    assert not is_primary(mk("core_cheap_talk", 6, channel="counts"))

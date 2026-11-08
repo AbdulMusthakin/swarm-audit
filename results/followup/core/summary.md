@@ -131,6 +131,15 @@ round 2. Size, degree and topology all change at once, so this is not a size con
 
   It shares inputs and definitions with the pipeline, so it is a consistency check, not a
   replication.
+- **Independent Codex review** (`codex/independent-audit-20261108`) reproduced the core
+  headline numbers and found no critical error. Its material points concern the core:
+  simulation error, already addressed by C1, and the primary flag on the OLMo arm, now fixed
+  in `analysis.is_primary`. Both are handled; see `codex_review_response.md`. The table-only
+  SD of the endpoint D is poorly determined (0 to 6e-5 across estimates), so table
+  uncertainty is not called negligible.
+- **Related work.** The reviewer read Flint et al. in full: cached LLM policies over memory
+  states, validated against direct generations. The overlap is high, so no "first" claims
+  (`related_work.md`).
 - **Tests:** `tests/test_followup_core.py` covers CRPS normalisation, block indexing, the
   clock-table partition and fallback, the clock chain reducing to the original chain, and
   resampling integrity.

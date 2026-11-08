@@ -13,6 +13,25 @@ papers. No "first" claim is supported by this check.
 | *Cheap Talk Stabilizes Strategic Interaction in LLM Agents*, arXiv:2609.16270. **Authors not confirmed** by search (the hand-off names Lorè, Zhu and Heydari). A related earlier paper is N. Lorè and B. Heydari, *Communication Enhances LLMs' Stability in Strategic Thinking*, arXiv:2602.06081 (4 Feb 2026). | Four open-weight 7-9B models, repeated play in Prisoner's Dilemma, Snowdrift, Stag Hunt and Harmony. Cheap talk stabilises play in 71 of 96 model-game-context comparisons after correction, and 5 reverse under social or team framings. The 2602.06081 paper reports that pre-play messages smooth cooperation trajectories in 10-round PD, with model, prompt and framing dependence. | We do not test whether messages stabilise play. We test whether an isolated audit that conditions on messages forecasts the group better than one that ignores them. It does not at the endpoint (primary null). In early rounds it forecasts slightly worse than the actions-only audit. Our messages are statements about the agent's next bid on a network. | **Medium.** Both use cheap talk among small open-weight models in repeated games. Check whether they model message content as a predictor of later actions; that would overlap with our signal-aware table. |
 | H. Madmoun and S. Lahlou (MBZUAI), *Communication Enables Cooperation in LLM Agents: A Comparison with Curriculum-Based Approaches*, arXiv:2510.05748 (v1 7 Oct 2025; revised Jan 2026, v3 per the hand-off; listed as EACL 2026 short paper 23). | In a 4-player Stag Hunt, a one-word cheap-talk channel raises coordination from 0% to 48.3%. A curriculum through progressively complex games lowers payoffs by 27.4% in an iterated public-goods game with punishment ("learned pessimism"). | Same as above: forecast adequacy of isolated audits, not whether communication raises cooperation. | **Low to medium.** It is a precedent that one-word cheap talk changes LLM group outcomes. Cite it for that effect, not for auditing. |
 
+**Update after the independent Codex review (01:25 UTC).** That reviewer read the full text
+of Flint et al. on PubMed Central (https://pmc.ncbi.nlm.nih.gov/articles/PMC13505991/;
+PNAS 123(34) e2531697123, DOI 10.1073/pnas.2531697123). This session could not reach it, so
+the following comes from `review-codex/report_notes.md`, not from our own reading:
+
+- the paper uses finite memory H = 5;
+- it uses restricted-token policies cached for all memory states;
+- it validates them empirically against direct LLM generations;
+- it studies naming-game bias and population-size effects.
+
+The overlap with our audit composition is therefore **high**. Do **not** claim the first
+composition of cached LLM policies, the first study of collective size effects, or that the
+earlier work lacked live validation. The defensible distinction is:
+
+- the audit is fitted on **synthetic histories in isolation** and transferred to
+  **full-history** swarm histories;
+- the information omitted by coarse states (messages) is tested explicitly;
+- the transient failure is diagnosed by history length vs history content.
+
 **Suggested contribution wording (for the authors to check against the papers):** "We ask
 when an audit built from isolated per-agent tests forecasts a networked LLM swarm, what
 information it loses, and how to diagnose that loss." Do not write "messages improve
