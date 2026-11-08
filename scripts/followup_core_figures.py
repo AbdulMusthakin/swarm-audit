@@ -190,7 +190,34 @@ def figure3() -> None:
     save(fig, "fig3_clock_audit")
 
 
+def figure_a1() -> None:
+    """Appendix: OLMo consensus survival (imported runs, extra arm 9b; core reanalysis)."""
+    p = FU / "temporal" / "olmo_core_cheap_talk__cheap_talk_n10_cycle_full.json"
+    if not p.exists():
+        return
+    r = json.loads(p.read_text())
+    cons = r["consensus"]
+    fig, ax = plt.subplots(figsize=(5.6, 3.5), facecolor=SURFACE)
+    _style(ax)
+    t = np.arange(1, len(cons["swarm"]["survival"]) + 1)
+    ax.step(t, cons["swarm"]["survival"], where="post", color=INK, linewidth=2, label="swarm (50 runs)")
+    for m in ("actions_only", "signal_aware"):
+        ax.step(t, cons[m]["survival"], where="post", color=COLOURS[m], linewidth=2,
+                label=f"{LABELS[m]} (20,000 sims)")
+    ax.set_ylim(0, 1.02)
+    ax.set_xlim(1, t[-1])
+    _int_rounds(ax)
+    _lab(ax, "round t", "P(no consensus run has started by round t)")
+    ax.legend(frameon=False, fontsize=7, loc="upper right")
+    ax.set_title("OLMo-3-7B, cheap talk, n = 10 cycle: time to consensus\n"
+                 "consensus = X_t = X_t+1 = X_t+2 in {0, 1}; none: censored at T. "
+                 "Extra-arm runs, reanalysed (exploratory)", fontsize=8, color=INK, loc="left")
+    fig.tight_layout()
+    save(fig, "figA1_olmo_consensus_survival")
+
+
 if __name__ == "__main__":
     figure1()
     figure3()
+    figure_a1()
     print(f"figures in {FIG}")

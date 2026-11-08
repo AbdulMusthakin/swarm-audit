@@ -28,6 +28,27 @@
    "z": 1.3212827317140932,
    "pass": true,
    "independent_sims": 200000
+  },
+  "clock_signed_error_2-7": {
+   "independent": -0.01951034184562141,
+   "pipeline": -0.019510341845621414,
+   "abs_diff": 3.469446951953614e-18,
+   "pass": true
+  },
+  "clock_signed_error_14-20": {
+   "independent": -0.039046541876223376,
+   "pipeline": -0.039046541876223376,
+   "abs_diff": 0.0,
+   "pass": true
+  },
+  "clock_early_crps_improvement": {
+   "independent": 0.006009521855000001,
+   "independent_mc_se": 2.847206590296468e-05,
+   "pipeline": 0.005962235297916662,
+   "pipeline_mc_se": 5.228443149482702e-05,
+   "z": 0.7942755837846489,
+   "pass": true,
+   "independent_sims": 200000
   }
  },
  "pass": true

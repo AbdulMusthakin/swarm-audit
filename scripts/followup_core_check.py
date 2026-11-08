@@ -74,6 +74,54 @@ def tables():
     return joint, kao, d
 
 
+def block_joints(blocks=((1, 6), (7, 12), (13, 19))):
+    """Clock tables: mean of the fitting vectors whose length lies in each block; START fixed;
+    an empty cell keeps the pooled mean."""
+    j = json.loads(SIG.read_text())
+    out = []
+    for lo, hi in blocks:
+        tab = {}
+        for k, e in j["entries"].items():
+            f = np.asarray(e["fit"], float).reshape(len(e["fit"]), 6)
+            if k == "START":
+                tab[k] = np.asarray(e["kappa"], float).reshape(6)
+                continue
+            sel = [(lo <= L <= hi) for L in e["fit_L"]]
+            tab[k] = f[sel].mean(0) if any(sel) else np.asarray(e["kappa"], float).reshape(6)
+        out.append(tab)
+    return out
+
+
+def cum_lookup(joint):
+    L = np.zeros((2, 3, 3, 3, 3, 6))
+    for a in range(2):
+        for k in range(3):
+            for sh in range(3):
+                for sl in range(3 - sh):
+                    for m in range(3):
+                        v = joint[f"{'HL'[a]}-{k}-{sh}-{sl}-{2 - sh - sl}-{SIGNALS[m]}"]
+                        L[a, k, sh, sl, m] = v / v.sum()
+    return np.cumsum(L, -1)
+
+
+def simulate_clock(joints, n, T, R, rng):
+    """Round t >= 2 uses block b(t - 1); own implementation of the composed chain."""
+    cums = [cum_lookup(jt) for jt in joints]
+    block = lambda L: 0 if L <= 6 else (1 if L <= 12 else 2)  # noqa: E731
+    out = np.zeros((R, T, n), int)
+    start = joints[0]["START"] / joints[0]["START"].sum()
+    out[:, 0] = (rng.random((R, n))[..., None] > np.cumsum(start)).sum(-1).clip(max=5)
+    for t in range(1, T):            # index t is round t + 1, with L = t past rounds
+        cum = cums[block(t)]
+        prev = out[:, t - 1]
+        a, m = prev // 3, prev % 3
+        k = (np.roll(a, 1, 1) == 0).astype(int) + (np.roll(a, -1, 1) == 0)
+        sh = (np.roll(m, 1, 1) == 0).astype(int) + (np.roll(m, -1, 1) == 0)
+        sl = (np.roll(m, 1, 1) == 1).astype(int) + (np.roll(m, -1, 1) == 1)
+        out[:, t] = (rng.random((R, n))[..., None] > cum[a, k, sh, sl, m]).sum(-1).clip(max=5)
+    return (out // 3 == 0).astype(int)
+
+
 def simulate_signal(joint, n, T, R, rng):
     """Own implementation: agent i hears i-1 and i+1 (cycle); output index a*3+m, a=0 is H."""
     keys = {}
@@ -171,6 +219,34 @@ def main():
                                           "pipeline": theirs, "pipeline_mc_se": float(se_theirs),
                                           "z": float(z), "pass": bool(abs(z) < 3),
                                           "independent_sims": N_SIM}
+    # C2: clock-indexed audit, signal-aware.
+    blocks = block_joints()
+    e_clock = np.zeros_like(P)
+    for t in range(T):
+        b = 0 if t <= 6 else (1 if t <= 12 else 2)   # round t + 1 has L = t; round 1 is START
+        kHb = {k: v[:3].sum() for k, v in blocks[b].items()}
+        e_clock[:, t] = P[:, t] - np.vectorize(kHb.__getitem__)(S2[:, t])
+    mech = json.loads((FU / "mechanism/core_cheap_talk__cheap_talk_n10_cycle_full.json").read_text())
+    for blk, sl in (("2-7", slice(1, 7)), ("14-20", slice(13, 20))):
+        mine = float(e_clock[:, sl].mean())
+        theirs = mech["errors"]["signal_aware_clock"]["by_block"][blk]["mean"]
+        out["checks"][f"clock_signed_error_{blk}"] = {"independent": mine, "pipeline": theirs,
+                                                      "abs_diff": abs(mine - theirs),
+                                                      "pass": bool(abs(mine - theirs) < 1e-10)}
+    imp = []
+    for b in range(4):
+        pooled = scores(simulate_signal(joint, n, T, N_SIM // 4, rng), A)[1]
+        clock = scores(simulate_clock(blocks, n, T, N_SIM // 4, rng), A)[1]
+        imp.append(float((pooled - clock).mean()))
+    clk = json.loads((FU / "clock/core_cheap_talk__cheap_talk_n10_cycle_full.json").read_text())
+    ref = clk["comparison"]["signal_aware"]["improvement_pooled_minus_clock"]["2-7"]
+    v = np.array(imp)
+    se_mine = float(v.std(ddof=1) / np.sqrt(len(v)))
+    z = (v.mean() - ref["mean"]) / np.sqrt(se_mine ** 2 + ref["mc_sd_of_pooled_estimate"] ** 2)
+    out["checks"]["clock_early_crps_improvement"] = {
+        "independent": float(v.mean()), "independent_mc_se": se_mine, "pipeline": ref["mean"],
+        "pipeline_mc_se": ref["mc_sd_of_pooled_estimate"], "z": float(z), "pass": bool(abs(z) < 3),
+        "independent_sims": N_SIM}
     out["pass"] = bool(all(c["pass"] for c in out["checks"].values()))
     (FU / "independent_check.json").write_text(json.dumps(out, indent=1) + "\n")
     print(json.dumps(out, indent=1))

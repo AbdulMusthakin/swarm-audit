@@ -54,9 +54,15 @@ detectably. The sign of D is not established.
   [−0.062, −0.054] in rounds 2–7 (signal-aware) and about −0.02 later. The audit
   over-predicts high bids early, and the bias does not cancel round by round. It is in the
   same direction for both audits.
+- **The bias is within states, not a state-mix artefact.** In rounds 2–7 the signal-aware
+  signed error is negative in all six coarse states, from −0.039 to −0.091
+  (`signed_errors_by_state.csv`). Later, the sign splits: high-bid states are near 0 or
+  positive, low-bid states negative. So pooled late summaries partly cancel.
 - **OLMo endpoint.** Every run ends all-low, so the endpoint cannot discriminate. The swarm
-  still converges faster than forecast: no consensus by round 5 in 20% of runs, against 71%
-  forecast (imported, extra arm).
+  still converges faster than forecast. Under the existing three-round consensus
+  definition, with non-consensus censored, no consensus run has started by round 5 in 20%
+  of runs, against 71% forecast (actions-only). The median start is round 4 for the swarm,
+  against round 7 for both forecasts (Figure A1).
 
 ## 3. Mechanism: synthetic-history length, then content
 
@@ -71,6 +77,10 @@ detectably. The sign of D is not established.
 - **Early forecasts improve.** Early CRPS improves (pooled − clock): Llama **+0.0060
   [+0.0033, +0.0086]** (nested [+0.0028, +0.0083]); OLMo **+0.041 [+0.029, +0.051]**. The
   clock audit's held-out error on synthetic histories, eps(p_test), is lower in every block.
+- **Round-2 check (separately labelled).** The L = 1 full-history prompt is byte-identical
+  to the last-round prompt in all 108 states, so the enumerated last-round table is the
+  exact round-2 kernel. Its round-2 CRPS is 0.093, against 0.097 for the clock table and
+  0.108 for the pooled table: the clock table gets most of the way to the exact kernel.
 - **It fails later on Llama.** Rounds 8–13: −0.0014 [−0.0022, −0.0006]. Rounds 14–20:
   −0.0015 [−0.0028, −0.0001]. Endpoint: **−0.0036 [−0.0070, −0.0002]**. The late
   teacher-forced bias grows to −0.039, against −0.020 for the pooled table.
@@ -106,3 +116,24 @@ round 2. Size, degree and topology all change at once, so this is not a size con
 - The related-work check could not read full texts (`related_work.md`).
 - The toy procurement game exposes an audit failure mode. It is not a detector of real-world
   collusion, and high bidding alone does not show intentional coordination.
+- **Dual use.** Better forecasts of how coordinated agents behave could serve someone trying
+  to steer or exploit a population of agents, as well as an overseer. We report a
+  diagnostic of forecast failure, not a method for inducing coordination.
+
+## Checks, spend and jobs
+
+- **Independent re-derivation** (`independent_check.json`, code that imports nothing from
+  the pipeline) agrees on every checked headline:
+  - signed errors, pooled and clock: exact;
+  - endpoint D: z = −0.2;
+  - early D: z = 1.3;
+  - clock early gain: +0.00601 against +0.00596, z = 0.8.
+
+  It shares inputs and definitions with the pipeline, so it is a consistency check, not a
+  replication.
+- **Tests:** `tests/test_followup_core.py` covers CRPS normalisation, block indexing, the
+  clock-table partition and fallback, the clock chain reducing to the original chain, and
+  resampling integrity.
+- **Spend:** the follow-up used no GPU. The core ledger (`results/spend.json`) records
+  $5.80 before the remaining core runs, with a $40 cap.
+- **Jobs:** see the completion note in `results/README.md` for the final state.
