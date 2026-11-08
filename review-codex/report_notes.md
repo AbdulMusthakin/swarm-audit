@@ -1,0 +1,1 @@
+Initial checkpoint: retain exploratory labels, distinguish exact kernel predictions from finite live observations, and distinguish synthetic averaging from the literal `none` token. Final story and figures pending.

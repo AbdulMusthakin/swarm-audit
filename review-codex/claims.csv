@@ -1,0 +1,3 @@
+claim,status,result,condition,source_commit,source_path,independent_check,limitation
+OLMo exact late all-high,exploratory exact,0.14239254032336024 vs 0.0000763560316673361,n4 last1 T20,4a817051abffbdf208eb38a2b09160ab9d49aa0f,results/extra/audit/olmo-3-7b,yes,conditional on cached kernel
+OLMo observed paired CRPS,exploratory live,0.0252262741 [-0.003426035 0.053878583],50 runs n4 last1,4a817051abffbdf208eb38a2b09160ab9d49aa0f,results/extra/runs/olmo_calibration_cheap_talk,yes,interval crosses zero
