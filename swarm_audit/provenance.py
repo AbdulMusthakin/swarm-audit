@@ -56,6 +56,10 @@ def kernel_identity(backend: Any) -> dict:
 
 def run_payload(cond: Any, backend: Any) -> dict:
     design = {k: v for k, v in asdict(cond).items() if k not in ("runs", "params")}
+    # Preserve existing cycle/complete fingerprints when merging graph parameters.
+    # Nonempty parameters still identify the particular random regular graph.
+    if not design.get("graph_kwargs"):
+        design.pop("graph_kwargs", None)
     return {"kernel": kernel_identity(backend), "design": design,
             "sampling": SAMPLING_PROTOCOL}
 

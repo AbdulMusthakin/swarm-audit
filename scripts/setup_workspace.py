@@ -32,7 +32,11 @@ from swarm_audit import build  # noqa: E402
 
 
 def main() -> None:
-    cfg = build.load("core.yaml")
+    import argparse
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--config", default="core.yaml")
+    cfg = build.load(ap.parse_args().config)
     m = cfg["model"]
     if os.environ.get("SWARM_AUDIT_HF_SECRET") != "huggingface":
         raise SystemExit("set SWARM_AUDIT_HF_SECRET=huggingface (the secret's name in the workspace)")
@@ -55,7 +59,7 @@ def main() -> None:
     labels = build.check_final_labels(tok, cfg)
     out = {"workspace": ws, "secret": "huggingface", "model": m["hf_id"], "revision": m["revision"],
            "weights": dl, "seconds": round(time.time() - t0, 1), "label_check": labels}
-    path = REPO / "results" / "serving" / "workspace_setup.json"
+    path = build.results_root(cfg) / "serving" / "workspace_setup.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(out, indent=1, default=str) + "\n")
     print(json.dumps(out, indent=1, default=str))

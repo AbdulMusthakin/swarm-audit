@@ -31,8 +31,7 @@ import numpy as np  # noqa: E402
 from swarm_audit import build, calibration, plots  # noqa: E402
 from swarm_audit.analysis import analyse_condition, to_jsonable  # noqa: E402
 from swarm_audit.provenance import ProvenanceError, check_tables_match_runs  # noqa: E402
-from swarm_audit.swarm import load_runs  # noqa: E402
-from swarm_audit.topology import make  # noqa: E402
+from swarm_audit.swarm import graph_of, load_runs  # noqa: E402
 
 OUT = REPO / "results" / "analysis"
 
@@ -44,7 +43,9 @@ def one(args) -> None:
     if args.run_range:      # e.g. "0-49": analyse a pre-specified subset of run indices
         lo, hi = map(int, args.run_range.split("-"))
         data = data.subset(np.nonzero((data.runs >= lo) & (data.runs <= hi))[0])
-    g = make(data.graph, data.n)
+    g = graph_of(data)
+    root = build.results_root(cfg)
+    OUT = root / "analysis"
     tables = build.load_tables(Path(args.tables), args.tag)
     try:   # review C2: tables must come from the runs' kernel (prompts, model, payoffs...)
         check_tables_match_runs(data.meta.get("kernel_fingerprint"),
@@ -76,7 +77,7 @@ def one(args) -> None:
     path = OUT / arm / f"{cond}.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(to_jsonable(res)) + "\n")
-    plots.figure1(res, REPO / "results" / "figures" / f"fig1_{arm}_{cond}.png", f"{arm}: {cond}")
+    plots.figure1(res, root / "figures" / f"fig1_{arm}_{cond}.png", f"{arm}: {cond}")
     print(f"wrote {path}")
     sc = res["scores"]
     for k, v in sc["crps"].items():
@@ -86,9 +87,13 @@ def one(args) -> None:
         print(f"  paired D: {D['mean']:.4f} [{D['lo']:.4f}, {D['hi']:.4f}]")
 
 
-def collect() -> None:
+def collect(root: Path | None = None) -> None:
+    """Figure 2 and the summary tables over the analysed conditions under `root`
+    (a config's results_dir; default results/)."""
     import numpy as np
 
+    root = root or REPO / "results"
+    OUT = root / "analysis"
     rows = []
     for p in sorted(OUT.glob("*/*.json")):
         if p.name.endswith("_G5.json"):
@@ -99,8 +104,8 @@ def collect() -> None:
                      "res": _arrays(res)})
     if not rows:
         raise SystemExit(f"no analysed conditions in {OUT}")
-    plots.figure2(rows, REPO / "results" / "figures" / "fig2.png")
-    tdir = REPO / "results" / "tables"
+    plots.figure2(rows, root / "figures" / "fig2.png")
+    tdir = root / "tables"
     tdir.mkdir(parents=True, exist_ok=True)
     lines = ["| condition | predictor | CRPS (95% CI) | E_swarm F − E_model F (95% CI) | max Δ_t | floor |",
              "|---|---|---|---|---|---|"]
@@ -119,7 +124,7 @@ def collect() -> None:
             lines.append(f"| {r['name']} | {k} | {d['eps_test_pooled']:.4f} | {d['eps_swarm']:.4f} | "
                          f"{d['bound']['B'][-1]:.2f} | {d['bound']['first_saturation_round']} |")
     (tdir / "defects.md").write_text("\n".join(lines) + "\n")
-    print(f"wrote results/figures/fig2.png and {tdir}/scores.md, defects.md")
+    print(f"wrote {root / 'figures' / 'fig2.png'} and {tdir}/scores.md, defects.md")
 
 
 def _arrays(x):
@@ -146,7 +151,7 @@ def main() -> None:
     ap.add_argument("--run-range", help="analyse only run indices lo-hi (inclusive), e.g. 0-49")
     args = ap.parse_args()
     if args.collect:
-        collect()
+        collect(build.results_root(build.load(args.config)))
     elif args.runs and args.tables and args.tag:
         one(args)
     else:

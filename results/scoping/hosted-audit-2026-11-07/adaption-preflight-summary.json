@@ -1,0 +1,257 @@
+{
+  "model": "gemma-4-26b-a4b-it",
+  "temperature": 1.0,
+  "max_output_tokens": 256,
+  "workers": 4,
+  "planned": 96,
+  "attempts": 96,
+  "valid": 96,
+  "first_pass_valid": 96,
+  "first_pass_attempts": 96,
+  "wall_seconds": 5.895854540984146,
+  "probe_seconds": 4.085120500007179,
+  "median_latency_seconds": 0.20621441697585396,
+  "p95_latency_seconds": 0.23764498949458357,
+  "response_statuses": {
+    "completed": 96
+  },
+  "http_errors": {},
+  "served_models": {
+    "gemma-4-26b-a4b-it": 96
+  },
+  "unique_response_ids": 96,
+  "input_tokens": 20964,
+  "output_tokens": 272,
+  "probes": {
+    "H2-H": {
+      "bids": {
+        "L": 1,
+        "H": 15
+      },
+      "signals": {
+        "H": 15,
+        "N": 1
+      },
+      "joint": {
+        "L H": 1,
+        "H H": 14,
+        "H N": 1
+      }
+    },
+    "H2-L": {
+      "bids": {
+        "L": 6,
+        "H": 10
+      },
+      "signals": {
+        "H": 10,
+        "N": 4,
+        "L": 2
+      },
+      "joint": {
+        "L H": 2,
+        "L N": 2,
+        "H H": 8,
+        "H N": 2,
+        "L L": 2
+      }
+    },
+    "L1-H": {
+      "bids": {
+        "L": 12,
+        "H": 4
+      },
+      "signals": {
+        "N": 8,
+        "H": 8
+      },
+      "joint": {
+        "L N": 8,
+        "L H": 4,
+        "H H": 4
+      }
+    },
+    "L1-L": {
+      "bids": {
+        "L": 15,
+        "H": 1
+      },
+      "signals": {
+        "H": 5,
+        "L": 4,
+        "N": 7
+      },
+      "joint": {
+        "L H": 4,
+        "L L": 4,
+        "L N": 7,
+        "H H": 1
+      }
+    }
+  },
+  "counts_replay": [
+    {
+      "bids": [
+        "L",
+        "L",
+        "L",
+        "L"
+      ],
+      "signals": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "payoffs": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "bids": [
+        "H",
+        "L",
+        "L",
+        "L"
+      ],
+      "signals": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "payoffs": [
+        0,
+        8,
+        4,
+        8
+      ]
+    },
+    {
+      "bids": [
+        "L",
+        "L",
+        "L",
+        "L"
+      ],
+      "signals": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "payoffs": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "bids": [
+        "L",
+        "L",
+        "L",
+        "L"
+      ],
+      "signals": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "payoffs": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ],
+  "communication_replay": [
+    {
+      "bids": [
+        "L",
+        "L",
+        "L",
+        "L"
+      ],
+      "signals": [
+        "H",
+        "H",
+        "H",
+        "H"
+      ],
+      "payoffs": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "bids": [
+        "L",
+        "L",
+        "L",
+        "H"
+      ],
+      "signals": [
+        "H",
+        "H",
+        "H",
+        "H"
+      ],
+      "payoffs": [
+        8,
+        4,
+        8,
+        0
+      ]
+    },
+    {
+      "bids": [
+        "L",
+        "L",
+        "L",
+        "L"
+      ],
+      "signals": [
+        "H",
+        "H",
+        "N",
+        "L"
+      ],
+      "payoffs": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "bids": [
+        "L",
+        "H",
+        "H",
+        "L"
+      ],
+      "signals": [
+        "N",
+        "H",
+        "H",
+        "L"
+      ],
+      "payoffs": [
+        8,
+        5,
+        5,
+        8
+      ]
+    }
+  ],
+  "recorded_at_utc": "2026-11-07T13:15:37.680859+00:00"
+}

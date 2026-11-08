@@ -1,4 +1,5 @@
-"""Interaction graphs: the undirected cycle C_n and the complete graph K_n.
+"""Interaction graphs: the undirected cycle C_n, the complete graph K_n, and a random
+d-regular graph (extra arm 8, docs/handoff-extra-arms.md section 3).
 
 An undirected graph is read as directed both ways (setup-paper section 2), so every
 edge {i, j} gives i -> j and j -> i. Agent i's record counts the outputs of its
@@ -89,9 +90,77 @@ def complete(n: int) -> Graph:
                                           for i in range(n)))
 
 
-def make(kind: str, n: int) -> Graph:
+def random_regular(n: int, d: int, seed: int, max_tries: int = 100_000) -> Graph:
+    """A simple, connected d-regular graph on n agents, uniform over such graphs.
+
+    Pairing (configuration) model with rejection: shuffle n * d half-edges with
+    numpy.random.Generator(PCG64(seed)), pair them in order, and start again if the
+    result has a self-loop, a repeated edge, or is not connected. Accepting only simple
+    pairings makes the draw uniform over simple d-regular graphs; the connectivity
+    condition then keeps it uniform over connected ones. The same seed gives the same
+    graph. Needs n * d even and d < n.
+    """
+    import numpy as np
+
+    if d < 1 or d >= n or (n * d) % 2:
+        raise ValueError(f"no simple {d}-regular graph on {n} vertices")
+    rng = np.random.Generator(np.random.PCG64(seed))
+    stubs = np.repeat(np.arange(n), d)
+    for _ in range(max_tries):
+        pairs = rng.permutation(stubs).reshape(-1, 2)
+        if np.any(pairs[:, 0] == pairs[:, 1]):
+            continue
+        e = {(int(min(a, b)), int(max(a, b))) for a, b in pairs}
+        if len(e) != len(pairs):
+            continue
+        nb: list[list[int]] = [[] for _ in range(n)]
+        for a, b in sorted(e):
+            nb[a].append(b)
+            nb[b].append(a)
+        g = Graph(f"random_regular{n}_d{d}_seed{seed}", n, tuple(tuple(sorted(x)) for x in nb))
+        if _connected(g):
+            return g
+    raise RuntimeError(f"no simple connected {d}-regular graph on {n} in {max_tries} tries")
+
+
+def _connected(g: Graph) -> bool:
+    seen, frontier = {0}, [0]
+    while frontier:
+        nxt = []
+        for v in frontier:
+            for w in g.in_neighbours[v]:
+                if w not in seen:
+                    seen.add(w)
+                    nxt.append(w)
+        frontier = nxt
+    return len(seen) == g.n
+
+
+def diameter(g: Graph) -> int:
+    """The largest graph distance between two agents (breadth-first search from each)."""
+    best = 0
+    for s in range(g.n):
+        dist, frontier = {s: 0}, [s]
+        while frontier:
+            nxt = []
+            for v in frontier:
+                for w in g.in_neighbours[v]:
+                    if w not in dist:
+                        dist[w] = dist[v] + 1
+                        nxt.append(w)
+            frontier = nxt
+        if len(dist) != g.n:
+            raise ValueError(f"{g.name} is not connected")
+        best = max(best, max(dist.values()))
+    return best
+
+
+def make(kind: str, n: int, **kw) -> Graph:
+    """A graph by kind. "random_regular" needs d= and seed= (extra arm 8)."""
     if kind == "cycle":
         return cycle(n)
     if kind == "complete":
         return complete(n)
-    raise ValueError(f"unknown graph kind {kind!r} (cycle or complete)")
+    if kind == "random_regular":
+        return random_regular(n, int(kw["d"]), int(kw["seed"]))
+    raise ValueError(f"unknown graph kind {kind!r} (cycle, complete or random_regular)")

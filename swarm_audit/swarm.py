@@ -57,14 +57,19 @@ class Condition:
     base_seed: int = 20261107
     params: PayoffParams = DEFAULT_PARAMS
     own_signal_in_state: bool = True
+    # Extra parameters of the graph kind, as sorted (name, value) pairs, e.g.
+    # (("d", 4), ("seed", 20261108)) for "random_regular" (extra arm 8). Empty for the
+    # cycle and the complete graph, whose names and logs are then unchanged.
+    graph_kwargs: tuple = ()
 
     @property
     def name(self) -> str:
         mem = "full" if self.last_k is None else f"last{self.last_k}"
-        return f"{self.channel}_n{self.n}_{self.graph}_{mem}"
+        extra = "".join(f"_{k}{v}" for k, v in self.graph_kwargs)
+        return f"{self.channel}_n{self.n}_{self.graph}{extra}_{mem}"
 
     def make_graph(self) -> Graph:
-        return make(self.graph, self.n)
+        return make(self.graph, self.n, **dict(self.graph_kwargs))
 
     def rng(self, run: int) -> np.random.Generator:
         ss = np.random.SeedSequence([self.base_seed, self.arm_id, self.condition_id, run])
@@ -132,6 +137,8 @@ def simulate(cond: Condition, backend: Backend, runs: Sequence[int]) -> dict[int
                        "p_H": o.p_H, "logprob_H": o.logprob_H, "logprob_L": o.logprob_L,
                        "p_valid": o.p_valid, "u_action": u_a, "action": a,
                        "replayed": o.replayed}
+                if cond.graph_kwargs:
+                    row["graph_kwargs"] = dict(cond.graph_kwargs)
                 if cheap:
                     u_m = float(rngs[r].random())
                     m = sample_signal(u_m, o.sig[a])
@@ -189,13 +196,16 @@ def update_manifest(arm_dir: Path, cond: Condition, provenance: dict, session: d
 
 
 def run_condition(cond: Condition, backend: Backend, runs_root: Path, chunk: int | None = None,
-                  extra_manifest: dict | None = None, log=print) -> Path:
+                  extra_manifest: dict | None = None, log=print, max_runs: int | None = None) -> Path:
     """Run every unfinished run of `cond`, `chunk` runs at a time in lockstep (all at
-    once by default), writing each run's log as it completes. Returns the folder."""
+    once by default), writing each run's log as it completes. Returns the folder.
+    max_runs: run only the first that many unfinished runs (e.g. a benchmark)."""
     out = runs_root / cond.arm / cond.name
     # Review C2: bind the configuration before computing; a resume must match it.
     prov = bind_run_provenance(out, cond, backend, git_commit())
     todo = [r for r in range(cond.runs) if not run_file(out, r).exists()]
+    if max_runs is not None:
+        todo = todo[:max_runs]
     if len(todo) < cond.runs:
         log(f"{cond.name}: {cond.runs - len(todo)} runs already logged, {len(todo)} to run")
     chunk = chunk or max(len(todo), 1)
@@ -213,8 +223,9 @@ def run_condition(cond: Condition, backend: Backend, runs_root: Path, chunk: int
         "condition": {**asdict(cond), "name": cond.name},
         "backend": backend.describe(), "git_commit": git_commit(),
         "time": _dt.datetime.now(_dt.timezone.utc).isoformat(),
-        "runs_added": len(todo), "seconds": round(time.time() - t0, 2), "decisions": n_dec,
-        **(extra_manifest or {})}, summary)
+        "runs": todo, "runs_added": len(todo),
+        "seconds": round(time.time() - t0, 2), "decisions": n_dec,
+        **(extra_manifest or {}), **(extra_manifest or {}).get("session", {})}, summary)
     return out
 
 
@@ -314,7 +325,13 @@ def load_runs(folder: Path) -> RunData:
                    sigs if cheap else None, sig, st_sig,
                    meta={"folder": str(folder), "fingerprint": prov.get("fingerprint"),
                          "kernel_fingerprint": prov.get("kernel_fingerprint"),
-                         "design": prov.get("payload", {}).get("design", {})})
+                         "design": prov.get("payload", {}).get("design", {}),
+                         **({"graph_kwargs": first["graph_kwargs"]} if "graph_kwargs" in first else {})})
+
+
+def graph_of(data: RunData) -> Graph:
+    """The graph the logged runs were played on (with its extra parameters, if any)."""
+    return make(data.graph, data.n, **data.meta.get("graph_kwargs", {}))
 
 
 assert ACTIONS == ("H", "L")
