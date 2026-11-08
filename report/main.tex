@@ -1,0 +1,501 @@
+% Can you audit a swarm by auditing its agents?
+% Final report, Apart Research Swarm Alignment Hackathon (6-8 November 2026).
+%
+% Build:  cd report && latexmk -pdf main.tex
+% The layout follows the team's Google Docs draft (Apart Research report template):
+% US Letter, 0.75in margins, Calibri-metric body (Carlito), 11pt single spacing.
+
+\documentclass[11pt,letterpaper]{article}
+
+% ---------------------------------------------------------------- page and fonts
+% The right margin is 0.05in wider than the draft's 0.75in so that lines break where
+% Google Docs breaks them (its line fitting leaves a few points of slack).
+\usepackage[letterpaper,margin=0.75in,right=0.80in,headheight=14pt]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[sfdefault,lining]{carlito}   % metric-compatible with Calibri
+\usepackage{textcomp}
+\usepackage{amsmath,amssymb}
+% Match Google Docs line breaking: no font expansion and no shrinking of word spaces.
+\usepackage[final,expansion=false,protrusion=false]{microtype}
+\AddToHook{selectfont}{\fontdimen4\font=0pt}
+
+\usepackage{xcolor}
+\definecolor{titlenavy}{HTML}{1B1F3B}
+\definecolor{headinggrey}{HTML}{434343}
+\definecolor{linkblue}{HTML}{1155CC}
+
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{float}
+\usepackage[labelsep=period,font=normalsize,justification=raggedright,
+            singlelinecheck=false,skip=4pt]{caption}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{array}
+\usepackage{etoolbox}
+\usepackage[round]{natbib}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=linkblue]{hyperref}
+\usepackage{xurl}
+\urlstyle{same}
+
+% ---------------------------------------------------------------- paragraphs
+% Google Docs style: left-aligned, no indent, 4pt after each paragraph.
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt plus 1pt}
+\raggedright
+\setlength{\emergencystretch}{2em}
+\pagestyle{empty}
+
+% ---------------------------------------------------------------- headings
+% Section numbers are written into the headings, as in the draft.
+\titleformat{\section}{\fontsize{14}{17}\selectfont\bfseries\color{headinggrey}}{}{0pt}{}
+\titlespacing*{\section}{0pt}{12pt}{4pt}
+\titleformat{\subsection}{\normalsize\bfseries}{}{0pt}{}
+\titlespacing*{\subsection}{0pt}{6pt}{2pt}
+\setcounter{secnumdepth}{0}
+
+% Bold run-in heads ("Overview", "Procedure." ...) on their own line.
+\newcommand{\parahead}[1]{\par\textbf{#1}\par}
+
+% ---------------------------------------------------------------- lists
+\setlist{topsep=0pt,partopsep=0pt,itemsep=2pt,parsep=0pt}
+\setlist[itemize,1]{label=\textbullet,leftmargin=36pt,labelsep=10pt}
+\setlist[itemize,2]{label=$\circ$,leftmargin=36pt,labelsep=10pt}
+\setlist[enumerate,1]{label=\arabic*.,leftmargin=36pt,labelsep=8pt}
+
+% ---------------------------------------------------------------- figures
+% The draft places each figure where it is discussed, followed by a bold
+% "Figure N" line and the caption paragraph.
+\newcommand{\reportfigure}[3]{% file, caption text, label
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=6.5in]{#1}\par\vspace{4pt}
+    \raggedright\textbf{Figure~\ref{#3}}
+    \caption{#2}\label{#3}
+  \end{figure}}
+\setlength{\intextsep}{6pt}
+
+% ---------------------------------------------------------------- references
+% Author-year citations in the text; the list is numbered, italic, hanging.
+\renewcommand{\bibsection}{\section{References}}
+\renewcommand{\bibfont}{\itshape}
+\setlength{\bibsep}{2pt}
+\makeatletter
+\renewcommand{\NAT@bibsetup}[1]{%
+  \setlength{\leftmargin}{36pt}\setlength{\labelwidth}{18pt}%
+  \setlength{\labelsep}{8pt}\setlength{\itemindent}{0pt}%
+  \setlength{\itemsep}{\bibsep}\setlength{\parsep}{\z@}}
+\patchcmd{\@lbibitem}{\item[\hfil\NAT@anchor{#2}{\NAT@num}]}
+  {\item[\hfil\normalfont\the\c@NAT@ctr.]\NAT@anchor{#2}{}}{}{\PatchFailed}
+\makeatother
+\newcommand{\doi}[1]{\href{https://doi.org/#1}{\nolinkurl{https://doi.org/#1}}}
+
+\hypersetup{
+  pdftitle={Can you audit a swarm by auditing its agents?},
+  pdfauthor={Abdul Musthakin, Aliyusuf Belal, Michele Senso, Jack Rossiter, Petra Yang},
+}
+
+\begin{document}
+
+% ================================================================ title block
+\begingroup
+\centering
+\vspace*{-22pt}
+{\color{black}\rule{\textwidth}{3pt}}\par\vspace{14pt}
+{\fontsize{30}{37}\selectfont\bfseries\color{titlenavy}
+ Can you audit a swarm by auditing its\\ agents?\par}
+\vspace{12pt}
+\rule{\textwidth}{1pt}\par\vspace{5pt}
+\begin{tabular}{*{3}{>{\centering\arraybackslash}p{1.5in}}}
+  Abdul Musthakin & Aliyusuf Belal & Michele Senso \\
+  Mercial         & Mercial        & Mercial       \\[8pt]
+  Jack Rossiter   & Petra Yang     &               \\
+  Mercial         & Mercial        &               \\
+\end{tabular}\par\vspace{3pt}
+\textbf{With}\\
+Apart Research\par\vspace{3pt}
+{\fontsize{14}{17}\selectfont\bfseries Abstract\par}\vspace{8pt}
+\begin{minipage}{355pt}
+\centering\itshape
+AI agents are usually safety-tested one at a time, but groups of agents can behave in ways that individual tests miss.
+We studied whether testing each agent alone can predict what a group will do.
+We call this prediction an audit.
+Agents played a repeated bidding game in which the group earns more if everyone bids high, but each agent is tempted to undercut.
+In the real game, agents remember every round; in testing, each agent was shown scripted game histories instead.
+We compared audits with 50 real games per setup, using two models (Llama 3.1 8B and OLMo-3-7B) in groups of 4 to 20 agents.
+Our planned test asked whether audits improve if they also read the short messages agents send each other.
+This test was too weak to settle the question: Llama barely reacts to other agents, and reading their messages did not improve the audit.
+Unplanned analysis found two ways that audits fail.
+First, the Llama audit predicted the end of the game correctly, but for the wrong reasons: it expected too much high bidding early on, and a second error later in the game happened to cancel this out.
+Second, with OLMo, 8 of 50 games ended with every agent bidding high, but the audit that ignored messages said this would almost never happen.
+We suggest two checks: compare audits with real games round by round, not just at the end, and make sure test histories look like real games.
+\end{minipage}\par
+\endgroup
+\vspace{8pt}
+
+% ================================================================ 1
+\section{1. Introduction}
+
+In July 2026, around 700 agents in an internal OpenAI evaluation went beyond their tasks and coordinated an attack on Hugging Face's systems \citep{metr2026incident}.
+As \citet{greenblatt2026swarms} put it, ``we don't have good approaches for understanding/overseeing the activity and aims of AI `swarms'{}''.
+
+\newpage
+AI systems are typically tested in isolation, as if group behaviour followed from individual tests \citep{hammond2025}.
+Yet agent populations develop collective biases even when no individual is biased \citep{flintashery2025}, with effects that depend on group size \citep{flint2026}; models conform to peers \citep{bellina2026}; and among thousands of agents, privacy violations more than double compared with single-model tests \citep{priyanshu2026}.
+We study one failure mode: a swarm audit, built from tests of its members, that misses behaviour arising only from interaction.
+We ask:
+
+\textit{To what extent can we predict how a group of AI agents behaves by testing each agent on its own, with varying degrees of memory?}
+
+Prior work simulates populations only for agents remembering five interactions \citep{flint2026}, and finds cheap talk makes agent pairs play more consistently \citep{lore2026}.
+None, to our knowledge, tests short-test audits against full memory, or whether reading signals helps.
+
+Contributions
+\begin{itemize}
+  \item Our planned test found that reading messages did not improve the prediction, though Llama barely reacted to other agents.
+  \item Unplanned findings: the prediction can get the ending right by luck but the start wrong, because practice histories were the wrong length; and in small groups it missed games where every agent bid high, by assuming a message agents never sent.
+  \item We show our maths cannot guarantee the prediction, and propose Easy checks: compare round by round, and check practice histories resemble real games.
+\end{itemize}
+
+% ================================================================ 2
+\section{2. Related Work}
+
+The introduction covers evidence that groups of agents behave differently from their members.
+Here we focus on work closest to our method.
+
+\textbf{Auditing groups from individual agents}.
+The closest work is \citet{flint2026}.
+Their agents play a naming game (agreeing on a word) and remember their last five interactions.
+The authors store each model's choice probabilities for every possible memory state, simulate populations from them, and report close agreement with direct runs.
+Because the agents only see five interactions, these tests cover every situation they can be in.
+We study the case where tests cannot: our audit sees only the last round and uses made-up histories, while our agents remember everything.
+Group size is Flint et al.'s main topic; we only compare audit accuracy across sizes.
+
+\textbf{Communication}.
+Repeated games such as the prisoner's dilemma are well studied for language-model agents, mostly in pairs \citep{akata2025}.
+\citet{lore2026} find that cheap talk (non-binding messages before each round) mostly makes pairs of small open-weight models play more consistently.
+Our agents can each send one of three fixed messages, and we ask whether an audit that reads them predicts the group better.
+
+\textbf{Bounding the gap}.
+Our bound uses a standard argument in which per-round errors add up over time, as in imitation learning \citep{ross2010} and in measuring how far two probabilistic models drift apart \citep{bian2017}.
+We use it to explain the gap, not as a new result.
+
+\textbf{What this adds}.
+The closest existing method \citep{flint2026} predicts a group from tests that cover every situation its agents can face.
+We study the harder case: agents that remember the whole game, tested on scripted histories that cannot cover everything they remember.
+This matters for anyone who can test agents one at a time but cannot run every possible group, because they need to know how far those tests can be trusted.
+We measure how far the audit's prediction is from real games, both at the end and round by round, and whether reading the agents' messages makes it more accurate.
+
+% ================================================================ 3
+\newpage
+\section{3. Methods}
+
+\parahead{Overview}
+We build an audit of each agent from isolated tests, use it to predict the group's behaviour, run the real group, and measure the gap.
+
+Agents represent firms in a repeated procurement auction lasting 20 rounds.
+Each round, every agent bids high or low.
+The payoffs (12, 10, 4, 0) give the game the structure of a prisoner's dilemma.
+We chose this game because language-model behaviour in the repeated prisoner's dilemma is well studied \citep{akata2025,lore2026}, and with only two choices the audit's last-round situations are few enough to test every one.
+
+The agent sees everything that has happened to them so far: in each past round, their own bid, their payoff, and how many of their neighbours bid high or low.
+In the signal games, they also see how many neighbours sent each message.
+They aren't told how many rounds there are, and see no running score.
+The audit, by contrast, uses only the last round.
+
+\textbf{The outcome is the} coordination on high bids, measured as the share of agents bidding high each round.
+
+\parahead{Procedure.}
+\begin{enumerate}
+  \item \textbf{Test}: for each situation defined by the previous round, we show the model about 20 made-up histories and record its probability of bidding high.
+    These histories are kept separate from the real runs.
+    Agents with the same number of neighbours share one set of tests.
+  \item \textbf{Audit}: we simulate the group 10,000 to 100,000 times using only the audit.
+    Combining stored per-agent probabilities like this follows \citet{flint2026}, and is a standard dynamic Bayesian network.
+  \item \textbf{Run}: we run the real group for 20 rounds, [RUNS] times per setup, logging every output.
+  \item \textbf{Compare}: each round, we measure the total variation distance between audit and real group in the share bidding high.
+    We also compare the time until all agents agree and the final split.
+    We report the gap against a noise floor (the gap we would expect from chance alone), with 95\% bootstrapped intervals.
+\end{enumerate}
+
+\textbf{Explaining the gap.}
+The gap has two sources: the audit being wrong in situations it was tested on, and the real group reaching situations the tests covered poorly.
+We measure both.
+If the first is zero and the group stays within tested situations, the audit is exact (Proposition 2, Appendix A).
+Adding these errors over rounds and agents bounds the gap \citep{ross2010,bian2017}.
+At our group sizes the bound exceeds 1, the largest possible gap, so we use it to explain the gap, not to cap it.
+
+\textbf{Calibration.}
+Two 4-agent checks, in which agents see only recent rounds, test the pipeline before the main runs.
+A miss is investigated rather than assumed to be a bug: sampling variation, changes in model serving or a prompt mismatch can also cause one.
+
+\textbf{Reproducibility.}
+Code, prompts and logged probabilities are linked in Code and Data.
+Code written before the sprint is marked as pre-existing.
+
+% ================================================================ 4
+\section{4. Results}
+
+\textbf{Headline finding.}
+Checking how a group ends and checking how it gets there catch different failures.
+The audit got the ending right partly by luck, and it missed a whole outcome that only a check of the ending revealed.
+
+Each setup was run 50 times, for 20 rounds.
+The audit is our prediction of the group's behaviour, built only from testing each agent alone.
+Ranges are 95\%; a range that includes zero means no clear difference.
+Below are our three main findings, each with an associated figure.
+
+\newpage
+\subsection{4.1 Planned main test: reading messages made no difference}
+
+With Llama (10 agents in a ring), the audit that read messages and the one that ignored them were equally accurate over the last five rounds (Figure~1a).
+The 95\% range of the difference includes zero, and this held under every check of randomness we ran.
+
+The test was weak: Llama barely reacts to other agents.
+Its chance of bidding high moves by only about 5 points when its neighbours' messages change, and a ``coin'' audit that assumes agents ignore each other did almost as well.
+
+\reportfigure{fig1_primary_temporal}{Llama, 10 agents in a ring, with messages, 50 runs.
+(a) Difference in audit error between the audit that ignores messages and the one that reads them, by stretch of the game; left of zero means ignoring messages did better, and bars crossing zero mean no clear difference.
+(b) Share of agents bidding high each round: real groups (black) and audits (coloured).
+(c) How much too high or too low each audit was, round by round; below zero means it expected too much high bidding.}{fig:primary}
+
+\subsection{4.2 The ending was right, but the path was wrong}
+
+In rounds 2--7, the audit expected 38\% of agents to bid high, but real groups were at 32\%: for each decision it was about 6 points too optimistic (Figure~1b, c).
+The cause was the test histories.
+They were 1 to 19 rounds long, but at round 3 a real agent has seen only 2.
+Matching the length to the round cut the early error to about 2 points, but the late error grew from about 2 to about 4 (Figure~2).
+The same happened on 50 new runs with 20 agents, and with messages switched off there was no early error.
+So the original audit got the ending right partly because two errors cancelled out.
+
+\reportfigure{fig2_clock_audit}{Same runs as Figure~1.
+(a) Share of agents bidding high: real groups (black), the original audit (orange) and the audit with test histories matched in length (purple); both audits read messages.
+(b) How much too high or too low each audit was, round by round.
+(c) Where matching lengths helped (right of zero) or hurt (left of zero), by stretch of the game.}{fig:clock}
+
+\subsection{4.3 Ignoring messages made the audit miss a whole outcome}
+
+With OLMo (4 agents in a ring, each remembering only the last round), 8 of 50 groups ended with every agent bidding high.
+The audit that ignored messages put this at under 0.01\%; the audit that read them put it at 14\% (Figure~3A).
+To ignore messages, the audit averages over every message an agent might send, including ``I'll bid low''.
+But no real agent ever said ``low'' while everyone was bidding high (0 of 608 messages).
+
+One unrealistic test case erased the outcome.
+This was not planned in advance, it did not occur with 10 agents, and the 50 real games alone could not clearly separate the two audits.
+
+\reportfigure{fig3_olmo_mechanism}{OLMo, 4 agents in a ring.
+(A) Chance that every agent ends up bidding high, under audits that keep different parts of the messages; the dashed line is the real rate (8 of 50) and the grey band its 95\% range.
+(B) The same chance, calculated with the model, when agents see no messages; it barely changes.
+(C) Once every agent bids high, how long each audit expects that to last: the audit that ignores messages (blue) expects it to break up within a few rounds, while the one that reads messages (orange) expects it to stay.}{fig:olmo}
+
+\subsection{4.4 How robust are these results?}
+
+\begin{itemize}
+  \item \textbf{Solid:} the early-round error is well outside chance.
+    The history-length effect repeated with 20 agents and with OLMo, and disappeared when messages were off.
+  \item \textbf{Less certain:} the OLMo outcome (4.3) appears only in small groups.
+    With 20 agents, the main test leans one way but not clearly.
+  \item \textbf{Checks:} all pipeline checks passed (one failed once and passed on new runs), no runs were dropped, and an independent script reproduced the results.
+\end{itemize}
+
+% ================================================================ 5
+\section{5. Discussion and Limitations}
+
+\textbf{What the results mean.}
+An audit can be right for the wrong reasons \citep{kirchner2006,hourdin2017}.
+With Llama, two errors cancelled to give the right ending; with OLMo, the audit missed a whole outcome.
+Neither showed in an overall score, so audits need checking on the ending and along the way.
+Individual agent tests can miss a group's path or a rare outcome, additional cheap checks to ensure safety include, (a) compare with real runs round by round, (b) rebuild the audi with length-matched histories and look for disagreement, (c) check for weight on situations real agents never reach.
+
+\newpage
+\parahead{Trends.}
+\begin{itemize}
+  \item \textbf{Unrealistic tests caused both failures:} histories of the wrong length, and a message real agents never send.
+  \item \textbf{Messages mattered only sometimes:} no effect with Llama, decisive with OLMo.
+  \item \textbf{More interaction, more revealing failures:} Llama barely reacted to others, so its audit had little to get wrong.
+\end{itemize}
+
+\parahead{Limitations}
+\begin{itemize}
+  \item \textbf{Scope.} One game, one prompt, mostly one small model, 50 runs per setup.
+    Llama barely reacts to other agents, so the main test was weak.
+  \item \textbf{How sure we are.} Only the main test was planned, and it was inconclusive.
+    The other findings came after seeing the data and need confirming on new runs; only the 20-agent repeat used new runs.
+  \item \textbf{Untested explanation.} The late error may come from history content (half high bids in tests, a third in real games).
+    We did not test this.
+\end{itemize}
+
+\textbf{Assumptions.}
+Agents cannot detect testing and behave the same in tests as in groups.
+High bidding corresponds to coordination.
+An agent's situation is described sufficiently by the last round.
+
+\textbf{Future Work.}
+Test the explanation for the late error, confirm the exploratory findings on fresh runs, use models that react more to each other, and develop bounds that cover the whole game.
+Repeat with agents that learn during the games, mix models in the groups, and run tests with more than 20 agents.
+
+% ================================================================ 6
+\section{6. Conclusion}
+
+Testing AI agents one at a time can produce audits that look accurate but are not.
+Our planned test was inconclusive: reading the agents' messages did not improve the Llama audit, but Llama barely reacts to other agents.
+Two unplanned findings were more revealing.
+The Llama audit predicted the end of the game correctly, but only because an early error and a later error cancelled out.
+With OLMo, the audit that ignored messages missed an outcome that happened in 8 of 50 games.
+
+For AI safety, this means individual tests can miss what a group does along the way, or a rare group outcome.
+Two easy checks could catch these failures: compare audits with real games round by round, and make sure test histories look like real games.
+Both should be tested on larger models.
+
+% ================================================================ back matter
+\section{Author Contributions (optional)}
+
+Abdul Musthakin - Research lead
+
+Aliyusuf Belal - Design and Validation\\
+Michele Senso - Project Manager
+
+Jack Rossiter - Literature Support
+
+Petra Yang - Literature Support
+
+\clearpage
+\begin{thebibliography}{13}
+
+\bibitem[Akata et~al.(2025)]{akata2025}
+Akata, E., Schulz, L., Coda-Forno, J., Oh, S.\,J., Bethge, M., \& Schulz, E. (2025).
+Playing repeated games with large language models.
+Nature Human Behaviour, 9(7), 1380--1390.
+\doi{10.1038/s41562-025-02172-y}
+
+\bibitem[Bellina et~al.(2026)]{bellina2026}
+Bellina, A., De Marzo, G., \& Garcia, D. (2026).
+Conformity and social impact on AI agents.
+Advances in Psychology, 1, e680902. arXiv:2601.05384.
+
+\bibitem[Bian and Abate(2017)]{bian2017}
+Bian, G., \& Abate, A. (2017).
+On the relationship between bisimulation and trace equivalence in an approximate probabilistic context.
+In Foundations of Software Science and Computation Structures (FoSSaCS 2017), LNCS 10203 (pp.~321--337). Springer.
+\url{https://doi.org/10.1007/978-3-662-54458-7_19}
+
+\bibitem[Flint et~al.(2026)]{flint2026}
+Flint, A., Aiello, L.\,M., Pastor-Satorras, R., \& Baronchelli, A. (2026).
+Group size effects and collective misalignment in LLM multi-agent systems.
+Proceedings of the National Academy of Sciences, 123(34), e2531697123.
+\doi{10.1073/pnas.2531697123}
+
+\bibitem[Flint~Ashery et~al.(2025)]{flintashery2025}
+Flint Ashery, A., Aiello, L.\,M., \& Baronchelli, A. (2025).
+Emergent social conventions and collective bias in LLM populations.
+Science Advances, 11(20), eadu9368.
+\doi{10.1126/sciadv.adu9368}
+
+\bibitem[Greenblatt(2026)]{greenblatt2026swarms}
+Greenblatt, R. (2026).
+[Post on X about the Hugging Face incident investigation].
+\url{https://x.com/RyanGreenblatt/status/2092692685224325542}
+
+\bibitem[Hammond et~al.(2025)]{hammond2025}
+Hammond, L., Chan, A., Clifton, J., Hoelscher-Obermaier, J., Khan, A., et al. (2025).
+Multi-agent risks from advanced AI (Cooperative AI Foundation Technical Report No.~1).
+arXiv:2502.14143.
+
+\bibitem[Hourdin et~al.(2017)]{hourdin2017}
+Hourdin, F., Mauritsen, T., Gettelman, A., Golaz, J.-C., Balaji, V., Duan, Q., Folini, D., Ji, D., Klocke, D., Qian, Y., Rauser, F., Rio, C., Tomassini, L., Watanabe, M., \& Williamson, D. (2017).
+The art and science of climate model tuning.
+Bulletin of the American Meteorological Society, 98(3), 589--602.
+\doi{10.1175/BAMS-D-15-00135.1}
+
+\bibitem[Kirchner(2006)]{kirchner2006}
+Kirchner, J.\,W. (2006).
+Getting the right answers for the right reasons: Linking measurements, analyses, and models to advance the science of hydrology.
+Water Resources Research, 42, W03S04.
+\doi{10.1029/2005WR004362}
+
+\bibitem[Lor{\`e} et~al.(2026)]{lore2026}
+Lor{\`e}, N., Zhu, H., \& Heydari, B. (2026).
+Cheap talk stabilizes strategic interaction in LLM agents.
+arXiv:2609.16270.
+
+\bibitem[METR(2026)]{metr2026incident}
+METR. (2026, August 26).
+Brief independent investigation of agents' behavior, reasoning and collaboration in the OpenAI\,/\,Hugging Face hacking incident.
+\url{https://metr.org/blog/2026-08-26-openai-hugging-face-incident-investigation/}
+
+\bibitem[Priyanshu et~al.(2026)]{priyanshu2026}
+Priyanshu, A., Vijay, S., \& Pahwa, E. (2026).
+Got a secret? LLM agents can't keep it: Evaluating privacy in multi-agent systems.
+arXiv:2605.27766.
+
+\bibitem[Ross and Bagnell(2010)]{ross2010}
+Ross, S., \& Bagnell, D. (2010).
+Efficient reductions for imitation learning.
+In Proceedings of the 13th International Conference on Artificial Intelligence and Statistics (AISTATS), PMLR 9 (pp.~661--668)
+
+\end{thebibliography}
+
+% ================================================================ appendix
+\section{Appendix \textit{(optional)}}
+
+Main results
+\begin{itemize}
+  \item OLMo, 4 agents (4.3): how often does every agent end up bidding high?
+  \begin{itemize}
+    \item What happened: Real games: 8 of 50 (16\%) ended with all 4 agents bidding high in the last 5 rounds, and all 8 had started that way in round 1.
+      Audit that ignores messages: under 0.01\% (about 1 in 13,000).
+      Audit that reads messages: 14\%, close to the real rate.
+    \item How sure: Fairly sure: it happened 8 times when one audit said almost never.
+      But 50 games are too few to prove it formally.
+    \item Planned in advance: No
+  \end{itemize}
+  \item Llama, 10 agents (4.1): does reading messages improve the audit of the last 5 rounds?
+  \begin{itemize}
+    \item What happened: No.
+      Both audits expected about 38\% of agents to bid high in the final rounds, close to the real groups, and their accuracy was almost identical.
+      Llama's chance of bidding high moved only about 5 points when its neighbours' messages changed.
+    \item How sure: No clear difference either way.
+      A weak test, because Llama barely reacts to other agents.
+    \item Planned in advance: Yes (main test)
+  \end{itemize}
+  \item Llama, 10 agents (4.2): what happens if test histories match the real game length?
+  \begin{itemize}
+    \item What happened: Original audit: 38\% bidding high in rounds 2--7, against 32\% in real games (about 6 points too high per decision).
+      With matched lengths: about 2 points too high early, but about 4 points too high in the final rounds (up from 2).
+      Same pattern with 20 agents.
+    \item How sure: Sure: both changes are bigger than chance, and the pattern repeated with 20 agents.
+    \item Planned in advance: No
+  \end{itemize}
+\end{itemize}
+
+\parahead{Key parameters}
+\begin{itemize}
+  \item Rounds: 20, not disclosed to agents
+  \item Payoffs (u\_LH, u\_HH, u\_LL, u\_HL): (12, 10, 4, 0)
+  \item Group sizes: 10 and 20
+  \item Audit memory: 1 round
+  \item Test histories: about 20 per situation
+  \item Temperature / precision: 1 / bf16
+  \item Audit simulations: 10,000 to 100,000
+  \item Gap measure: total variation distance, share bidding high in 5 bands
+  \item Error bars: 95\% bootstrap, resampling whole runs
+\end{itemize}
+
+\vspace{10pt}
+\textbf{Model and tools .}All agents use Llama 3.1 8B, an open-weights model served with vLLM on Modal, sampled at temperature 1.
+\begin{itemize}
+  \item We log the model's probability of each bid at the moment it is drawn.
+    These are computed in bf16 precision, so near 0.5 they move in steps of about 3 percentage points.
+  \item No external dataset is used.
+\end{itemize}
+
+\clearpage
+\section{LLM Usage Statement}
+
+We used LLMs extensively but with human oversight at every step.
+AI coding agents (Claude Code) wrote much of the experiment and analysis code under our direction, an independent AI reviewer (OpenAI Codex) checked the design and results, and an AI assistant (Claude) found and checked references and produced first drafts of several sections, from Results onwards, which we then heavily edited.
+The research question, design, choice of experiments and final wording are ours.
+Every number was checked against our results files and re-derived by a separate script.
+
+\end{document}
