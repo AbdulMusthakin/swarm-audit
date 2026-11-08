@@ -64,6 +64,15 @@ detectably. The sign of D is not established.
   of runs, against 71% forecast (actions-only). The median start is round 4 for the swarm,
   against round 7 for both forecasts (Figure A1).
 
+- **Replication at n = 20 (secondary condition, fresh runs).**
+  - Early D is −0.00097 [−0.00119, −0.00075] at 2,000,000 simulated runs; none of the 200
+    table resamples is positive.
+  - Endpoint D, conditional on the tables, is −0.00031 [−0.00045, −0.00017].
+  - Including table uncertainty, endpoint D is [−0.00068, +0.00008] (nested
+    [−0.00081, +0.00008]), so its sign is not established.
+  - At 20,000 runs the published n = 20 D (−0.00004) sat within simulation noise: the
+    batch SD is 1.7e-4, twice that at n = 10.
+
 ## 3. Mechanism: synthetic-history length, then content
 
 - **The candidate cause.** The audit pools synthetic histories of lengths 1–19. At round t
@@ -91,6 +100,12 @@ detectably. The sign of D is not established.
   offsetting: short histories over-weighted early, high-bid-rich histories late. Matching
   the clock removes one and exposes the other. This is an interpretation of a decomposition,
   not a causal test.
+- **Replication at n = 20 (cheap talk, secondary).** The same pattern holds:
+  - early bias −0.060 → −0.021 with the clock table;
+  - late bias −0.022 → −0.042;
+  - early gain +0.0089 [+0.0066, +0.0111];
+  - endpoint −0.0083 [−0.0109, −0.0058];
+  - swarm histories again about 35% high.
 - **Counts control (Llama n = 10).** The pooled audit is unbiased there (+0.002), the clock
   table changes no score detectably, and swarm histories contain about 59% high bids.
 

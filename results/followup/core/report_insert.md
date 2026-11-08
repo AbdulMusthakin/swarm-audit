@@ -84,6 +84,12 @@ every table resample, so it is not fitting noise. The pooled audit's
 acceptable late-round fit is consistent with these two errors offsetting each other; this is
 our interpretation, not a causal test.
 
+The same pattern holds on 50 fresh runs at n = 20 (a secondary condition): early-round
+gain +0.0089 (+0.0066 to +0.0111), endpoint −0.0083. There, at high simulation precision
+and conditional on the tables, the actions-only audit is also better at the endpoint
+(D = −0.00031, −0.00045 to −0.00017). With audit-table uncertainty included, that sign is not
+established (nested −0.00081 to +0.00008).
+
 On the counts channel, the pooled audit is unbiased (+0.002) and the clock-indexed audit
 changes no score detectably.
 

@@ -24,3 +24,14 @@ All rows: T = 20 rounds, 50 live runs per condition, payoffs (12, 10, 4, 0), cyc
 | Clock gain, rounds 2–7 | **+0.0060 [+0.0033, +0.0086]** | −0.0001 [−0.0003, +0.0002] | +0.041 [+0.029, +0.051] |
 | Clock gain, endpoint | −0.0036 [−0.0070, −0.0002] | +0.0008 [−0.0002, +0.0018] | +0.000005 (degenerate) |
 | Swarm share of high bids before the last round (p_test: 0.5) | 0.35 | 0.59 | 0.13 at round 12 |
+
+**Replication, Llama cheap talk n = 20 (secondary, fresh runs).**
+
+| quantity | value |
+|---|---|
+| Endpoint D (2M sims, conditional on the tables) | −0.00031 [−0.00045, −0.00017] |
+| Endpoint D, nested | [−0.00081, +0.00008]: sign not established |
+| Early D | −0.00097 [−0.00119, −0.00075] |
+| Early bias, pooled → clock | −0.060 → −0.021 |
+| Clock gain, rounds 2–7 | +0.0089 [+0.0066, +0.0111] |
+| Clock gain, endpoint | −0.0083 [−0.0109, −0.0058] |

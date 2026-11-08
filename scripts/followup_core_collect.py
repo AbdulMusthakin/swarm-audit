@@ -122,6 +122,20 @@ def build_claims() -> None:
               f"comparison/signal_aware/improvement_pooled_minus_clock/{blk}", "exploratory", run10, "95% " + COND)
     claim("X1", "Independent re-derivation agrees with the pipeline (signed errors exact; D within MC error)",
           "results/followup/core/independent_check.json", "pass", "exploratory", run10, "consistency check")
+    T20 = "results/followup/core/temporal/core_cheap_talk__cheap_talk_n20_cycle_full.json"
+    C20 = "results/followup/core/clock/core_cheap_talk__cheap_talk_n20_cycle_full.json"
+    run20 = "core_cheap_talk/cheap_talk_n20_cycle_full, runs 0-49 (Llama 3.1 8B, live)"
+    claim("R1", "n = 20: endpoint D at the capped precision (2,000,000 sims), conditional on tables", T20,
+          f"monte_carlo/precision_run/paired/{k}/endpoint", "secondary / exploratory", run20, "95% " + COND)
+    claim("R2", "n = 20: endpoint D, nested runs x tables x simulation", T20,
+          f"table_resampling/summary/paired_nested/{k}/endpoint", "secondary / exploratory", run20,
+          "95% percentile over 200 nested resamples")
+    claim("R3", "n = 20: early D (rounds 2-7), 2,000,000 sims", T20,
+          f"monte_carlo/precision_run/paired/{k}/2-7", "secondary / exploratory", run20, "95% " + COND)
+    claim("R4", "n = 20: clock-indexed early CRPS gain (signal_aware)", C20,
+          "comparison/signal_aware/improvement_pooled_minus_clock/2-7", "secondary / exploratory", run20, "95% " + COND)
+    claim("R5", "n = 20: clock-indexed endpoint CRPS gain (signal_aware)", C20,
+          "comparison/signal_aware/improvement_pooled_minus_clock/endpoint", "secondary / exploratory", run20, "95% " + COND)
     # Imported from the extra arm (labels unchanged).
     O = "results/extra/analysis/olmo_core_cheap_talk/cheap_talk_n10_cycle_full.json"
     olmo = "olmo_core_cheap_talk/cheap_talk_n10_cycle_full, 50 runs (OLMo-3-7B, live; extra arm 9b, exploratory)"
