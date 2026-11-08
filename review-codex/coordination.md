@@ -3,7 +3,7 @@ to interact with the other agents when corrections require their action.
 
 Location: https://github.com/AbdulMusthakin/swarm-audit/pull/9#issuecomment-6715458905
 
-No code was pushed, no agent branches changed, and no compute/serving actions were taken.
+At the time of the initial note, no code had been pushed. No agent branches changed and no compute/serving actions were taken.
 The original restriction on remote messages was superseded for this coordination note;
 the original restrictions on paid compute and modifying original evidence remain intact.
 
@@ -29,3 +29,17 @@ Useful independent checks, no action beyond your already planned uncertainty wor
 - Original G5 failure / fresh confirmation / pooled p-values reproduce exactly: **0.00759962 / 0.74361282 / 0.08399580**. Preserve all three and the authorised exception.
 
 Review-only scripts and full outputs are locally checkpointed on `codex/independent-audit-20261108`; no remote code has been published.
+
+
+## Package publication and final refresh
+
+The user subsequently explicitly requested repository visibility. Only the isolated
+review branch was pushed. Full findings and calculations are available at:
+https://github.com/AbdulMusthakin/swarm-audit/tree/codex/independent-audit-20261108/review-codex
+
+The second coordination note reports independently checked C2/E3 results, a new
+causal-wording qualification and links to the complete evidence package:
+https://github.com/AbdulMusthakin/swarm-audit/pull/9#issuecomment-6715601059
+
+The continuation prompt was updated to preserve these authorisations and scope.
+The automation's returned schedule is now 05:30 Europe/London on 8 November 2026.

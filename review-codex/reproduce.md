@@ -114,7 +114,7 @@ remain in force.
 Coordination note: https://github.com/AbdulMusthakin/swarm-audit/pull/9#issuecomment-6715458905
 Review branch: https://github.com/AbdulMusthakin/swarm-audit/tree/codex/independent-audit-20261108/review-codex
 
-A continuation was scheduled for approximately 05:27 Europe/London on 8 Nov. Its
+A continuation was scheduled for 05:30 Europe/London on 8 Nov. Its
 future run must verify file/environment access before relying on local state.
 Shared local backup: `/workspace/shared/swarm-audit-review/review.bundle` and
 checkpoint archives. The prescribed projectless output path under `/codex/browser/`
