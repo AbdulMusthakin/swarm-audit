@@ -48,7 +48,7 @@ DOBRUSHIN = {"8b": REPO / "results/followup/dobrushin/dobrushin_results.json",
 AUDITS = ("order0", "actions_only", "signal_aware")
 CLAIMS = REPO / "results/followup/core/claims.csv"
 PERSISTENCE = REPO / "results/extra/followup/persistence.json"
-SOURCE_COMMIT = "report"   # set to the report commit when the report is pinned
+SOURCE_COMMIT = "c3ed9cb"   # the report commit that produced these files
 B, SEED = 2000, 20261108
 
 
