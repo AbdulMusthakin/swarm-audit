@@ -67,7 +67,7 @@ GPU steps run with `SWARM_AUDIT_HF_SECRET=huggingface SWARM_AUDIT_BATCH_INVARIAN
 
 The final report is `report/main.tex` (built PDF: `report/main.pdf`; build with
 `cd report && latexmk -pdf main.tex`). The report and its scripts are at commit
-[`e75e800`](https://github.com/AbdulMusthakin/swarm-audit/tree/e75e8003cd56553756ec3f804df09a09a93c32ac).
+[`68be23e`](https://github.com/AbdulMusthakin/swarm-audit/tree/68be23ec4092a9070f0bee207f5ae724831ac240).
 The original 8B and OLMo evidence is pinned at
 [`b524342`](https://github.com/AbdulMusthakin/swarm-audit/tree/b52434290039a1bc775137271a38ee35c06d432c), and the 70B evidence at
 [`5f88de5`](https://github.com/AbdulMusthakin/swarm-audit/tree/5f88de5bc83acfab90a01a78f696849421523f5c); both are included in the report revision.
