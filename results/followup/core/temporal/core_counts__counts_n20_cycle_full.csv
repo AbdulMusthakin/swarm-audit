@@ -1,0 +1,17 @@
+arm,condition,status,quantity,block,mean,lo,hi,interval
+core_counts,counts_n20_cycle_full,secondary,CRPS order0,endpoint,0.03231136603186726,0.026713592625053382,0.038673983977332876,"95% whole-run bootstrap, conditional on tables and simulation"
+core_counts,counts_n20_cycle_full,secondary,CRPS order0,2-7,0.0603842355458103,0.05626821791955921,0.06471099415297954,"95% whole-run bootstrap, conditional on tables and simulation"
+core_counts,counts_n20_cycle_full,secondary,CRPS order0,8-13,0.06065697390500178,0.05675258659768186,0.06487781936902702,"95% whole-run bootstrap, conditional on tables and simulation"
+core_counts,counts_n20_cycle_full,secondary,CRPS order0,14-20,0.05946171969732843,0.05556077904274274,0.06372255987729908,"95% whole-run bootstrap, conditional on tables and simulation"
+core_counts,counts_n20_cycle_full,secondary,CRPS actions_only,endpoint,0.032296565124999996,0.026508342124999997,0.03837528362499999,"95% whole-run bootstrap, conditional on tables and simulation"
+core_counts,counts_n20_cycle_full,secondary,CRPS actions_only,2-7,0.06051709566666667,0.05634928399999999,0.06460110858333334,"95% whole-run bootstrap, conditional on tables and simulation"
+core_counts,counts_n20_cycle_full,secondary,CRPS actions_only,8-13,0.06060685452083333,0.056653566187500004,0.06497734702083333,"95% whole-run bootstrap, conditional on tables and simulation"
+core_counts,counts_n20_cycle_full,secondary,CRPS actions_only,14-20,0.05952991417857143,0.05567029525,0.06351962775000002,"95% whole-run bootstrap, conditional on tables and simulation"
+core_counts,counts_n20_cycle_full,secondary,paired actions_only - order0,endpoint,-1.4800906867257005e-05,-0.0013914298385024817,0.001479228345131772,"95% whole-run bootstrap, conditional on tables and simulation"
+core_counts,counts_n20_cycle_full,secondary,paired actions_only - order0 (nested),endpoint,-4.4801823322083626e-05,-0.0014239826320937177,0.0013450907623391896,95% nested: runs x tables x simulation
+core_counts,counts_n20_cycle_full,secondary,paired actions_only - order0,2-7,0.000132860120856374,-0.00033747533409915075,0.0006188268173834964,"95% whole-run bootstrap, conditional on tables and simulation"
+core_counts,counts_n20_cycle_full,secondary,paired actions_only - order0 (nested),2-7,0.0001325139024338605,-0.000413796023890945,0.0009139771777958161,95% nested: runs x tables x simulation
+core_counts,counts_n20_cycle_full,secondary,paired actions_only - order0,8-13,-5.0119384168461066e-05,-0.0004962199655870863,0.00043216150099252825,"95% whole-run bootstrap, conditional on tables and simulation"
+core_counts,counts_n20_cycle_full,secondary,paired actions_only - order0 (nested),8-13,-1.1747733732130115e-05,-0.00047835988947377364,0.0005629805602405366,95% nested: runs x tables x simulation
+core_counts,counts_n20_cycle_full,secondary,paired actions_only - order0,14-20,6.819448124300368e-05,-0.0004065894762976223,0.0005837714644650028,"95% whole-run bootstrap, conditional on tables and simulation"
+core_counts,counts_n20_cycle_full,secondary,paired actions_only - order0 (nested),14-20,4.75180727094187e-05,-0.0006146564561695726,0.0006356077706375333,95% nested: runs x tables x simulation

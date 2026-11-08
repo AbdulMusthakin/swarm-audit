@@ -122,56 +122,70 @@ def figure1() -> None:
 
 def figure3() -> None:
     p = FU / "clock" / f"{PRIMARY}.json"
-    if not p.exists():
-        print("no clock result; Figure 3 skipped")
+    mp = FU / "mechanism" / f"{PRIMARY}.json"
+    if not p.exists() or not mp.exists():
+        print("no clock or mechanism result; Figure 3 skipped")
         return
     r = json.loads(p.read_text())
+    mech = json.loads(mp.read_text())
     tr = json.loads((FU / "temporal" / f"{PRIMARY}.json").read_text())
     m = "signal_aware"
     comp = r["comparison"][m]
-    fig, axes = plt.subplots(1, 2, figsize=(10.5, 3.6), facecolor=SURFACE,
-                             gridspec_kw={"width_ratios": [1.3, 1.0]})
+    fig, axes = plt.subplots(1, 3, figsize=(13, 3.7), facecolor=SURFACE,
+                             gridspec_kw={"width_ratios": [1.2, 1.2, 1.0]})
     for ax in axes:
         _style(ax)
-    a = axes[0]
     sw = tr["X"]["swarm"]
     T = len(sw["mean"])
     t = np.arange(1, T + 1)
+
+    a = axes[0]
     a.fill_between(t, sw["lo"], sw["hi"], color=INK, alpha=0.12, linewidth=0)
     a.plot(t, sw["mean"], color=INK, linewidth=2, marker="o", markersize=4, label="swarm (50 runs)")
     a.plot(t, comp["mean_X_pooled"], color=COLOURS[m], linewidth=2, label="pooled audit (L = 1-19)")
-    a.plot(t, comp["mean_X_clock"], color=CLOCK_COLOUR, linewidth=2,
-           label="clock-indexed audit (L blocks 1-6 / 7-12 / 13-19)")
-    for x in (7.5, 13.5):
-        a.axvline(x, color=INK2, linewidth=0.8, linestyle=":")
+    a.plot(t, comp["mean_X_clock"], color=CLOCK_COLOUR, linewidth=2, label="clock-indexed audit")
     a.set_xlim(1, T)
     a.set_ylim(0, max(0.6, float(np.max(sw["hi"])) + 0.05))
     _lab(a, "round t", "mean fraction bidding high, X_t")
     a.legend(frameon=False, fontsize=7, loc="upper right")
-    a.set_title("(a) signal-aware audit: pooled vs clock-indexed", fontsize=9, color=INK, loc="left")
+    a.set_title("(a) signal-aware forecasts", fontsize=9, color=INK, loc="left")
 
     b = axes[1]
+    for key, c, lab in (("signal_aware_pooled", COLOURS[m], "pooled table"),
+                        ("signal_aware_clock", CLOCK_COLOUR, "clock-indexed table")):
+        e = mech["errors"][key]["by_round"]
+        mean, lo, hi = (np.asarray(e[k], float) for k in ("mean", "lo", "hi"))
+        b.fill_between(t[1:], lo[1:], hi[1:], color=c, alpha=0.18, linewidth=0)
+        b.plot(t[1:], mean[1:], color=c, linewidth=2, label=lab)
+    b.axhline(0, color=INK2, linewidth=1)
+    b.set_xlim(2, T)
+    _lab(b, "round t", "mean p_H - kappa(H | s)  (swarm histories)")
+    b.legend(frameon=False, fontsize=7, loc="lower left")
+    b.set_title("(b) signed one-step error, teacher-forced", fontsize=9, color=INK, loc="left")
+
+    c_ = axes[2]
     keys = [("2-7", "rounds 2-7 (primary)"), ("8-13", "rounds 8-13"), ("14-20", "rounds 14-20"),
             ("endpoint", "endpoint y")]
     cond = comp["improvement_pooled_minus_clock"]
     nest = r["table_sensitivity"]["results"][m]
     for i, (k, _) in enumerate(keys):
-        for j, (lab, v, c, mk) in enumerate([("runs resampled", cond[k], INK, "o"),
-                                              ("runs x tables x sims", nest[k]["nested_runs_tables_simulation"],
-                                               LAYER3, "^")]):
+        for j, (lab, v, col, mk) in enumerate([("runs resampled", cond[k], INK, "o"),
+                                                ("runs x tables x sims", nest[k]["nested_runs_tables_simulation"],
+                                                 LAYER3, "^")]):
             y = i + (j - 0.5) * 0.25
-            b.plot([v["lo"] * 1e3, v["hi"] * 1e3], [y, y], color=c, linewidth=2)
-            b.plot(v["mean"] * 1e3, y, marker=mk, color=c, markersize=6, linestyle="none",
-                   markeredgecolor=SURFACE, markeredgewidth=1, label=lab if i == 0 else None)
-    b.axvline(0, color=INK2, linewidth=1)
-    b.set_yticks(range(len(keys)), [k[1] for k in keys], fontsize=8)
-    b.invert_yaxis()
-    _lab(b, "CRPS(pooled) - CRPS(clock)  [x 1e-3]\n> 0: clock-indexed audit better", "")
-    b.legend(frameon=False, fontsize=7, loc="lower right")
-    b.set_title("(b) paired improvement, 95% intervals", fontsize=9, color=INK, loc="left")
-    _int_rounds(a)
-    fig.suptitle("Exploratory repair: matching the audit's history length to the round "
-                 "(same 50 runs; not an independent validation)", fontsize=10, color=INK, x=0.01, ha="left")
+            c_.plot([v["lo"] * 1e3, v["hi"] * 1e3], [y, y], color=col, linewidth=2)
+            c_.plot(v["mean"] * 1e3, y, marker=mk, color=col, markersize=6, linestyle="none",
+                    markeredgecolor=SURFACE, markeredgewidth=1, label=lab if i == 0 else None)
+    c_.axvline(0, color=INK2, linewidth=1)
+    c_.set_yticks(range(len(keys)), [k[1] for k in keys], fontsize=8)
+    c_.invert_yaxis()
+    _lab(c_, "CRPS(pooled) - CRPS(clock)  [x 1e-3]\n> 0: clock-indexed audit better", "")
+    c_.legend(frameon=False, fontsize=7, loc="lower right")
+    c_.set_title("(c) paired improvement, 95% intervals", fontsize=9, color=INK, loc="left")
+    _int_rounds(a, b)
+    fig.suptitle("Exploratory repair: matching history length fixes the early bias and exposes a "
+                 "content shift later (same 50 runs; not an independent validation)",
+                 fontsize=10, color=INK, x=0.01, ha="left")
     fig.tight_layout()
     save(fig, "fig3_clock_audit")
 
