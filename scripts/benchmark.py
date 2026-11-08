@@ -61,7 +61,7 @@ def main() -> None:
             t0 = time.time()
             out = run_condition(c, be, root)
             sec = time.time() - t0
-            usd = sec / 3600 * cfg["serving"]["l4_usd_per_hour"]
+            usd = sec / 3600 * build.usd_per_hour(cfg)
             lines = read_run(run_file(out, 0))
             tok20 = [ln["n_tokens"] for ln in lines if ln["round"] == c.T]
             res[c.name] = {"decisions": len(lines), "seconds": sec,

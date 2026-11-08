@@ -1,0 +1,71 @@
+{
+ "fingerprint": "9f3962ed6bb5f6268f28d41924394b3de1b6351aa0ef43ca4beb0d062264eea2",
+ "kernel_fingerprint": "43617bbe4293d57a413789920495e632837181597c55a5f11637acaea0df9de0",
+ "payload": {
+  "kernel": {
+   "templates": {
+    "cheap_talk": "7df81f5308f515f855107eb9a06703e1bbc9d21c23e2e84799554641221c2991",
+    "counts": "2598208c29c8cb6c5ecea266c8c3b2b59b02c32acf3a3362395f4a13519f4357"
+   },
+   "backend": {
+    "backend": "llm",
+    "labels": [
+     " H",
+     " L",
+     " high",
+     " low",
+     " none"
+    ],
+    "action_ids": [
+     473,
+     445
+    ],
+    "signal_ids": [
+     1579,
+     3428,
+     7000
+    ],
+    "chat_kwargs": {},
+    "model": "llama-3.1-70b",
+    "hf_id": "meta-llama/Llama-3.1-70B-Instruct",
+    "revision": "1605565b47bb9346c5515c34102e054115b4f98b",
+    "serving": {
+     "hf_id": "meta-llama/Llama-3.1-70B-Instruct",
+     "revision": "1605565b47bb9346c5515c34102e054115b4f98b",
+     "method": "logprob_token_ids",
+     "dtype": "bfloat16",
+     "engine_kwargs": {
+      "max_model_len": 4096,
+      "gpu_memory_utilization": 0.9,
+      "enforce_eager": true
+     },
+     "vllm_version": "0.32.0",
+     "batch_invariant": true,
+     "gpu": "B200",
+     "serving_code_sha256": "2f93b0b380439fd923cedb4348b03c3d2d6e1188020e085c3863c18f3c93097c"
+    }
+   },
+   "payoffs": {
+    "uLH": 12.0,
+    "uHH": 10.0,
+    "uLL": 4.0,
+    "uHL": 0.0
+   }
+  },
+  "design": {
+   "arm": "m70_core_counts",
+   "arm_id": 5,
+   "condition_id": 10,
+   "channel": "counts",
+   "n": 10,
+   "graph": "cycle",
+   "T": 20,
+   "last_k": null,
+   "base_seed": 20261107,
+   "own_signal_in_state": true
+  },
+  "sampling": "v1: one numpy PCG64 stream per run, SeedSequence([base_seed, arm_id, condition_id, run]); agents draw in index order; a = H iff u < p_H; on cheap talk each agent then draws its signal from P(m | h, a) for its sampled a; vLLM's own sampling is not used"
+ },
+ "created": "2026-11-08T14:19:43.949840+00:00",
+ "git_commit": "671ccfbb4abc1ed168aaceba3d8c29903427672b"
+}

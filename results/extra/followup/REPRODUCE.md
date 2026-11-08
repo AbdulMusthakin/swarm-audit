@@ -38,6 +38,23 @@ E2 live validation, once its runs exist (writes `observation_live.json`):
 python scripts/extra_followup_live.py
 ```
 
+Fresh four-agent cohort: the original arm 9a roundwise check (exact round laws of the cached
+audit chains, original simultaneous cutoffs) reapplied to the 50 unmodified E2 runs; it also
+recomputes the original cohort and stops unless that reproduces the committed analysis
+(writes `fresh_cohort_roundwise.json`, about 5 s):
+
+```bash
+python scripts/report_fresh_cohort.py
+```
+
+Diagnostic sensitivity within the four-agent setting, pre-registered in
+`sensitivity/plan.md` (writes `sensitivity/results.json` and `sensitivity/summary.md`,
+about 20 s):
+
+```bash
+python scripts/report_sensitivity.py
+```
+
 Figure 2 candidate and the appendix figures (writes `figures/`):
 
 ```bash

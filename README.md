@@ -63,6 +63,36 @@ GPU steps run with `SWARM_AUDIT_HF_SECRET=huggingface SWARM_AUDIT_BATCH_INVARIAN
     python scripts/analyse.py --runs results/runs/<arm>/<condition> --tables results/audit/<model> --tag <channel>_d2
     python scripts/analyse.py --collect
 
+## Report
+
+The final report is `report/main.tex` (built PDF: `report/main.pdf`; build with
+`cd report && latexmk -pdf main.tex`). The report and its scripts are at commit
+[`68be23e`](https://github.com/AbdulMusthakin/swarm-audit/tree/68be23ec4092a9070f0bee207f5ae724831ac240).
+The original 8B and OLMo evidence is pinned at
+[`b524342`](https://github.com/AbdulMusthakin/swarm-audit/tree/b52434290039a1bc775137271a38ee35c06d432c), and the 70B evidence at
+[`5f88de5`](https://github.com/AbdulMusthakin/swarm-audit/tree/5f88de5bc83acfab90a01a78f696849421523f5c); both are included in the report revision.
+Everything it reports can be recomputed on CPU from committed tables and logs, with no
+model queries:
+
+- Llama follow-up: [`results/followup/core/reproduce.md`](results/followup/core/reproduce.md).
+- OLMo mechanism, interventions and memory controls:
+  [`results/extra/followup/REPRODUCE.md`](results/extra/followup/REPRODUCE.md).
+- Fresh four-agent OLMo cohort (the original roundwise check reapplied to the 50 fresh
+  runs): `python scripts/report_fresh_cohort.py`.
+- Diagnostic sensitivity within the four-agent setting (Appendix F; pre-registered in
+  [`results/extra/followup/sensitivity/plan.md`](results/extra/followup/sensitivity/plan.md)):
+  `python scripts/report_sensitivity.py`.
+- Compounding over persistence in the four-agent setting: `python scripts/report_persistence.py`.
+- Exploratory Llama 3.1 70B rerun ([`interest/model-70b/`](interest/model-70b/README.md), report
+  §4.5): `python interest/model-70b/compare.py`, then `python scripts/report_70b.py` (after the
+  persistence line), which also adds the report's claims to `results/followup/core/claims.csv`.
+- Report figures: `python scripts/report_figures.py` (after the fresh-cohort line above).
+- Independent re-derivations: `python -I scripts/followup_core_check.py`,
+  `python -I scripts/extra_followup_check.py`, then `python scripts/report_final_check.py`.
+  The last checks the new 70B and persistence calculations without importing experiment
+  or report-generation code and records input hashes in `results/followup/report_final_check.json`.
+  The final review is recorded in [`report/verification.md`](report/verification.md).
+
 ## Results
 
 See `results/README.md` and `results/validation.md`.
@@ -73,9 +103,18 @@ CPU-only reproduction scripts.
 
 ## Pre-existing code
 
-The repository scaffold (folder layout and empty files) was created on 3 November 2026, before the sprint. Any code written before Friday 6 November is listed here.
+Only scaffold and stubs predate the sprint. The initial commit of 3 November 2026
+([`1e52f0b`](https://github.com/AbdulMusthakin/swarm-audit/commit/1e52f0b)) holds the folder
+layout, placeholder configuration files and package metadata, docstring-only module and
+script stubs, and a set-up paper skeleton. No working code predates Friday 6 November.
 
-The build (from 7 November 2026) reuses only this repository's own sprint code (the
-screening of 6–7 November). The teammates' scoping study (`abdul_openrouter_study.py`,
-`abdul_adaption_analysis.py`) was not in the repository when the build was written, so
-none of its code is reused; its findings shaped the design (no hosted APIs).
+The implementation (game, prompts, serving, audit tables, live runs, analysis, figures and
+report) was written during the sprint, 6–8 November 2026. The build (from 7 November) reuses
+only this repository's own sprint code (the screening of 6–7 November).
+
+Earlier scoping work informed the design but is not reused. Before the build, the
+teammates' scoping study (`abdul_openrouter_study.py`, `abdul_adaption_analysis.py`, outside
+this repository) ran a message-free calibration through a hosted API and found that the same
+prompt received different probabilities in isolation and during live games. That finding
+shaped the design (models served by us, no hosted APIs); none of its code is in this
+repository.

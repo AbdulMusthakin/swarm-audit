@@ -1,2 +1,97 @@
-# ~70B model: conditional extra 3
-# DROPPED by docs/handoff-build.md (7 Nov 2026 review): not run in this build.
+# Llama 3.1 70B Instruct: runs "for interest" only (Abdul, 8 Nov 2026).
+# NOT part of the report or the submission. Outputs go to interest/model-70b/ (never
+# results/), with their own spend ledger; nothing here feeds any claim in report/.
+# Copied from core.yaml; only model, serving, results_dir and arms differ. The arms reuse
+# the core's arm ids, so each run uses the same random draws as the 8B run of that index.
+
+inputs:
+  model_confirmed: true     # Abdul, 8 Nov 2026: 70B runs for interest
+  prompts_approved:         # the core's approved templates, unchanged
+    cheap_talk: true
+    counts: true
+  pilot_rule: all_low_fallback   # as the core (the payoffs are the core pilot's frozen ones)
+  modal_account: teammate   # Abdul, 8 Nov 2026: the Modal workspace used for the core
+  forbidden_workspaces: [abdulmusthakin]
+
+model:
+  name: llama-3.1-70b
+  hf_id: meta-llama/Llama-3.1-70B-Instruct
+  revision: 1605565b47bb9346c5515c34102e054115b4f98b   # HF main on 8 Nov 2026
+  gated: true
+  chat_kwargs: {}           # same chat template family as the 8B
+  engine_kwargs: {}
+  labels: {H: " H", L: " L", sig_high: " high", sig_low: " low", sig_none: " none"}
+  label_ids: {actions: [473, 445], signals: [1579, 3428, 7000]}   # same tokenizer as the 8B; checked by setup_workspace.py
+
+results_dir: interest/model-70b
+check_core_pilot: true
+
+payoffs: {uLH: 12, uHH: 10, uLL: 4, uHL: 0}
+T: 20
+
+# p_test (hand-off section 5; described in results/audit/README.md). FLAGGED for Abdul.
+p_test: {L_min: 1, L_max: 19, p_own_H: 0.5, p_neighbour_H: 0.5, seed: 20261108}
+
+# The current cheap-talk draft shows agents their own past messages, so the signal-aware
+# state includes the own last signal (108 states on the cycle; 36 without).
+own_signal_in_state: true
+
+# If G4 shows the audit is too slow, reduce histories per state (Abdul, 7 Nov 2026);
+# never change the prompt for speed.
+audit:
+  actions: {n_fit: 100, n_score: 50}   # actions-only tables, fitted directly
+  signal: {n_fit: 50, n_score: 25}     # signal-aware tables (cheap talk)
+
+seeds: {base_seed: 20261107}
+
+analysis: {n_model: 20000, bootstrap: 2000, noise_floor_draws: 1000, ks_sims: 20000, seed: 7}
+
+serving:
+  gpu: B200                  # 192 GB: bf16 70B (141 GB) on one GPU, no tensor parallelism
+  app_name: swarm-audit-serving-70b       # never replaces the core's swarm-audit-serving
+  weights_volume: swarm-audit-weights-70b # separate, so it can be deleted afterwards
+  vllm_version: "0.32.0"
+  method: logprob_token_ids
+  max_model_len: 4096
+  gpu_memory_utilization: 0.90
+  enforce_eager: true
+  batch_invariant: true      # the core's G3 choice; G3 is re-measured on this GPU
+  numerical_floor: 0.0   # G3 on the B200 (interest/model-70b/serving/g3_batchinv1.json)
+  max_containers: 1
+  deployed: true
+  scaledown_window_s: 120    # steps are chained back to back; a B200 idles at about $6/h
+  timeout_minutes: 30
+  cost_cap_usd: 40.0         # Abdul, 8 Nov 2026: cap for the 70B runs (interest/model-70b/spend.json)
+  l4_usd_per_hour: 0.80      # unused here (gpu_usd_per_hour is set)
+  gpu_usd_per_hour: 6.25     # Modal B200 list price; check the dashboard
+
+decisions:
+  g3:                          # scripts/check_serving.py --decide
+    # Floor 0 with default settings: keep them. Otherwise use batch invariance if its
+    # maximum difference is smaller and it keeps at least half the default throughput;
+    # the chosen setting's maximum is the numerical floor.
+    min_throughput_ratio: 0.5
+    max_floor: 0.07            # about two bf16 steps in P(H) near 0.5; above this, stop
+  g4:                          # scripts/benchmark.py
+    cost_margin: 1.25          # projected cost x 1.25 (cold starts, queueing) must fit what is left of the cap
+    max_gpu_hours: 12          # projected GPU time must also fit this (the sprint ends 8 Nov)
+    reduced_signal_audit: {n_fit: 25, n_score: 15}   # first cut if over budget (Abdul: histories, never the prompt)
+    cut_order: [n20]           # then the hand-off's cut order; arms 1-4b and n = 10 are never cut
+  arm7: if_budget              # second topology runs last, only if the G4 plan still fits it with the margin
+  signal_responsiveness_below_bar: continue   # report it; changing the model or prompt would be tuning
+  drift_pause_above_floor_by: 0.035           # about one bf16 step; a smaller excess is recorded and reported, runs go on
+  pilot_readings_disagree: primary            # tau <= 5 governs
+  weighting_disagreement: primary             # p_test's weights give the headline; equal weights are the sensitivity check
+
+arms:
+  m70_calibration_counts:     {arm_id: 4,  channel: counts,     graph: cycle, n: [4],  runs: 50, last_k: 1}
+  m70_calibration_cheap_talk: {arm_id: 41, channel: cheap_talk, graph: cycle, n: [4],  runs: 50, last_k: 1}
+  m70_core_counts:            {arm_id: 5,  channel: counts,     graph: cycle, n: [10], runs: 50, last_k: null}
+  m70_core_cheap_talk:        {arm_id: 6,  channel: cheap_talk, graph: cycle, n: [10], runs: 50, last_k: null}
+  # Stage 2 (added 8 Nov 2026 once stage 1 fitted well inside the cap): the rest of the
+  # core matrix. Separate arm names so stage 1's script is unaffected; same arm ids as
+  # the core (5, 6, 7, 71), so the same seeds as the core's runs.
+  m70_core_counts_n20:            {arm_id: 5,  channel: counts,     graph: cycle,    n: [20], runs: 50, last_k: null}
+  m70_core_cheap_talk_n20:        {arm_id: 6,  channel: cheap_talk, graph: cycle,    n: [20], runs: 50, last_k: null}
+  m70_second_topology_counts:     {arm_id: 7,  channel: counts,     graph: complete, n: [10], runs: 50, last_k: null}
+  m70_second_topology_cheap_talk: {arm_id: 71, channel: cheap_talk, graph: complete, n: [10], runs: 50, last_k: null}
