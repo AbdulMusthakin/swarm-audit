@@ -20,3 +20,16 @@ the final-five-round high-bid count. A separate killed-chain calculation checks 
 all-high event. All transition normalization and outcome-law checks passed at 3e-13.
 It verifies every OLMo calibration log record, state, sampled draw, joint probability
 and within-state prompt hash. Additional priorities are pending; see findings.md.
+
+## Priority 1 additional commands
+
+```sh
+OPENBLAS_NUM_THREADS=1 python review-codex/independent/primary_review.py --source . --out review-codex/independent/llama_primary.json --table-resamples 200 --mc-batches 20
+OPENBLAS_NUM_THREADS=1 python review-codex/independent/secondary_checks.py --main . --extra ../extra-snapshot --out review-codex/independent/secondary_checks.json
+```
+
+Both scripts are independent of project modules. `secondary_checks.py` imports only the
+new review's exact calculation and SciPy for binomial intervals. All archived original
+Llama predictor CDFs and paired per-run scores matched exactly; gate MC p-values
+matched exactly. New intervals use independently documented RNG seeds and need not
+have identical bootstrap endpoints to a 2,000-draw archived interval.
