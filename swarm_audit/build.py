@@ -322,13 +322,39 @@ def spent_usd(cfg: dict | None = None) -> float:
     return float(sum(e["usd"] for e in json.loads(f.read_text())))
 
 
+def usd_per_hour(cfg: dict) -> float:
+    """The GPU list price per container-hour: serving.gpu_usd_per_hour if set (a config
+    on another GPU type), else serving.l4_usd_per_hour."""
+    srv = cfg["serving"]
+    return float(srv.get("gpu_usd_per_hour", srv["l4_usd_per_hour"]))
+
+
+def apply_serving_env(cfg: dict) -> None:
+    """Export the config's optional serving names (app, weights volume, GPU) to the
+    environment before swarm_audit.serving is imported. Configs without them (the core's)
+    leave the environment, and so the core's app and volume, unchanged."""
+    import os
+    import sys
+
+    srv = cfg["serving"]
+    for key, env in (("app_name", "SWARM_AUDIT_APP_NAME"),
+                     ("weights_volume", "SWARM_AUDIT_WEIGHTS_VOLUME")):
+        if srv.get(key):
+            os.environ[env] = str(srv[key])
+    if srv.get("app_name"):
+        os.environ["SWARM_AUDIT_GPU"] = str(srv["gpu"])
+    mod = sys.modules.get("swarm_audit.serving")
+    if mod is not None and srv.get("app_name") and mod.APP_NAME != srv["app_name"]:
+        raise RuntimeError("swarm_audit.serving was imported before apply_serving_env")
+
+
 def record_spend(what: str, seconds: float, cfg: dict, containers: int = 1) -> float:
     import datetime as dt
 
     import fcntl
 
     SPEND_FILE = spend_file(cfg)
-    usd = seconds / 3600 * cfg["serving"]["l4_usd_per_hour"] * containers
+    usd = seconds / 3600 * usd_per_hour(cfg) * containers
     SPEND_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(SPEND_FILE.with_suffix(".lock"), "w") as lock:   # GPU scripts may run at once
         fcntl.flock(lock, fcntl.LOCK_EX)
@@ -343,7 +369,7 @@ def record_spend(what: str, seconds: float, cfg: dict, containers: int = 1) -> f
 def check_cost(cfg: dict, worst_minutes: float) -> None:
     """Stop if the worst case (every container to its time limit) would pass the cap."""
     srv = cfg["serving"]
-    worst = worst_minutes / 60 * srv["l4_usd_per_hour"] * srv["max_containers"]
+    worst = worst_minutes / 60 * usd_per_hour(cfg) * srv["max_containers"]
     left = srv["cost_cap_usd"] - spent_usd(cfg)
     print(f"worst-case GPU cost ${worst:.2f}; ${left:.2f} left of the ${srv['cost_cap_usd']:.2f} cap")
     if worst > left:
@@ -381,6 +407,7 @@ def gpu_session(cfg: dict, need: tuple[str, ...]):
 
     require_inputs(cfg, need)
     check_workspace(cfg)
+    apply_serving_env(cfg)
     srv = cfg["serving"]
     env_bi = os.environ.get("SWARM_AUDIT_BATCH_INVARIANT", "0") == "1"
     if env_bi != bool(srv["batch_invariant"]):

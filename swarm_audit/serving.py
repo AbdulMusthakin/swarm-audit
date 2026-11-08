@@ -46,7 +46,11 @@ from typing import Any
 
 import modal
 
-APP_NAME = "swarm-audit-serving"
+# The app and weights-volume names can be overridden (configs serving.app_name and
+# serving.weights_volume, via build.apply_serving_env), so a second model's server never
+# replaces the core's deployed app. Defaults are the core's names.
+APP_NAME = os.environ.get("SWARM_AUDIT_APP_NAME", "swarm-audit-serving")
+WEIGHTS_VOLUME = os.environ.get("SWARM_AUDIT_WEIGHTS_VOLUME", "swarm-audit-weights")
 VLLM_VERSION = os.environ.get("SWARM_AUDIT_VLLM_VERSION", "0.32.0")
 GPU = os.environ.get("SWARM_AUDIT_GPU", "L4")
 TIMEOUT_S = int(float(os.environ.get("SWARM_AUDIT_TIMEOUT_MIN", "20")) * 60)
@@ -81,11 +85,12 @@ image = (
           "SWARM_AUDIT_BATCH_INVARIANT": "1" if BATCH_INVARIANT else "0",
           "SWARM_AUDIT_SCALEDOWN_S": str(SCALEDOWN_S),
           "SWARM_AUDIT_MAX_CONTAINERS": str(MAX_CONTAINERS),
+          "SWARM_AUDIT_APP_NAME": APP_NAME, "SWARM_AUDIT_WEIGHTS_VOLUME": WEIGHTS_VOLUME,
           **({"VLLM_BATCH_INVARIANT": "1"} if BATCH_INVARIANT else {})})
     .add_local_python_source("swarm_audit")
 )
 
-weights = modal.Volume.from_name("swarm-audit-weights", create_if_missing=True)
+weights = modal.Volume.from_name(WEIGHTS_VOLUME, create_if_missing=True)
 
 secrets = [modal.Secret.from_name(_hf_secret)] if _hf_secret else []
 
@@ -95,7 +100,7 @@ _IGNORE = ["consolidated*", "original/*", "*.pth", "*.gguf"]
 
 
 @app.function(image=image, volumes={CACHE: weights}, secrets=secrets, cpu=2,
-              memory=4096, timeout=3600)
+              memory=4096, timeout=3 * 3600)   # a 70B snapshot is about 141 GB
 def download_weights(hf_id: str, revision: str) -> dict:
     """Cache a model snapshot in the Volume (CPU container; no GPU time)."""
     from huggingface_hub import snapshot_download

@@ -181,7 +181,7 @@ def analyse(repo, path, rng):
     return out
 
 
-def plots(results,out):
+def plots(results,out,model_label='Llama 3.1 8B'):
     colors = dict(thm='#747d8c',same='#d99320',sharp='#006f87',obs='#25324a',local='#168367')
     plt.rcParams.update({'font.size':10,'axes.spines.top':False,'axes.spines.right':False,
                          'axes.titleweight':'bold','axes.labelcolor':'#25324a','text.color':'#25324a',
@@ -222,7 +222,7 @@ def plots(results,out):
         fig.suptitle('Dobrushin contraction versus Theorem 1: current-round TV' if kind=='tv' else
                      'Local contraction gives tighter bounds for the mean high-bid rate',fontsize=18,x=.5,y=.98)
         fig.legend(lines,labels,loc='lower center',ncol=2,frameon=False,bbox_to_anchor=(.5,.055),fontsize=10)
-        fig.text(.5,.025,'Actions-only audit · Llama 3.1 8B · pointwise 95% whole-run bootstrap shading, fitted tables fixed\n'
+        fig.text(.5,.025,f'Actions-only audit · {model_label} · pointwise 95% whole-run bootstrap shading, fitted tables fixed\n'
                  'Estimated bound curves are not confidence certificates. Empirical gaps include sampling error; all bounds capped at 1.',
                  ha='center',fontsize=9,color='#5c6778')
         fig.subplots_adjust(left=.065,right=.985,bottom=.21,top=.85,hspace=.5,wspace=.2)
@@ -248,17 +248,36 @@ def checks():
     print('Mathematical implementation checks passed.',flush=True)
 
 
+# The six full-history conditions in figure order, then the two calibration arms.
+# 'core' is the 8B submission analysis (the default, unchanged); 'm70' is the Llama 3.1 70B
+# runs for interest (interest/model-70b, configs/model-70b.yaml), with the same arm ids.
+PRESETS = {
+    'core': dict(root='results/analysis', label='Llama 3.1 8B', specs=[
+        ('core_cheap_talk','cheap_talk_n10_cycle_full'),('core_cheap_talk','cheap_talk_n20_cycle_full'),
+        ('second_topology_cheap_talk','cheap_talk_n10_complete_full'),
+        ('core_counts','counts_n10_cycle_full'),('core_counts','counts_n20_cycle_full'),
+        ('second_topology_counts','counts_n10_complete_full'),
+        ('calibration_cheap_talk','cheap_talk_n4_cycle_last1_runs0-99'),
+        ('calibration_counts','counts_n4_cycle_last1')]),
+    'm70': dict(root='interest/model-70b/analysis', label='Llama 3.1 70B', specs=[
+        ('m70_core_cheap_talk','cheap_talk_n10_cycle_full'),
+        ('m70_core_cheap_talk_n20','cheap_talk_n20_cycle_full'),
+        ('m70_second_topology_cheap_talk','cheap_talk_n10_complete_full'),
+        ('m70_core_counts','counts_n10_cycle_full'),('m70_core_counts_n20','counts_n20_cycle_full'),
+        ('m70_second_topology_counts','counts_n10_complete_full'),
+        ('m70_calibration_cheap_talk','cheap_talk_n4_cycle_last1'),
+        ('m70_calibration_counts','counts_n4_cycle_last1')]),
+}
+
+
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--repo',type=Path,required=True);ap.add_argument('--out',type=Path,required=True)
+    ap.add_argument('--preset',choices=sorted(PRESETS),default='core',
+                    help="which analysed conditions: 'core' (8B, default) or 'm70' (70B, for interest)")
     args=ap.parse_args();args.out.mkdir(parents=True,exist_ok=True);checks()
-    specs=[('core_cheap_talk','cheap_talk_n10_cycle_full'),('core_cheap_talk','cheap_talk_n20_cycle_full'),
-           ('second_topology_cheap_talk','cheap_talk_n10_complete_full'),
-           ('core_counts','counts_n10_cycle_full'),('core_counts','counts_n20_cycle_full'),
-           ('second_topology_counts','counts_n10_complete_full'),
-           ('calibration_cheap_talk','cheap_talk_n4_cycle_last1_runs0-99'),
-           ('calibration_counts','counts_n4_cycle_last1')]
+    preset=PRESETS[args.preset]; specs=preset['specs']
     rng=np.random.default_rng(20261108)
-    res=[analyse(args.repo,args.repo/'results'/'analysis'/arm/(name+'.json'),rng) for arm,name in specs]
+    res=[analyse(args.repo,args.repo/preset['root']/arm/(name+'.json'),rng) for arm,name in specs]
     sha=subprocess.check_output(['git','-C',str(args.repo),'rev-parse','HEAD'],text=True).strip()
     artifact={'repository':'https://github.com/AbdulMusthakin/swarm-audit','commit':sha,
               'scope':'actions-only predictor; marginal TV and mean, not full-trajectory contraction',
@@ -276,7 +295,7 @@ def main():
                              'observed_binned_tv','observed_mean_error','eta_joint_mean','eps_sum_mean']}))
     with (args.out/'dobrushin_curves.csv').open('w',newline='') as fh:
         w=csv.DictWriter(fh,fieldnames=rows[0].keys());w.writeheader();w.writerows(rows)
-    plots(res,args.out)
+    plots(res,args.out,preset['label'])
     print('Completed:',args.out,flush=True)
 
 if __name__=='__main__':main()

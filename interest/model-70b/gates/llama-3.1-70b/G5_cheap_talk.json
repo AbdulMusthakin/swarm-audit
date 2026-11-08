@@ -1,0 +1,62 @@
+{
+ "gate": "G5",
+ "channel": "cheap_talk",
+ "pass": true,
+ "required": {
+  "per_decision": true,
+  "per_run": true
+ },
+ "floor": 0.0,
+ "runs": 50,
+ "kernel_fingerprint": "43617bbe4293d57a413789920495e632837181597c55a5f11637acaea0df9de0",
+ "run_fingerprint": "f196130911d86a6a5bcad3f969ac6866fb15ca3c4ad3c37ba608a20b51a64df9",
+ "table_fingerprints": {
+  "actions": "84b43d79a422c9e4fe717ef87e645ef5409a9b75fba8510c29060e7c2b047397",
+  "signal": "4536bad609155c3fcd71a342e3ae562e2825cc694d9edcac4e0ff285599e81a3"
+ },
+ "finding_not_gate": "actions-only chain on cheap talk",
+ "folder": "interest/model-70b/runs/m70_calibration_cheap_talk/cheap_talk_n4_cycle_last1",
+ "git_commit": "918d19a32f87ca7cdc361af7d05b7b177b4ecf86",
+ "time": "2026-11-08T15:15:08.403489+00:00",
+ "result": {
+  "per_decision": {
+   "pass": true,
+   "decisions": 4000,
+   "floor": 0.0,
+   "max_abs_diff_p_H": 0.0,
+   "max_abs_diff_signal": 0.0,
+   "worst": null,
+   "states_seen": 105,
+   "states_with_several_prompts": {},
+   "states_whose_prompt_differs_from_table": []
+  },
+  "per_run": {
+   "pass": true,
+   "gap": 0.17107630484993264,
+   "p_value": 0.02449877506124694,
+   "alpha": 0.01,
+   "rule": "discrete Monte Carlo p-value (1 + #{null >= gap}) / (1 + sims) > alpha",
+   "threshold_q99": 0.19093216469901897,
+   "sims": 20000,
+   "runs": 50,
+   "chain": "signal_aware",
+   "exact_mean_y": 4.347433845943167,
+   "swarm_mean_y": 4.74,
+   "n_profiles": 1296
+  },
+  "finding_actions_only_chain": {
+   "pass": true,
+   "gap": 0.08552897691815653,
+   "p_value": 0.496075196240188,
+   "alpha": 0.01,
+   "rule": "discrete Monte Carlo p-value (1 + #{null >= gap}) / (1 + sims) > alpha",
+   "threshold_q99": 0.19199457637406847,
+   "sims": 20000,
+   "runs": 50,
+   "chain": "actions_only",
+   "exact_mean_y": 4.813734338559572,
+   "swarm_mean_y": 4.74,
+   "n_profiles": 16
+  }
+ }
+}

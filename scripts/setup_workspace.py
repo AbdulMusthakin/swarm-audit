@@ -41,6 +41,7 @@ def main() -> None:
     if os.environ.get("SWARM_AUDIT_HF_SECRET") != "huggingface":
         raise SystemExit("set SWARM_AUDIT_HF_SECRET=huggingface (the secret's name in the workspace)")
     ws = build.check_workspace(cfg)
+    build.apply_serving_env(cfg)
     import modal
 
     try:

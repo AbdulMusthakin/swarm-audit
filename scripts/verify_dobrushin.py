@@ -9,7 +9,8 @@ from analyse_dobrushin import product_laws,product_tv,transition,adjacency,check
 
 repo=Path(sys.argv[1]); out=Path(sys.argv[2])
 checks()
-root=repo/'results/audit/llama-3.1-8b'
+# Optional third argument: the audit-table folder (default: the core's 8B tables).
+root=repo/(sys.argv[3] if len(sys.argv)>3 else 'results/audit/llama-3.1-8b')
 actions=json.loads((root/'cheap_talk_d2_enumerated_actions.json').read_text())['entries']
 signal=json.loads((root/'cheap_talk_d2_enumerated_signal.json').read_text())['entries']
 n=4; adj=adjacency(n,'cycle'); states=np.indices((6,)*n).reshape(n,-1).T

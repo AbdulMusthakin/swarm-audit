@@ -144,4 +144,14 @@ python scripts/analyse_dobrushin.py --repo . --out results/followup/dobrushin
 python scripts/verify_dobrushin.py . results/followup/dobrushin/verification.json
 ```
 
+Figure 1 of each condition with the contraction bounds added
+(`results/figures/fig1_<arm>_<condition>_contraction.png`; the original Figure 1 files are unchanged):
+
+```bash
+python scripts/plot_contraction.py --preset core
+```
+
+The right panel adds the two TV contraction curves for the actions-only audit beside Theorem 1. The
+left panel adds the local mean bound as a band around the audit's expected $X_t$.
+
 Dependencies: Python 3, NumPy, SciPy and Matplotlib. The analysis scripts read repository data only and do not change the original experiments.

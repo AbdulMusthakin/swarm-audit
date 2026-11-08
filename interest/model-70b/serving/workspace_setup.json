@@ -1,0 +1,43 @@
+{
+ "workspace": "aliyusufbelal",
+ "secret": "huggingface",
+ "model": "meta-llama/Llama-3.1-70B-Instruct",
+ "revision": "1605565b47bb9346c5515c34102e054115b4f98b",
+ "weights": {
+  "path": "/__modal/volumes/vo-WKYVh7rXU7z4TAPQkLTjCH/hf/hub/models--meta-llama--Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b",
+  "gb": 141.116699829,
+  "seconds": 696.0750515460968
+ },
+ "seconds": 726.1,
+ "label_check": {
+  "pass": true,
+  "action_ids": [
+   473,
+   445
+  ],
+  "signal_ids": [
+   1579,
+   3428,
+   7000
+  ],
+  "configured": {
+   "actions": [
+    473,
+    445
+   ],
+   "signals": [
+    1579,
+    3428,
+    7000
+   ]
+  },
+  "problems": [],
+  "prompts_checked": 148,
+  "signal_positions_checked": 250,
+  "max_prompt_tokens": {
+   "counts": 780,
+   "cheap_talk": 1616
+  },
+  "max_model_len": 4096
+ }
+}
