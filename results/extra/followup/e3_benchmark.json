@@ -1,0 +1,30 @@
+{
+ "what": "E3/E2 live cost projection from the 5-run n10_last1 benchmark (plan.json cost)",
+ "benchmark": {
+  "cell": "followup_olmo_n10_last1",
+  "runs": 5,
+  "decisions": 1000,
+  "lockstep_seconds": 41.9,
+  "session_seconds": 254,
+  "session_usd_estimate": 0.06
+ },
+ "assumptions": {
+  "short_prompt_s_per_decision": 0.0419,
+  "full_history_s_per_decision": 0.3627,
+  "full_history_source": "arm 9b session: 50 runs n = 10 full history, 3,627 s",
+  "per_session_overhead_s": 212.1,
+  "idle_after_each_session_s": 600,
+  "usd_per_hour": 0.8,
+  "margin": 1.25
+ },
+ "projected_seconds": {
+  "n10_last1_rest": 377,
+  "n4_full": 1451,
+  "E2_live_4_cells": 670
+ },
+ "projected_total_seconds_with_overheads": 5571,
+ "projected_usd_with_margin": 1.55,
+ "followup_ceiling_usd": 8.0,
+ "remaining_cap_usd_before": 19.79,
+ "decision": "fits: run n10_last1 (45 more), then n4_full, then the E2 live cells"
+}

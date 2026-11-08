@@ -185,6 +185,35 @@ def results_root(cfg: dict | None = None) -> Path:
     return REPO_ROOT / cfg["results_dir"]
 
 
+def serving_dir(cfg: dict | None = None) -> Path:
+    """Where a config's serving checks go: <results root>/serving, plus `serving_subdir`
+    if set (arm 9's OLMo checks sit beside Llama's in results/extra/serving/olmo-3-7b)."""
+    d = results_root(cfg) / "serving"
+    return d / cfg["serving_subdir"] if cfg and cfg.get("serving_subdir") else d
+
+
+def gates_dir(cfg: dict | None = None) -> Path | None:
+    """Where G5 gate records go: None (the core's results/gates) for core configs;
+    <results_dir>/gates/<model name> for extra configs, so an extra arm can never
+    overwrite the core's G5 records."""
+    if cfg is None or not cfg.get("results_dir"):
+        return None
+    return results_root(cfg) / "gates" / cfg["model"]["name"]
+
+
+LOCK_IN_ROUNDS = (16, 20)
+
+
+def lock_in(data, rounds: tuple[int, int] = LOCK_IN_ROUNDS) -> dict:
+    """Arm 9's lock-in stop (docs/handoff-extra-arms.md section 4): runs in which every
+    agent bid low in every round of `rounds` (inclusive). Stop if at least 45 of 50."""
+    a, b = rounds
+    all_low = (data.actions[:, a - 1:b, :] == 0).all(axis=(1, 2))
+    n = int(all_low.sum())
+    return {"rounds": [a, b], "runs": int(data.R), "runs_all_low": n,
+            "stop_threshold": 45, "stop": bool(n >= 45) if data.R == 50 else None}
+
+
 def table_dir(cfg: dict, backend_name: str) -> Path:
     return results_root(cfg) / "audit" / backend_name.replace(":", "_")
 

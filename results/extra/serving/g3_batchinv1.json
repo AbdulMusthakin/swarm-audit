@@ -1,0 +1,24 @@
+{
+ "batch_invariant": true,
+ "prompts": 48,
+ "others": 448,
+ "max_abs_diff_p_H": 0.0,
+ "max_abs_diff_signal": 0.0,
+ "by_pair": {
+  "alone_vs_batch": 0.0,
+  "alone_vs_warm": 0.0,
+  "batch_vs_warm": 0.0
+ },
+ "seconds": {
+  "alone": 808.4997131824493,
+  "batch": 121.83327651023865,
+  "warm": 7.291974782943726,
+  "total": 946.7252283096313
+ },
+ "throughput_prompts_per_s_batch": 4.071137329695939,
+ "workspace": "sensomichele",
+ "model": {
+  "hf_id": "meta-llama/Llama-3.1-8B-Instruct",
+  "revision": "0e9e39f249a16976918f6564b8830bc894c89659"
+ }
+}

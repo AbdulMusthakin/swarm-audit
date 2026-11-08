@@ -1,0 +1,33 @@
+{
+ "benchmark": {
+  "runs": [
+   0,
+   1,
+   2,
+   3,
+   4
+  ],
+  "decisions": 10000,
+  "seconds": 755.26,
+  "decisions_per_s": 13.240473479331621,
+  "lockstep_batch": 500,
+  "gpu": "L4, warm",
+  "containers": 1
+ },
+ "remaining": {
+  "runs": 45,
+  "decisions": 90000,
+  "projected_gpu_seconds": 6797,
+  "allowance_seconds_for_panels_idle_cold_start": 1980,
+  "projected_usd": 1.95,
+  "margin": 1.25,
+  "projected_usd_with_margin": 2.44,
+  "left_of_cap_usd": 24.05
+ },
+ "rule": "continue if projected cost x 1.25 fits what is left of the $25 cap and it finishes by 10:00 Sunday 8 Nov",
+ "containers": "1: run_condition cannot split one lockstep batch across containers (parallel processes would pick the same runs)",
+ "chunk": 15,
+ "chunk_reason": "1,500 prompts per call (about 2 min, far below the 30-minute call limit); an interruption loses at most one chunk",
+ "time_projection_hours": 2.44,
+ "decision": "continue"
+}

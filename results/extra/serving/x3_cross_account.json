@@ -1,0 +1,35 @@
+{
+ "what": "X3: the core's drift panel queried on this account vs the core's logged panel outputs",
+ "this_account": {
+  "workspace": "sensomichele",
+  "file": "results/extra/serving/drift_panel.json",
+  "time": "2026-11-07T19:11Z",
+  "fresh": true
+ },
+ "core": {
+  "workspace": "aliyusufbelal",
+  "branch": "claude/funny-turing-qv2y66",
+  "files": [
+   "results/runs/calibration_counts/counts_n4_cycle_last1/drift.json",
+   "results/runs/calibration_cheap_talk/cheap_talk_n4_cycle_last1/drift.json"
+  ],
+  "panel_queries_compared": [
+   "start",
+   "end",
+   "mixed"
+  ]
+ },
+ "prompts": 136,
+ "same_prompt_sha256": "136 of 136 in all 6 comparisons",
+ "max_abs_diff_p_H": 0.0,
+ "max_abs_diff_signal": 0.0,
+ "serving_settings_identical": true,
+ "serving_code_sha256_identical": true,
+ "settings": {
+  "batch_invariant": true,
+  "vllm": "0.32.0",
+  "gpu": "L4",
+  "model_revision": "0e9e39f249a16976918f6564b8830bc894c89659"
+ },
+ "reading": "the two accounts served an identical kernel on these 136 prompts (informational, not a gate)"
+}

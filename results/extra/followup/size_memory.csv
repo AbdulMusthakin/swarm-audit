@@ -1,0 +1,5 @@
+cell,n,memory,source,runs,F1_count,P_F1,P_F1_lo,P_F1_hi,P_F0,mean_F,mean_F_lo,mean_F_hi,forecast_P_F1,forecast_source,evidence
+n4_last1,4,last1,"arm 9a (existing, 7 Nov session)",50,8,0.1600,0.0717,0.2911,0.8400,0.1600,0.0600,0.2600,0.14239,"exact, enumerated table",live runs
+n4_full,4,full,new tonight (arm_id 93),50,5,0.1000,0.0333,0.2181,0.9000,0.1000,0.0200,0.2000,0.11159,"exact, 9b sampled table (approximation)",live runs
+n10_last1,10,last1,new tonight (arm_id 92),50,0,0.0000,0.0000,0.0711,1.0000,0.0000,0.0000,0.0000,0.00814,"Monte Carlo 100,000 runs, enumerated table (SE 0.00028)",live runs
+n10_full,10,full,"arm 9b (existing, 7-8 Nov session)",50,0,0.0000,0.0000,0.0711,1.0000,0.0000,0.0000,0.0000,,no exact law at n = 10; 9b analysis: signal-aware simulation in results/extra/analysis/olmo_core_cheap_talk,live runs

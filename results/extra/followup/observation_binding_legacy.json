@@ -1,0 +1,49 @@
+{
+ "what": "Derived observation-binding record for the four E2 live cells (independent review m4, 8 Nov). They ran before observation.json existed; their original provenance is not rewritten. From now on swarm.bind_observation guards them through these recorded sessions.",
+ "cells": {
+  "followup_obs_unmodified": {
+   "observe_in_every_session": [
+    "unmodified"
+   ],
+   "sessions": 1,
+   "runs_logged": 50,
+   "observed_record_mismatches": 0,
+   "next_state_mismatches": 0,
+   "decisions_checked": 4000,
+   "single_treatment_verified": true
+  },
+  "followup_obs_own_null": {
+   "observe_in_every_session": [
+    "own_null"
+   ],
+   "sessions": 1,
+   "runs_logged": 50,
+   "observed_record_mismatches": 0,
+   "next_state_mismatches": 0,
+   "decisions_checked": 4000,
+   "single_treatment_verified": true
+  },
+  "followup_obs_neighbour_null": {
+   "observe_in_every_session": [
+    "neighbour_null"
+   ],
+   "sessions": 1,
+   "runs_logged": 50,
+   "observed_record_mismatches": 0,
+   "next_state_mismatches": 0,
+   "decisions_checked": 4000,
+   "single_treatment_verified": true
+  },
+  "followup_obs_both_null": {
+   "observe_in_every_session": [
+    "both_null"
+   ],
+   "sessions": 1,
+   "runs_logged": 50,
+   "observed_record_mismatches": 0,
+   "next_state_mismatches": 0,
+   "decisions_checked": 4000,
+   "single_treatment_verified": true
+  }
+ }
+}

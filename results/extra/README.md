@@ -7,18 +7,29 @@ Separate arms on a second Modal account. Nothing here feeds the core's primary c
 - **Branch:** `extra-arms`, with the core branch (`claude/funny-turing-qv2y66`) merged in.
 - **Configs:** `configs/extra-scale.yaml` (arm 8). `configs/extra-olmo.yaml` (arm 9) only if
   its trigger is met.
-- **Spend ledger:** `results/extra/spend.json`, cap $25. Spent so far: $0 on GPU. The X1
-  attempt and its diagnostic used only CPU containers, a few minutes each.
+- **Spend ledger:** `results/extra/spend.json`, cap $25. Spent: **$6.59** (wall-clock
+  estimates at the L4 list price; each session's 10-minute idle scaledown counted as an
+  upper bound). Arm 8 and its checks $2.57; arm 9 (OLMo X2, tables, runs) $2.59;
+  overnight follow-up $1.43.
+
+Completion notes: `completion_note.md` (arms 8 and 9), `followup/completion_note.md`
+(overnight follow-up).
+
+**Overnight follow-up (EXPLORATORY, 8 Nov):** why the actions-only audit erases OLMo's
+persistent high bidding, observation interventions, and OLMo size by memory. Plan
+`docs/overnight-extra-plan.md`; results, summary, claims and Figure 2 candidate in
+`followup/` (start at `followup/mechanism_summary.md`). Classification of every extra
+analysis (arm 9b is not the primary contrast): `analysis/classification.json`.
 
 ## Status
 
 | step | status | file |
 |---|---|---|
 | X1, workspace set-up | **PASS** (7 Nov). The secret first stored the token under key `huggingface` (Llama download: 401); after the teammate renamed it to `HF_TOKEN`, the token (HF account `micsenso`, read) has Llama access. Weights cached in this workspace's `swarm-audit-weights` volume (16.1 GB, 56 s, CPU). Every label one token with the configured id: actions 473/445, signals 1579/3428/7000, on 148 action and 250 signal positions (core d = 2 prompts), and on 66 counts prompts at d = 4 (arm 8's degree, longest 782 tokens) | `serving/workspace_setup.json`, `serving/label_check_d4.json` |
-| X2, serving repeatability | not run | `results/extra/serving/` |
-| X3, cross-account drift panel | not run | `results/extra/serving/drift_panel.json` |
-| Arm 8, 100 agents, random 4-regular | graph saved (simple, connected, 200 edges, measured diameter 6; pair distances 1–6: 200/579/1412/1980/758/21; 1 triangle). Not run; also needs the core pilot's frozen payoffs (G6 has not run on the core branch) | `results/extra/graph_rr4_n100.json`, `runs/`, `audit/` |
-| Arm 9, OLMo-3-7B (conditional second-model extension) | trigger not checked yet; reading fixed in advance (below) | – |
+| X2, serving repeatability | **PASS** (7 Nov, 19:11 UTC). Batch invariance on: 48 prompts alone, in a shuffled batch of 448 others, and warm; max difference **0** in P(H) and in every signal probability (floor 0, as in the core's G3). 4.07 prompts/s. Fresh queries (no replay) | `serving/g3_batchinv1.json` |
+| X3, cross-account drift panel | **identical**: all 136 panel prompts byte-identical, max difference **0** in P(H) and every signal probability, against the core's start, end and mixed panels of arms 4 and 4b (6 comparisons); same serving settings and serving-code hash. Informational | `serving/x3_cross_account.json` |
+| Arm 8, 100 agents, random 4-regular | **complete** (7 Nov, 21:31 UTC): 50/50 runs, 100,000 decisions, drift 0, no p_valid flags; analysed. Actions-only audit CRPS 0.0142 [0.0113, 0.0173] vs order-0 0.0170 [0.0140, 0.0204] (paired difference +0.0028 [0.0016, 0.0039]); max Δ_t 0.166 below the simultaneous null 0.180; ε(p_test) 0.061, ε(p_swarm) 0.058; bound vacuous from round 2. One graph realization; counts only. See `arm8_summary.md` | `arm8_summary.md`, `arm8_numbers.json`, `graph_rr4_n100.json`, `runs/extra_rr4/`, `audit/llama-3.1-8b/`, `analysis/extra_rr4/`, `figures/` |
+| Arm 9, OLMo-3-7B (**EXPLORATORY**) | **complete**. **Trigger not met** (Abdul confirmed, 7 Nov 20:15): 0.0553 on the d = 4 grid fixed in a2657c5, not below 0.05. **Run anyway as an EXPLORATORY arm** by Abdul's decision (7 Nov 20:15), made after seeing Llama's d = 2 responsiveness (0.038) and the core's arm 4b CRPS null; same design, cap and stop rules. OLMo X1 and X2 pass (floor 0). **9a**: 50 runs; G5 PASS (per decision 0, per run p = 0.84); lock-in 42/50 all-low (8 all-high), below 45, so 9b allowed; paired D +0.025 [−0.003, +0.054]. **9b**: 50 runs, every run locked into all-low (y = 0); both audits forecast the end state (CRPS ≤ 0.0001) but lock-in is about two rounds faster than either chain (max Δ_t 0.47–0.48 vs null 0.21); paired D −0.0001 (degenerate). See `arm9_summary.md` | `arm9_summary.md`, `arm9_trigger.json`, `arm9a_lock_in.json`, `arm9b_projection.json`, `gates/olmo-3-7b/`, `audit/olmo-3-7b/`, `runs/olmo_*`, `analysis/olmo_*` |
 
 ## Code added (additive; core behaviour unchanged)
 
@@ -31,14 +42,20 @@ Separate arms on a second Modal account. Nothing here feeds the core's primary c
 - `check_serving.py --panel`: also saves the drift panel's outputs (X3).
 - `analyse.py --collect` reads and writes under the config's results tree;
   `benchmark.py` (the core's G4) refuses an extra config.
+- `scripts/extra_arm8_report.py`: the numbers in `arm8_summary.md` and its defects figure,
+  from logs only.
 - Tests: `tests/test_extra.py`.
 
 ## Core commits merged
 
-- Up to `61de1cb` (spend-ledger lock, G4 info() fix, core cap $40). The review's correctness
-  repairs (fresh repeatability bypassing replay, cache identity, config fingerprints,
-  final payoff freeze, G5 discrete-threshold fix, matched TV null) were not on the core
-  branch at this merge; they will be merged, not re-implemented, when they land.
+- `61de1cb`: spend-ledger lock, G4 info() fix, core cap $40.
+- `a83410a`: review C1, fresh repeatability/drift measurements, serving identity in the cache key.
+- `470c271`: review C2, immutable provenance for runs and tables, checked on resume and load.
+- `9edb338`: G6 pilot, payoffs frozen at (12, 10, 4, 0).
+- `04cfc68`: review C3 and C5, G5 blocks the core launch; discrete Monte Carlo p-value.
+- `main` up to `1676dcd` (teammates' hosted scoping evidence), so PR #7 has no conflicts.
+- `846ce77`: review C4 and C6, matched null for Δ_t, labelled outputs (conditional
+  uncertainty); plus the core's arms 4 and 4b and its G5 investigation, up to `f2449ea`.
 
 ## Arm 9 trigger: the reading, fixed before any result (7 Nov, about 19:00 UTC)
 
@@ -49,3 +66,12 @@ the hand-off says "on the same grid". Arm 9 runs only if that number is **strict
 `results/serving/signal_responsiveness.json` if it exists when arm 8 finishes; otherwise
 measured on this account with the same function, and recorded as such. No responsiveness
 result for the final prompt existed on either branch when this was written.
+
+## Arm 9 is exploratory (Abdul, 7 Nov 20:15)
+
+The pre-registered trigger was **not met** (d = 4 length-1 responsiveness 0.0553 ≥ 0.05).
+Abdul then decided to run arm 9 anyway, **after** seeing Llama's d = 2 responsiveness
+(0.038) and the core's arm 4b CRPS null. Because that choice followed those results, arm 9
+is an **exploratory** conditional second-model extension, not a triggered or confirmatory
+arm and not a broad replication. Its design, the $25 cap and every stop rule (G5 on 9a,
+the lock-in stop before 9b) are unchanged from the hand-off.

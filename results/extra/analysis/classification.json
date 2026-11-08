@@ -1,0 +1,46 @@
+{
+ "what": "Derived classification of every extra-arm analysis (independent review M2, 8 Nov 2026). Original analysis JSONs are kept unchanged as provenance; where their stored is_primary_contrast differs from the corrected value, this file governs.",
+ "rule": "swarm_audit.analysis.is_primary_contrast: only the core's Llama arm core_cheap_talk (arm_id 6) is the primary contrast",
+ "files": {
+  "results/extra/analysis/extra_rr4/counts_n100_random_regular_d4_seed20261108_full.json": {
+   "arm": "extra_rr4",
+   "arm_id": 8,
+   "stored_is_primary_contrast": false,
+   "corrected_is_primary_contrast": false,
+   "status": "own arm (scale and topology demonstration), not a primary contrast",
+   "inherited_primary_notes_apply": false
+  },
+  "results/extra/analysis/olmo_calibration_cheap_talk/cheap_talk_n4_cycle_last1.json": {
+   "arm": "olmo_calibration_cheap_talk",
+   "arm_id": 9,
+   "stored_is_primary_contrast": false,
+   "corrected_is_primary_contrast": false,
+   "status": "EXPLORATORY (arm 9a; trigger not met, run by Abdul's decision after seeing results)",
+   "inherited_primary_notes_apply": false
+  },
+  "results/extra/analysis/olmo_core_cheap_talk/cheap_talk_n10_cycle_full.json": {
+   "arm": "olmo_core_cheap_talk",
+   "arm_id": 91,
+   "stored_is_primary_contrast": true,
+   "corrected_is_primary_contrast": false,
+   "status": "EXPLORATORY (arm 9b; trigger not met, run by Abdul's decision after seeing results)",
+   "inherited_primary_notes_apply": false
+  },
+  "results/extra/followup/analysis/followup_olmo_n10_last1/cheap_talk_n10_cycle_last1.json": {
+   "arm": "followup_olmo_n10_last1",
+   "arm_id": 92,
+   "stored_is_primary_contrast": false,
+   "corrected_is_primary_contrast": false,
+   "status": "EXPLORATORY overnight follow-up E3 (arm_id 92)",
+   "inherited_primary_notes_apply": false
+  },
+  "results/extra/followup/analysis/followup_olmo_n4_full/cheap_talk_n4_cycle_full.json": {
+   "arm": "followup_olmo_n4_full",
+   "arm_id": 93,
+   "stored_is_primary_contrast": false,
+   "corrected_is_primary_contrast": false,
+   "status": "EXPLORATORY overnight follow-up E3 (arm_id 93)",
+   "inherited_primary_notes_apply": false
+  }
+ }
+}
