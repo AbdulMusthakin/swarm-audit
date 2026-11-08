@@ -94,7 +94,21 @@ detectably. The sign of D is not established.
 - **Counts control (Llama n = 10).** The pooled audit is unbiased there (+0.002), the clock
   table changes no score detectably, and swarm histories contain about 59% high bids.
 
-## 4. Scale (imported from extra arm 8)
+## 4. The extra arm's mechanism (imported; `extra_import.md`)
+
+- **Setting:** OLMo, n = 4, last-round history; exact chain laws on the cached kernel.
+- **The finding:** the actions-only audit destroys a persistent all-high outcome.
+  P(F = 1) is 0.1424 under the full table against 0.00008 under the actions-only audit;
+  live, 8 of 50 runs had F = 1.
+- **Why:** it weights the agent's own "low" message at 1/3. The process almost never
+  visits that state inside all-high, and in that state retention is low. Keeping only the
+  own message recovers the full table's forecast (0.137).
+- **Same design question as ours.** Both results say the isolated tests' choice of history
+  and observation distribution is where the audit loses information.
+- **Labels:** these are exact model-based results plus live checks, exploratory, and
+  owned by the extra session.
+
+## 5. Scale (imported from extra arm 8)
 
 At n = 100 on a random 4-regular graph (counts), the actions-only audit improves endpoint
 CRPS over order-zero by +0.0028 [+0.0016, +0.0039], while the estimated bound is vacuous from
