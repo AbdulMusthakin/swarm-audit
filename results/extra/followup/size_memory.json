@@ -1,0 +1,539 @@
+{
+ "plan": "results/extra/followup/plan.json E3_size_by_memory",
+ "cells": {
+  "n4_last1": {
+   "cell": "n4_last1",
+   "n": 4,
+   "memory": "last1",
+   "source": "arm 9a (existing, 7 Nov session)",
+   "runs": 50,
+   "run_dir": "results/extra/runs/olmo_calibration_cheap_talk/cheap_talk_n4_cycle_last1",
+   "P_F1": 0.16,
+   "F1_count": 8,
+   "P_F1_ci": [
+    0.07170076718328619,
+    0.2911263065951108
+   ],
+   "P_F0": 0.84,
+   "F0_count": 42,
+   "P_F0_ci": [
+    0.7088736934048891,
+    0.9282992328167138
+   ],
+   "mean_F": 0.16,
+   "mean_F_ci": [
+    0.06,
+    0.26
+   ],
+   "EX_t": [
+    0.66,
+    0.345,
+    0.19,
+    0.16,
+    0.16,
+    0.16,
+    0.16,
+    0.16,
+    0.16,
+    0.16,
+    0.16,
+    0.16,
+    0.16,
+    0.16,
+    0.16,
+    0.16,
+    0.16,
+    0.16,
+    0.16,
+    0.16
+   ],
+   "consensus": {
+    "reached": 50,
+    "censored_at_T_minus_2": 0,
+    "median_round_if_reached": 3.0,
+    "side_counts": {
+     "H": 8,
+     "L": 42
+    }
+   },
+   "round1": {
+    "runs_all_H_round1": 8,
+    "F1_among_round1_all_H": 8,
+    "F1_among_round1_not_all_H": 0,
+    "exact_P_round1_all_H": 0.1501218566948747,
+    "note": "round 1 is the START prompt in every cell, so P(all high in round 1) = P(H | START)^n"
+   },
+   "evidence": "live runs",
+   "forecast_P_F1": 0.14239254032335946,
+   "forecast_source": "exact, enumerated table"
+  },
+  "n10_full": {
+   "cell": "n10_full",
+   "n": 10,
+   "memory": "full",
+   "source": "arm 9b (existing, 7-8 Nov session)",
+   "runs": 50,
+   "run_dir": "results/extra/runs/olmo_core_cheap_talk/cheap_talk_n10_cycle_full",
+   "P_F1": 0.0,
+   "F1_count": 0,
+   "P_F1_ci": [
+    0.0,
+    0.07112173646419764
+   ],
+   "P_F0": 1.0,
+   "F0_count": 50,
+   "P_F0_ci": [
+    0.9288782635358024,
+    1.0
+   ],
+   "mean_F": 0.0,
+   "mean_F_ci": [
+    0.0,
+    0.0
+   ],
+   "EX_t": [
+    0.6319999999999999,
+    0.344,
+    0.13599999999999995,
+    0.064,
+    0.032,
+    0.022,
+    0.016,
+    0.01,
+    0.006000000000000001,
+    0.004,
+    0.002,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "consensus": {
+    "reached": 50,
+    "censored_at_T_minus_2": 0,
+    "median_round_if_reached": 4.0,
+    "side_counts": {
+     "H": 0,
+     "L": 50
+    }
+   },
+   "round1": {
+    "runs_all_H_round1": 0,
+    "F1_among_round1_all_H": 0,
+    "F1_among_round1_not_all_H": 0,
+    "exact_P_round1_all_H": 0.008731921399197899,
+    "note": "round 1 is the START prompt in every cell, so P(all high in round 1) = P(H | START)^n"
+   },
+   "evidence": "live runs",
+   "forecast_P_F1": null,
+   "forecast_source": "no exact law at n = 10; 9b analysis: signal-aware simulation in results/extra/analysis/olmo_core_cheap_talk"
+  },
+  "n10_last1": {
+   "cell": "n10_last1",
+   "n": 10,
+   "memory": "last1",
+   "source": "new tonight (arm_id 92)",
+   "runs": 50,
+   "run_dir": "results/extra/followup/runs/followup_olmo_n10_last1/cheap_talk_n10_cycle_last1",
+   "P_F1": 0.0,
+   "F1_count": 0,
+   "P_F1_ci": [
+    0.0,
+    0.07112173646419764
+   ],
+   "P_F0": 1.0,
+   "F0_count": 50,
+   "P_F0_ci": [
+    0.9288782635358024,
+    1.0
+   ],
+   "mean_F": 0.0,
+   "mean_F_ci": [
+    0.0,
+    0.0
+   ],
+   "EX_t": [
+    0.59,
+    0.312,
+    0.176,
+    0.084,
+    0.046,
+    0.018,
+    0.006000000000000001,
+    0.002,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "consensus": {
+    "reached": 50,
+    "censored_at_T_minus_2": 0,
+    "median_round_if_reached": 4.0,
+    "side_counts": {
+     "H": 0,
+     "L": 50
+    }
+   },
+   "round1": {
+    "runs_all_H_round1": 0,
+    "F1_among_round1_all_H": 0,
+    "F1_among_round1_not_all_H": 0,
+    "exact_P_round1_all_H": 0.008731921399197899,
+    "note": "round 1 is the START prompt in every cell, so P(all high in round 1) = P(H | START)^n"
+   },
+   "evidence": "live runs",
+   "forecast_P_F1": 0.00814,
+   "forecast_source": "Monte Carlo 100,000 runs, enumerated table (SE 0.00028)"
+  },
+  "n4_full": {
+   "cell": "n4_full",
+   "n": 4,
+   "memory": "full",
+   "source": "new tonight (arm_id 93)",
+   "runs": 50,
+   "run_dir": "results/extra/followup/runs/followup_olmo_n4_full/cheap_talk_n4_cycle_full",
+   "P_F1": 0.1,
+   "F1_count": 5,
+   "P_F1_ci": [
+    0.03327509358902247,
+    0.21813536643420225
+   ],
+   "P_F0": 0.9,
+   "F0_count": 45,
+   "P_F0_ci": [
+    0.7818646335657977,
+    0.9667249064109775
+   ],
+   "mean_F": 0.1,
+   "mean_F_ci": [
+    0.02,
+    0.2
+   ],
+   "EX_t": [
+    0.55,
+    0.3,
+    0.145,
+    0.115,
+    0.11,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1
+   ],
+   "consensus": {
+    "reached": 50,
+    "censored_at_T_minus_2": 0,
+    "median_round_if_reached": 2.0,
+    "side_counts": {
+     "H": 5,
+     "L": 45
+    }
+   },
+   "round1": {
+    "runs_all_H_round1": 5,
+    "F1_among_round1_all_H": 5,
+    "F1_among_round1_not_all_H": 0,
+    "exact_P_round1_all_H": 0.1501218566948747,
+    "note": "round 1 is the START prompt in every cell, so P(all high in round 1) = P(H | START)^n"
+   },
+   "evidence": "live runs",
+   "forecast_P_F1": 0.1115940761338345,
+   "forecast_source": "exact, 9b sampled table (approximation)"
+  }
+ },
+ "contrasts": {
+  "memory_within_n4": {
+   "a": "n4_full",
+   "b": "n4_last1",
+   "P_F1_a_minus_b": {
+    "diff": -0.06,
+    "lo": -0.1973155108400621,
+    "hi": 0.0770291867371806,
+    "method": "Newcombe hybrid score (Wilson components), 95%"
+   },
+   "mean_F_a_minus_b": {
+    "diff": -0.06,
+    "lo": -0.2,
+    "hi": 0.07999999999999999,
+    "method": "independent whole-run bootstrap of each cell, B = 2000",
+    "degenerate": false
+   }
+  },
+  "memory_within_n10": {
+   "a": "n10_full",
+   "b": "n10_last1",
+   "P_F1_a_minus_b": {
+    "diff": 0.0,
+    "lo": -0.07134759913335872,
+    "hi": 0.07134759913335872,
+    "method": "Newcombe hybrid score (Wilson components), 95%"
+   },
+   "mean_F_a_minus_b": {
+    "diff": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "method": "independent whole-run bootstrap of each cell, B = 2000",
+    "degenerate": true
+   }
+  },
+  "size_within_last1": {
+   "a": "n10_last1",
+   "b": "n4_last1",
+   "P_F1_a_minus_b": {
+    "diff": -0.16,
+    "lo": -0.2851421606303499,
+    "hi": -0.05530046758157199,
+    "method": "Newcombe hybrid score (Wilson components), 95%"
+   },
+   "mean_F_a_minus_b": {
+    "diff": -0.16,
+    "lo": -0.28,
+    "hi": -0.06,
+    "method": "independent whole-run bootstrap of each cell, B = 2000",
+    "degenerate": false
+   }
+  },
+  "size_within_full": {
+   "a": "n10_full",
+   "b": "n4_full",
+   "P_F1_a_minus_b": {
+    "diff": -0.1,
+    "lo": -0.21360231437479654,
+    "hi": -0.008975448080590046,
+    "method": "Newcombe hybrid score (Wilson components), 95%"
+   },
+   "mean_F_a_minus_b": {
+    "diff": -0.1,
+    "lo": -0.2,
+    "hi": -0.02,
+    "method": "independent whole-run bootstrap of each cell, B = 2000",
+    "degenerate": false
+   }
+  }
+ },
+ "checks": {
+  "n10_last1": {
+   "kernel_fingerprint_matches_tables": true,
+   "per_decision_vs_enumerated_table": {
+    "pass": true,
+    "decisions": 10000,
+    "floor": 0.0,
+    "max_abs_diff_p_H": 0.0,
+    "max_abs_diff_signal": 0.0,
+    "worst": null,
+    "states_seen": 70,
+    "states_with_several_prompts": {},
+    "states_whose_prompt_differs_from_table": []
+   },
+   "sessions": [
+    {
+     "time": "2026-11-08T00:56:12.781144+00:00",
+     "runs_added": 5,
+     "seconds": 41.87,
+     "workspace": "sensomichele",
+     "git_commit": "a4fbb63e053210a7127b936be0b8bc14d6c32458"
+    },
+    {
+     "time": "2026-11-08T01:01:26.939717+00:00",
+     "runs_added": 45,
+     "seconds": 219.5,
+     "workspace": "sensomichele",
+     "git_commit": "649ab5be1b3d2dc2cf9d31e5fe1a0393952b9ecb"
+    }
+   ],
+   "drift_last_session": {
+    "start_vs_end": 0.0,
+    "start_vs_mixed": 0.0,
+    "floor": 0.0,
+    "action": "ok"
+   },
+   "p_valid_below_0.9": 0
+  },
+  "n4_full": {
+   "kernel_fingerprint_matches_tables": true,
+   "sessions": [
+    {
+     "time": "2026-11-08T01:20:44.252735+00:00",
+     "runs_added": 50,
+     "seconds": 1121.89,
+     "workspace": "sensomichele",
+     "git_commit": "76a647ec5f62b361f4048dbca05d30956e8e42de"
+    }
+   ],
+   "drift_last_session": {
+    "start_vs_end": 0.0,
+    "start_vs_mixed": 0.0,
+    "floor": 0.0,
+    "action": "ok"
+   },
+   "p_valid_below_0.9": 0
+  }
+ },
+ "analyses_new_cells": {
+  "n10_last1": {
+   "path": "results/extra/followup/analysis/followup_olmo_n10_last1/cheap_talk_n10_cycle_last1.json",
+   "crps": {
+    "order0": {
+     "mean": 0.1665699612813085,
+     "lo": 0.1665699612813085,
+     "hi": 0.1665699612813085,
+     "n": 50,
+     "B": 2000
+    },
+    "actions_only": {
+     "mean": 1.999999999999559e-10,
+     "lo": 1.999999999999559e-10,
+     "hi": 1.999999999999559e-10,
+     "n": 50,
+     "B": 2000
+    },
+    "actions_only_equal_w": {
+     "mean": 1.999999999999559e-10,
+     "lo": 1.999999999999559e-10,
+     "hi": 1.999999999999559e-10,
+     "n": 50,
+     "B": 2000
+    },
+    "signal_aware": {
+     "mean": 8.066325000000016e-05,
+     "lo": 8.066325000000016e-05,
+     "hi": 8.066325000000016e-05,
+     "n": 50,
+     "B": 2000
+    }
+   },
+   "paired_D": {
+    "mean": -8.066305000000019e-05,
+    "lo": -8.066305000000019e-05,
+    "hi": -8.066305000000019e-05,
+    "n": 50,
+    "B": 2000
+   },
+   "consensus_prob": {
+    "swarm": {
+     "H": 0.0,
+     "L": 1.0,
+     "": 0.0
+    },
+    "order0": {
+     "H": 0.0,
+     "L": 0.0213,
+     "": 0.9787
+    },
+    "actions_only": {
+     "H": 0.00115,
+     "L": 0.99885,
+     "": 0.0
+    },
+    "actions_only_equal_w": {
+     "H": 0.001,
+     "L": 0.999,
+     "": 0.0
+    },
+    "signal_aware": {
+     "H": 0.00945,
+     "L": 0.99055,
+     "": 0.0
+    }
+   }
+  },
+  "n4_full": {
+   "path": "results/extra/followup/analysis/followup_olmo_n4_full/cheap_talk_n4_cycle_full.json",
+   "crps": {
+    "order0": {
+     "mean": 0.32961491525936404,
+     "lo": 0.307577188844662,
+     "hi": 0.3571620732777414,
+     "n": 50,
+     "B": 2000
+    },
+    "actions_only": {
+     "mean": 0.09213462568891007,
+     "lo": 0.020938151912330207,
+     "hi": 0.18113021790963488,
+     "n": 50,
+     "B": 2000
+    },
+    "actions_only_equal_w": {
+     "mean": 0.09201982040627302,
+     "lo": 0.021030535818653665,
+     "hi": 0.18075642614079715,
+     "n": 50,
+     "B": 2000
+    },
+    "signal_aware": {
+     "mean": 0.09050493059757451,
+     "lo": 0.02997440863789694,
+     "hi": 0.15103545255725212,
+     "n": 50,
+     "B": 2000
+    }
+   },
+   "paired_D": {
+    "mean": 0.00162969509133552,
+    "lo": -0.009036256725566735,
+    "hi": 0.012295646908237777,
+    "n": 50,
+    "B": 2000
+   },
+   "consensus_prob": {
+    "swarm": {
+     "H": 0.1,
+     "L": 0.9,
+     "": 0.0
+    },
+    "order0": {
+     "H": 0.0001,
+     "L": 0.068,
+     "": 0.9319
+    },
+    "actions_only": {
+     "H": 0.1407,
+     "L": 0.85895,
+     "": 0.00035
+    },
+    "actions_only_equal_w": {
+     "H": 0.1426,
+     "L": 0.85675,
+     "": 0.00065
+    },
+    "signal_aware": {
+     "H": 0.1582,
+     "L": 0.8413,
+     "": 0.0005
+    }
+   }
+  }
+ },
+ "notes": {
+  "P_F1_intervals": "Clopper-Pearson 95% (zero successes give a nonzero upper bound)",
+  "joint_randomisation": "the four cells were collected in different sessions and were not jointly randomised",
+  "n10_full_forecast": "see the 9b analysis",
+  "no_phase_transition": "two sizes only"
+ }
+}

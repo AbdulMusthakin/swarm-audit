@@ -25,6 +25,22 @@
    "corrected_is_primary_contrast": false,
    "status": "EXPLORATORY (arm 9b; trigger not met, run by Abdul's decision after seeing results)",
    "inherited_primary_notes_apply": false
+  },
+  "results/extra/followup/analysis/followup_olmo_n10_last1/cheap_talk_n10_cycle_last1.json": {
+   "arm": "followup_olmo_n10_last1",
+   "arm_id": 92,
+   "stored_is_primary_contrast": false,
+   "corrected_is_primary_contrast": false,
+   "status": "EXPLORATORY overnight follow-up E3 (arm_id 92)",
+   "inherited_primary_notes_apply": false
+  },
+  "results/extra/followup/analysis/followup_olmo_n4_full/cheap_talk_n4_cycle_full.json": {
+   "arm": "followup_olmo_n4_full",
+   "arm_id": 93,
+   "stored_is_primary_contrast": false,
+   "corrected_is_primary_contrast": false,
+   "status": "EXPLORATORY overnight follow-up E3 (arm_id 93)",
+   "inherited_primary_notes_apply": false
   }
  }
 }
