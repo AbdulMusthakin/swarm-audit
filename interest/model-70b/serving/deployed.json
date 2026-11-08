@@ -1,0 +1,15 @@
+{
+ "app": "swarm-audit-serving-70b",
+ "workspace": "aliyusufbelal",
+ "code_sha256": "2f93b0b380439fd923cedb4348b03c3d2d6e1188020e085c3863c18f3c93097c",
+ "settings": {
+  "batch_invariant": true,
+  "scaledown_window_s": 120,
+  "max_containers": 1,
+  "timeout_minutes": 30,
+  "vllm_version": "0.32.0",
+  "gpu": "B200"
+ },
+ "git_commit": "f02d0f7244e545fd71094692ec8e16d455d0b297",
+ "time": "2026-11-08T13:24:01.632520+00:00"
+}
