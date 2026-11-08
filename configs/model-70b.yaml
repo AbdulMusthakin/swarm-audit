@@ -88,3 +88,10 @@ arms:
   m70_calibration_cheap_talk: {arm_id: 41, channel: cheap_talk, graph: cycle, n: [4],  runs: 50, last_k: 1}
   m70_core_counts:            {arm_id: 5,  channel: counts,     graph: cycle, n: [10], runs: 50, last_k: null}
   m70_core_cheap_talk:        {arm_id: 6,  channel: cheap_talk, graph: cycle, n: [10], runs: 50, last_k: null}
+  # Stage 2 (added 8 Nov 2026 once stage 1 fitted well inside the cap): the rest of the
+  # core matrix. Separate arm names so stage 1's script is unaffected; same arm ids as
+  # the core (5, 6, 7, 71), so the same seeds as the core's runs.
+  m70_core_counts_n20:            {arm_id: 5,  channel: counts,     graph: cycle,    n: [20], runs: 50, last_k: null}
+  m70_core_cheap_talk_n20:        {arm_id: 6,  channel: cheap_talk, graph: cycle,    n: [20], runs: 50, last_k: null}
+  m70_second_topology_counts:     {arm_id: 7,  channel: counts,     graph: complete, n: [10], runs: 50, last_k: null}
+  m70_second_topology_cheap_talk: {arm_id: 71, channel: cheap_talk, graph: complete, n: [10], runs: 50, last_k: null}
