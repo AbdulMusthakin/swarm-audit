@@ -72,7 +72,7 @@ labels, payoffs, serving). Run fingerprints are in each condition's `provenance.
 | 6 | cheap talk n = 20 cycle, full history | 50 (two sessions) | secondary |
 | 7 | counts / cheap talk n = 10 complete K_10 (d = 9, actions-only tables) | 50 / 50 | secondary |
 
-**Exclusions:** none. No run was dropped. No probability failed the p_valid check.
+**Exclusions:** none. No run was dropped. No decision in any condition had p_valid (the probability mass on the valid labels) below 0.9; see each manifest's `summary`.
 
 ### Results
 

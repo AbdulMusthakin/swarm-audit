@@ -7,10 +7,9 @@ Every number is listed with its exact source in `claims.csv` and `numbers.json`.
 
 ## Status
 
-- **Core:** gates G1–G6 done. The counts and cheap-talk n = 10 arms are complete and
-  analysed, and counts n = 20 is complete. Cheap talk n = 20 (runs 25–49) and arm 7 (K_10, both
-  channels) were still running when this was written; see the completion note in
-  `results/README.md` for their final state.
+- **Core:** complete (03:45 UTC). Gates G1–G6 are done. Every planned arm ran, including
+  n = 20 and arm 7 (K_10, both channels), and all of them are analysed. See the completion
+  note in `results/README.md`.
 - **G5 history is unchanged and kept distinct:** the cheap-talk per-run test failed
   (p = 0.0076); it was investigated (sampling, wiring and end to end all pass); Abdul accepted
   it as chance; the confirmation on fresh seeds passed. A later pass does not erase the
