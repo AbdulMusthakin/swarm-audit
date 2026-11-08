@@ -26,6 +26,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
+import numpy as np  # noqa: E402
+
 from swarm_audit import build, calibration, plots  # noqa: E402
 from swarm_audit.analysis import analyse_condition, to_jsonable  # noqa: E402
 from swarm_audit.provenance import ProvenanceError, check_tables_match_runs  # noqa: E402
@@ -39,6 +41,9 @@ def one(args) -> None:
     cfg = build.load(args.config)
     an = cfg["analysis"]
     data = load_runs(Path(args.runs))
+    if args.run_range:      # e.g. "0-49": analyse a pre-specified subset of run indices
+        lo, hi = map(int, args.run_range.split("-"))
+        data = data.subset(np.nonzero((data.runs >= lo) & (data.runs <= hi))[0])
     g = make(data.graph, data.n)
     tables = build.load_tables(Path(args.tables), args.tag)
     try:   # review C2: tables must come from the runs' kernel (prompts, model, payoffs...)
@@ -48,7 +53,7 @@ def one(args) -> None:
     except ProvenanceError as e:
         raise SystemExit(f"Stopping: {e}")
     arm = Path(args.runs).parent.name
-    cond = Path(args.runs).name
+    cond = Path(args.runs).name + (f"_runs{args.run_range}" if args.run_range else "")
     if args.gate_g5:
         floor = args.floor if args.floor is not None else build.numerical_floor(cfg)
         tabs = {"actions": tables.actions, "signal": tables.signal}
@@ -138,6 +143,7 @@ def main() -> None:
     ap.add_argument("--gate-g5", action="store_true")
     ap.add_argument("--floor", type=float, help="override the G3 floor in the config")
     ap.add_argument("--collect", action="store_true")
+    ap.add_argument("--run-range", help="analyse only run indices lo-hi (inclusive), e.g. 0-49")
     args = ap.parse_args()
     if args.collect:
         collect()
