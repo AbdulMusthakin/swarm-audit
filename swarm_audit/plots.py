@@ -43,13 +43,18 @@ def _style(ax) -> None:
     ax.set_axisbelow(True)
 
 
-def figure1(res: dict, path: Path, title: str = "") -> None:
+def figure1(res: dict, path: Path, title: str = "", contraction: dict | None = None) -> None:
     """X_t for the swarm (with its run-level band) against each predictor; the bound
-    B_t in a separate panel, because its scale hides the measured gap."""
+    B_t in a separate panel, because its scale hides the measured gap.
+
+    `contraction` (optional): one condition's result from scripts/analyse_dobrushin.py
+    (`analyse`). It adds, for the actions-only audit, the Dobrushin TV contraction bounds
+    next to Theorem 1 (right panel), and the local Dobrushin bound on the mean as a band
+    around the audit's expected X_t (left panel). Without it the figure is unchanged."""
     T = len(res["X"]["swarm"]["mean"])
     t = np.arange(1, T + 1)
-    fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 3.6), gridspec_kw={"width_ratios": [3, 2]},
-                                 facecolor=SURFACE)
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 4.9 if contraction else 3.6),
+                                 gridspec_kw={"width_ratios": [3, 2]}, facecolor=SURFACE)
     for ax in (a1, a2):
         _style(ax)
     sw = res["X"]["swarm"]
@@ -59,10 +64,24 @@ def figure1(res: dict, path: Path, title: str = "") -> None:
         if name != "swarm":
             a1.plot(t, v["mean"], color=COLOURS.get(name, INK2), linewidth=2,
                     label=LABELS.get(name, name))
+    blue = COLOURS["actions_only"]
+    if contraction:   # |E_swarm X_t - E_audit X_t| <= M_t (local Dobrushin bound on the mean)
+        mu = np.asarray(contraction["model_mean"])
+        m = np.asarray(contraction["mean_local_bound"])
+        lo, hi = np.clip(mu - m, 0, 1), np.clip(mu + m, 0, 1)
+        a1.fill_between(t, lo, hi, color=blue, alpha=0.08, linewidth=0)
+        for edge in (lo, hi):
+            a1.plot(t, edge, color=blue, linewidth=1, linestyle=":")
+        a1.plot([], [], color=blue, linewidth=1, linestyle=":",
+                label=f"actions-only mean ± local Dobrushin bound (α = {contraction['alpha']:.2f})")
     a1.set_xlabel("round t", color=INK2, fontsize=9)
     a1.set_ylabel("mean fraction bidding high, X_t", color=INK2, fontsize=9)
     a1.set_ylim(0, 1)
-    a1.legend(frameon=False, fontsize=8, loc="best")
+    if contraction:
+        a1.legend(frameon=False, fontsize=7, loc="upper center", bbox_to_anchor=(0.5, -0.15), ncol=2,
+                   handlelength=3.5)
+    else:
+        a1.legend(frameon=False, fontsize=8, loc="best")
     for name, d in res["defects"].items():
         b = d["bound"]
         c = COLOURS.get(name, INK2)
@@ -70,6 +89,17 @@ def figure1(res: dict, path: Path, title: str = "") -> None:
                         linewidth=0)
         a2.plot(t, b["B_capped"], color=c, linewidth=2,
                 label=f"bound, {LABELS.get(name, name)} (uncapped B_T = {b['B'][-1]:.2f})")
+    if contraction:   # Dobrushin TV contraction for the actions-only audit (current round)
+        n = contraction["condition"]["n"]
+        rel = "=" if contraction["delta_kind"].startswith("exact") else "≤"
+        a2.plot(t, np.minimum(contraction["tv_contraction_same_local_defects"], 1), color=blue,
+                linewidth=1.6, linestyle=":", label="contraction, same local defects")
+        lo, hi = np.minimum(contraction["tv_contraction_joint_defect_ci"], 1)
+        a2.fill_between(t, lo, hi, color=blue, alpha=0.12, linewidth=0)
+        joint = contraction["tv_contraction_joint_defect"]
+        a2.plot(t, np.minimum(joint, 1), color=blue, linewidth=2, linestyle="-.",
+                label=f"contraction + joint defect (δ {rel} {contraction['delta']:.3f}, "
+                      f"uncapped {joint[-1]:.2f})")
     delta = res["scores"]["delta"].get("actions_only")
     if delta is not None:
         a2.plot(t, delta, color=INK, linewidth=2, linestyle="--", label="measured Δ_t (actions-only)")
@@ -82,7 +112,11 @@ def figure1(res: dict, path: Path, title: str = "") -> None:
     a2.set_xlabel("round t", color=INK2, fontsize=9)
     a2.set_ylabel("TV distance (bound: estimate, capped at 1)", color=INK2, fontsize=9)
     a2.set_ylim(0, 1.05)
-    a2.legend(frameon=False, fontsize=7, loc="center right")
+    if contraction:
+        a2.legend(frameon=False, fontsize=6.5, loc="upper center", bbox_to_anchor=(0.5, -0.15),
+                   handlelength=3.5)
+    else:
+        a2.legend(frameon=False, fontsize=7, loc="center right")
     for ax in (a1, a2):
         ax.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(integer=True))
     if title:

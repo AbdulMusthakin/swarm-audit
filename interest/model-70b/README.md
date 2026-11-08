@@ -98,6 +98,61 @@ the one-agent audit tables forecast the 70B's swarms worse than the 8B's on thre
 (cheap talk on the cycle at both sizes, counts on K_10). Calibrating at n = 4 did not guarantee a
 good forecast at n = 10.
 
+## Contraction bounds (Dobrushin)
+
+The same analysis as `results/followup/dobrushin/` (the 8B), run on the 70B data. It reproduces
+with:
+
+```
+python scripts/analyse_dobrushin.py --repo . --out interest/model-70b/dobrushin --preset m70
+python scripts/verify_dobrushin.py . interest/model-70b/dobrushin/verification.json interest/model-70b/audit/llama-3.1-70b
+python scripts/plot_contraction.py --preset m70
+```
+
+- The six-panel figures are `dobrushin/dobrushin_tv.png` and `dobrushin/dobrushin_mean.png`.
+- Every per-condition Figure 1 also has a version with the contraction bounds:
+  `figures/fig1_<arm>_<condition>_contraction.png`.
+  - Right panel: the TV contraction bounds for the actions-only audit (dotted: same local defects;
+    dash-dot with band: exact joint one-step defect), beside Theorem 1.
+  - Left panel: the local Dobrushin bound on the mean, drawn as a band around the actions-only
+    audit's expected X_t.
+- The definitions, proofs and limitations are in `results/followup/dobrushin/README.md`. These are
+  marginal, current-round bounds, not trajectory bounds.
+
+Round-20 values below are capped at 1; the uncapped joint-defect value is in brackets. "Mean"
+bounds the absolute error in the mean high-bid fraction, and "observed" is that error.
+
+| Condition | δ 8B | δ 70B | α 8B | α 70B | TV joint, 8B | TV joint, 70B | Mean, 8B | Mean, 70B | Observed mean error, 8B / 70B |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Cheap talk, cycle, n = 10 | 0.098 | 0.963 | 0.121 | 0.818 | 0.205 | 1 (6.61) | 0.064 | 0.722 | 0.023 / 0.062 |
+| Cheap talk, cycle, n = 20 | ≤ 0.174 | ≤ 0.999 | 0.121 | 0.818 | 0.296 | 1 (11.91) | 0.061 | 0.680 | 0.023 / 0.069 |
+| Cheap talk, K_10 | 0.275 | 0.942 | 0.552 | 3.819 | 0.391 | 1 (4.76) | 0.192 | 1 | 0.068 / 0.010 |
+| Counts, cycle, n = 10 | 0.682 | 0.985 | 0.706 | 1.259 | 0.579 | 1 (6.62) | 0.195 | 1 | 0.028 / 0.017 |
+| Counts, cycle, n = 20 | ≤ 0.869 | ≤ 1.000 | 0.706 | 1.259 | 1 (1.87) | 1 (10.29) | 0.196 | 1 | 0.008 / 0.011 |
+| Counts, K_10 | 0.588 | 0.904 | 1.420 | 2.855 | 0.482 | 1 (3.52) | 1 | 1 | 0.046 / 0.096 |
+| Cheap talk, n = 4 calibration | 0.179 | 0.617 | 0.201 | 0.523 | 0.162 | 0.441 | 0.078 | 0.154 | 0.044 / 0.069 |
+| Counts, n = 4 calibration | 0.597 | 0.954 | 1.136 | 1.499 | 0 | 0 | 0 | 0 | 0.027 / 0.017 |
+
+**Contraction does not rescue the 70B.**
+
+- The 70B audit chain barely contracts: δ is 0.90–1.00, against 0.10–0.87 for the 8B. Its kernel
+  is near-deterministic in the neighbours' bids (P(H) is 0.89 after two high neighbours and 0.03
+  after two low ones on counts). Two configurations that differ in one neighbour therefore lead
+  to almost disjoint next rounds, so earlier errors are hardly discounted.
+- Every full-history TV bound is vacuous from about round 4. That includes the joint-defect
+  version, which was non-vacuous for the 8B in five of six conditions.
+- The local mean bound has α < 1 only on cheap talk on the cycle (α = 0.82). There it gives 0.72
+  at n = 10 and 0.68 at n = 20: valid, but ten times the 8B's 0.064 and far above the observed
+  errors of 0.06–0.07. On counts and on K_10, α > 1, and the local criterion fails.
+- Only the n = 4 cheap-talk calibration keeps a useful TV bound: 0.441 at round 20, against 0.162
+  for the 8B. The exact-population check passes in all 20 rounds (`dobrushin/verification.json`):
+  the actual profile TV is 0.058 against a bound of 0.454, and the actual mean error is 0.023
+  against 0.161.
+
+So a stronger model with sharper, more neighbour-driven responses makes the audit predictor mix
+more slowly, and the contraction route to non-vacuous bounds closes. This adds to the CRPS results
+above: both the forecasts and the guarantees are worse for the 70B.
+
 ## Caveats
 
 - Exploratory. Nothing was fixed in advance for this model, and nothing here was tuned.
